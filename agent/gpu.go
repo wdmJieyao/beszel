@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"maps"
@@ -752,12 +753,12 @@ func NewGPUManager() (*GPUManager, error) {
 	}
 
 	if !hasAnyGpuCollector(caps) {
-		return nil, fmt.Errorf(noGPUFoundMsg)
+		return nil, errors.New(noGPUFoundMsg)
 	}
 
 	// auto-detect and start collectors when GPU_COLLECTOR is unset.
 	if gm.startCollectorsByPriority(gm.resolveLegacyCollectorPriority(caps), caps) == 0 {
-		return nil, fmt.Errorf(noGPUFoundMsg)
+		return nil, errors.New(noGPUFoundMsg)
 	}
 
 	return &gm, nil

@@ -64,12 +64,12 @@ func NewWsConnection(conn *gws.Conn, agentVersion semver.Version) *WsConn {
 
 // OnOpen sets a deadline for the WebSocket connection and extracts agent version.
 func (h *Handler) OnOpen(conn *gws.Conn) {
-	conn.SetDeadline(time.Now().Add(deadline))
+	_ = conn.SetDeadline(time.Now().Add(deadline))
 }
 
 // OnMessage routes incoming WebSocket messages to the request manager.
 func (h *Handler) OnMessage(conn *gws.Conn, message *gws.Message) {
-	conn.SetDeadline(time.Now().Add(deadline))
+	_ = conn.SetDeadline(time.Now().Add(deadline))
 	if message.Opcode != gws.OpcodeBinary || message.Data.Len() == 0 {
 		return
 	}
@@ -102,7 +102,7 @@ func (h *Handler) OnClose(conn *gws.Conn, err error) {
 // Close terminates the WebSocket connection gracefully.
 func (ws *WsConn) Close(msg []byte) {
 	if ws.IsConnected() {
-		ws.conn.WriteClose(1000, msg)
+		_ = ws.conn.WriteClose(1000, msg)
 	}
 	if ws.requestManager != nil {
 		ws.requestManager.Close()
@@ -114,7 +114,7 @@ func (ws *WsConn) Ping() error {
 	if ws.conn == nil {
 		return gws.ErrConnClosed
 	}
-	ws.conn.SetDeadline(time.Now().Add(deadline))
+	_ = ws.conn.SetDeadline(time.Now().Add(deadline))
 	return ws.conn.WritePing(nil)
 }
 
@@ -136,7 +136,9 @@ func (ws *WsConn) handleAgentRequest(req *PendingRequest, handler ResponseHandle
 	// Wait for response
 	select {
 	case message := <-req.ResponseCh:
-		defer message.Close()
+		defer func() {
+			_ = message.Close()
+		}()
 		// Cancel request context to stop timeout watcher promptly
 		defer req.Cancel()
 		data := message.Data.Bytes()

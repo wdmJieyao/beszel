@@ -67,6 +67,7 @@ func setCollectionAuthSettings(app core.App) error {
 	}
 	systemsWriteRule := systemsReadRule + " && @request.auth.role != \"readonly\""
 	systemScopedWriteRule := systemScopedReadRule + " && @request.auth.role != \"readonly\""
+	authenticatedWriteRule := authenticatedRule + " && @request.auth.role != \"readonly\""
 
 	if err := applyCollectionRules(app, []string{"systems"}, collectionRules{
 		list:   &systemsReadRule,
@@ -105,6 +106,26 @@ func setCollectionAuthSettings(app core.App) error {
 	if err := applyCollectionRules(app, []string{"system_details"}, collectionRules{
 		list: &systemScopedReadRule,
 		view: &systemScopedReadRule,
+	}); err != nil {
+		return err
+	}
+
+	if err := applyCollectionRules(app, []string{"public_system_visibility", "network_probe_assignments", "network_probe_results"}, collectionRules{
+		list:   &systemScopedReadRule,
+		view:   &systemScopedReadRule,
+		create: &systemScopedWriteRule,
+		update: &systemScopedWriteRule,
+		delete: &systemScopedWriteRule,
+	}); err != nil {
+		return err
+	}
+
+	if err := applyCollectionRules(app, []string{"network_probes"}, collectionRules{
+		list:   &authenticatedRule,
+		view:   &authenticatedRule,
+		create: &authenticatedWriteRule,
+		update: &authenticatedWriteRule,
+		delete: &authenticatedWriteRule,
 	}); err != nil {
 		return err
 	}

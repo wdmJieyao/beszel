@@ -47,7 +47,7 @@ func TestSystemAlertsCachePopulateAndFilter(t *testing.T) {
 	require.NoError(t, err)
 
 	cache := alerts.NewAlertsCache(hub)
-	cache.PopulateFromDB(false)
+	_ = cache.PopulateFromDB(false)
 
 	statusAlerts := cache.GetAlertsByName(system1.Id, "Status")
 	require.Len(t, statusAlerts, 1)

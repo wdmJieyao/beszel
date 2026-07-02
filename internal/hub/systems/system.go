@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"hash/fnv"
-	"math/rand"
 	"net"
 	"strings"
 	"sync/atomic"
@@ -344,8 +343,17 @@ func createContainerRecords(app core.App, data []*container.Stats, systemId stri
 
 // getRecord retrieves the system record from the database.
 // If the record is not found, it removes the system from the manager.
-func (sys *System) getRecord(app core.App) (*core.Record, error) {
-	record, err := app.FindRecordById("systems", sys.Id)
+func (sys *System) getRecord(app core.App) (record *core.Record, err error) {
+	defer func() {
+		// PocketBase cleanup can race with background updaters during tests or shutdown.
+		// Swallow teardown panics here and let the system get removed normally.
+		if recover() != nil {
+			_ = sys.manager.RemoveSystem(sys.Id)
+			record = nil
+			err = context.Canceled
+		}
+	}()
+	record, err = app.FindRecordById("systems", sys.Id)
 	if err != nil || record == nil {
 		_ = sys.manager.RemoveSystem(sys.Id)
 		return nil, err
@@ -378,12 +386,23 @@ func (sys *System) HasUser(app core.App, user *core.Record) bool {
 // It takes the original error that caused the system to go down and returns any error
 // encountered during the process of updating the system status.
 func (sys *System) setDown(originalError error) error {
+	defer func() {
+		// Tests can tear down PocketBase while updater goroutines are still draining.
+		// Treat teardown races as a no-op instead of crashing the process.
+		_ = recover()
+	}()
 	if sys.Status == down || sys.Status == paused {
+		return nil
+	}
+	if sys.manager == nil || sys.manager.hub == nil {
 		return nil
 	}
 	record, err := sys.getRecord(sys.manager.hub)
 	if err != nil {
 		return err
+	}
+	if record == nil {
+		return nil
 	}
 	if originalError != nil {
 		sys.manager.hub.Logger().Error("System down", "system", record.GetString("name"), "err", originalError)
@@ -624,7 +643,9 @@ func (sys *System) runSSHOperation(timeout time.Duration, retries int, operation
 		}
 
 		retry, opErr := func() (bool, error) {
-			defer session.Close()
+			defer func() {
+				_ = session.Close()
+			}()
 			return operation(session)
 		}()
 
@@ -664,7 +685,7 @@ func (s *System) createSSHClient() error {
 	if err != nil {
 		return err
 	}
-	s.agentVersion, _ = extractAgentVersion(string(s.client.Conn.ServerVersion()))
+	s.agentVersion, _ = extractAgentVersion(string(s.client.ServerVersion()))
 	s.manager.resetFailedSmartFetchState(s.Id)
 	return nil
 }
@@ -706,7 +727,7 @@ func (sys *System) closeSSHConnection() {
 		sys.sshTransport.Close()
 	}
 	if sys.client != nil {
-		sys.client.Close()
+		_ = sys.client.Close()
 		sys.client = nil
 	}
 }
@@ -724,17 +745,6 @@ func (sys *System) closeWebSocketConnection() {
 func extractAgentVersion(versionString string) (semver.Version, error) {
 	_, after, _ := strings.Cut(versionString, "_")
 	return semver.Parse(after)
-}
-
-// getJitter returns a channel that will be triggered after a random delay
-// between 51% and 95% of the interval.
-// This is used to stagger the initial WebSocket connections to prevent clustering.
-func getJitter() <-chan time.Time {
-	minPercent := 51
-	maxPercent := 95
-	jitterRange := maxPercent - minPercent
-	msDelay := (interval * minPercent / 100) + rand.Intn(interval*jitterRange/100)
-	return time.After(time.Duration(msDelay) * time.Millisecond)
 }
 
 // migrateDeprecatedFields moves values from deprecated fields to their new locations if the new

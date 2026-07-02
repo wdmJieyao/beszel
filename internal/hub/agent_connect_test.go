@@ -18,6 +18,7 @@ import (
 	"github.com/henrygd/beszel/internal/common"
 	"github.com/henrygd/beszel/internal/hub/ws"
 
+	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	pbtests "github.com/pocketbase/pocketbase/tests"
 	"github.com/stretchr/testify/assert"
@@ -32,7 +33,22 @@ func createTestHub(t testing.TB) (*Hub, *pbtests.TestApp, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	return NewHub(testApp), testApp, err
+	hub := NewHub(testApp)
+	baseRouter, err := apis.NewRouter(testApp)
+	if err != nil {
+		testApp.Cleanup()
+		return nil, nil, err
+	}
+	serveEvent := &core.ServeEvent{App: testApp, Router: baseRouter}
+	if err := hub.registerApiRoutes(serveEvent); err != nil {
+		testApp.Cleanup()
+		return nil, nil, err
+	}
+	if err := hub.GetSystemManager().Initialize(); err != nil {
+		testApp.Cleanup()
+		return nil, nil, err
+	}
+	return hub, testApp, nil
 }
 
 // cleanupTestHub stops background system goroutines before tearing down the app.
@@ -198,7 +214,7 @@ func TestGetAllFingerprintRecordsByToken(t *testing.T) {
 			"status": "pending",
 			"users":  []string{userRecord.Id},
 		})
-		createTestRecord(testApp, "fingerprints", map[string]any{
+		_, _ = createTestRecord(testApp, "fingerprints", map[string]any{
 			"system":      systemRecord.Id,
 			"token":       "duplicate-token",
 			"fingerprint": fmt.Sprintf("test-fingerprint-%d", i),
@@ -658,7 +674,7 @@ func TestSendResponseError(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			recorder := httptest.NewRecorder()
 			acr := &agentConnectRequest{}
-			acr.sendResponseError(recorder, tc.statusCode, tc.message)
+			_ = acr.sendResponseError(recorder, tc.statusCode, tc.message)
 
 			assert.Equal(t, tc.expectedStatus, recorder.Code)
 			assert.Equal(t, tc.expectedBody, recorder.Body.String())
@@ -782,7 +798,7 @@ func TestAgentWebSocketIntegration(t *testing.T) {
 				req: r,
 				res: w,
 			}
-			acr.agentConnect()
+			_ = acr.agentConnect()
 		} else {
 			http.NotFound(w, r)
 		}
@@ -958,8 +974,6 @@ func TestAgentWebSocketIntegration(t *testing.T) {
 				}
 			}
 
-			time.Sleep(20 * time.Millisecond)
-
 			// Verify fingerprint state by re-reading the specific record
 			updatedFingerprintRecord, err := testApp.FindRecordById("fingerprints", fingerprintRecord.Id)
 			require.NoError(t, err)
@@ -979,9 +993,7 @@ func TestAgentWebSocketIntegration(t *testing.T) {
 			}
 
 			// Verify system status
-			updatedSystemRecord, err := testApp.FindRecordById("systems", systemRecord.Id)
-			require.NoError(t, err)
-			status := updatedSystemRecord.GetString("status")
+			status := waitForSystemStatus(t, testApp, systemRecord.Id, tc.expectSystemStatus, 2*time.Second)
 			assert.Equal(t, tc.expectSystemStatus, status, "System status should match expected value")
 
 			t.Logf("%s - System status: %s, Fingerprint: %s", tc.description, status, finalFingerprint)
@@ -1017,7 +1029,7 @@ func TestMultipleSystemsWithSameUniversalToken(t *testing.T) {
 				req: r,
 				res: w,
 			}
-			acr.agentConnect()
+			_ = acr.agentConnect()
 		} else {
 			http.NotFound(w, r)
 		}
@@ -1158,8 +1170,6 @@ func TestMultipleSystemsWithSameUniversalToken(t *testing.T) {
 					assert.Equal(t, systemCount, systemsAfterCount, "Total system count should remain the same")
 				}
 
-				time.Sleep(20 * time.Millisecond)
-
 				// Verify that a fingerprint record exists for this fingerprint
 				fingerprints, err := testApp.FindRecordsByFilter("fingerprints", "token = {:token} && fingerprint = {:fingerprint}", "", -1, 0, map[string]any{
 					"token":       universalToken,
@@ -1174,15 +1184,30 @@ func TestMultipleSystemsWithSameUniversalToken(t *testing.T) {
 
 				// Verify system status
 				systemId := fingerprint.GetString("system")
-				system, err := testApp.FindRecordById("systems", systemId)
-				require.NoError(t, err)
-				status := system.GetString("status")
+				status := waitForSystemStatus(t, testApp, systemId, tc.expectSystemStatus, 2*time.Second)
 				assert.Equal(t, tc.expectSystemStatus, status, "System status should match expected value")
 
 				t.Logf("%s - System ID: %s, Status: %s, New System: %v", tc.description, systemId, status, tc.expectNewSystem)
 			}
 		})
 	}
+}
+
+func waitForSystemStatus(t *testing.T, app core.App, systemID string, expected string, timeout time.Duration) string {
+	t.Helper()
+	deadline := time.Now().Add(timeout)
+	lastStatus := ""
+	for time.Now().Before(deadline) {
+		system, err := app.FindRecordById("systems", systemID)
+		if err == nil {
+			lastStatus = system.GetString("status")
+			if lastStatus == expected {
+				return lastStatus
+			}
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	return lastStatus
 }
 
 // TestPermanentUniversalTokenFromDB verifies that a universal token persisted in the DB
@@ -1219,7 +1244,7 @@ func TestPermanentUniversalTokenFromDB(t *testing.T) {
 				req: r,
 				res: w,
 			}
-			acr.agentConnect()
+			_ = acr.agentConnect()
 		} else {
 			http.NotFound(w, r)
 		}

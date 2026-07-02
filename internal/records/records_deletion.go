@@ -12,7 +12,7 @@ import (
 
 // Delete old records
 func (rm *RecordManager) DeleteOldRecords() {
-	rm.app.RunInTransaction(func(txApp core.App) error {
+	_ = rm.app.RunInTransaction(func(txApp core.App) error {
 		err := deleteOldSystemStats(txApp)
 		if err != nil {
 			slog.Error("Error deleting old system stats", "err", err)

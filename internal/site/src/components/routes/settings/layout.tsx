@@ -8,7 +8,9 @@ import {
 	FileSlidersIcon,
 	FingerprintIcon,
 	HeartPulseIcon,
+	NetworkIcon,
 	SettingsIcon,
+	Share2Icon,
 } from "lucide-react"
 import { lazy, useEffect } from "react"
 import { $router } from "@/components/router.tsx"
@@ -26,6 +28,8 @@ const configYamlSettingsImport = () => import("./config-yaml.tsx")
 const fingerprintsSettingsImport = () => import("./tokens-fingerprints.tsx")
 const alertsHistoryDataTableSettingsImport = () => import("./alerts-history-data-table.tsx")
 const heartbeatSettingsImport = () => import("./heartbeat.tsx")
+const publicStatusSettingsImport = () => import("./public-status.tsx")
+const networkProbesSettingsImport = () => import("./network-probes.tsx")
 
 const GeneralSettings = lazy(generalSettingsImport)
 const NotificationsSettings = lazy(notificationsSettingsImport)
@@ -33,6 +37,8 @@ const ConfigYamlSettings = lazy(configYamlSettingsImport)
 const FingerprintsSettings = lazy(fingerprintsSettingsImport)
 const AlertsHistoryDataTableSettings = lazy(alertsHistoryDataTableSettingsImport)
 const HeartbeatSettings = lazy(heartbeatSettingsImport)
+const PublicStatusSettings = lazy(publicStatusSettingsImport)
+const NetworkProbesSettings = lazy(networkProbesSettingsImport)
 
 export async function saveSettings(newSettings: Partial<UserSettings>) {
 	try {
@@ -98,6 +104,20 @@ export default function SettingsLayout() {
 			preload: heartbeatSettingsImport,
 		},
 		{
+			title: t`公共看板`,
+			href: getPagePath($router, "settings", { name: "public-status" }),
+			icon: Share2Icon,
+			noReadOnly: true,
+			preload: publicStatusSettingsImport,
+		},
+		{
+			title: t`线路检测`,
+			href: getPagePath($router, "settings", { name: "network-probes" }),
+			icon: NetworkIcon,
+			noReadOnly: true,
+			preload: networkProbesSettingsImport,
+		},
+		{
 			title: t`YAML Config`,
 			href: getPagePath($router, "settings", { name: "config" }),
 			icon: FileSlidersIcon,
@@ -159,5 +179,9 @@ function SettingsContent({ name }: { name: string }) {
 			return <AlertsHistoryDataTableSettings />
 		case "heartbeat":
 			return <HeartbeatSettings />
+		case "public-status":
+			return <PublicStatusSettings />
+		case "network-probes":
+			return <NetworkProbesSettings />
 	}
 }

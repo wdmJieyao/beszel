@@ -33,6 +33,139 @@ export interface SystemRecord extends RecordModel {
 	updated: string
 }
 
+export interface PublicStatusResponse {
+	generatedAt: string
+	systems: PublicStatusSystem[]
+}
+
+export interface PublicStatusSystem {
+	id: string
+	name: string
+	status: SystemRecord["status"] | "stale"
+	freshness?: string
+	metrics: {
+		cpuPercent?: number
+		memoryPercent?: number
+		diskPercent?: number
+		unavailable?: PublicUnavailableMetric[]
+	}
+	history?: PublicMetricPoint[]
+	probes: PublicProbeSummary[]
+}
+
+export type PublicUnavailableMetric = "cpu" | "memory" | "disk" | "freshness"
+
+export interface PublicMetricPoint {
+	created: string
+	cpuPercent?: number
+	memoryPercent?: number
+	diskPercent?: number
+}
+
+export interface PublicProbeSummary {
+	id: string
+	name: string
+	type: NetworkProbeType
+	latest?: {
+		success: boolean
+		latencyMs?: number
+		error?: string
+		failureCategory?: NetworkProbeFailureCategory
+		created: string
+	}
+	series: NetworkProbeSeriesPoint[]
+}
+
+export type NetworkProbeFailureCategory =
+	| "invalid_target"
+	| "dns_failure"
+	| "timeout"
+	| "connection_refused"
+	| "target_unreachable"
+	| "execution_node_unavailable"
+	| "unsupported"
+	| "unknown_failure"
+
+export interface NetworkProbeSeriesPoint {
+	created: string
+	success: boolean
+	latencyMs?: number
+	packetLossPercent?: number
+	httpStatus?: number
+	error?: string
+	failureCategory?: NetworkProbeFailureCategory
+}
+
+export type NetworkProbeType = "tcping" | "icmp_ping" | "http_get"
+
+export interface NetworkProbe {
+	id: string
+	name: string
+	type: NetworkProbeType
+	target: string
+	intervalSeconds: number
+	timeoutSeconds: number
+	enabled: boolean
+	publicVisible: boolean
+	systems: string[]
+	created?: string
+	updated?: string
+}
+
+export type NetworkProbeInput = Omit<NetworkProbe, "id" | "created" | "updated"> & {
+	id?: string
+}
+
+export interface NetworkProbeResultsResponse {
+	probeId: string
+	series: NetworkProbeResultPoint[]
+}
+
+export interface NetworkProbeLiveSession {
+	sessionId: string
+	systemId: string
+	range: "1m"
+	cadenceSeconds: number
+	expiresAt: string
+}
+
+export interface NetworkProbeResultPoint extends NetworkProbeSeriesPoint {
+	systemId: string
+	type?: NetworkProbeType
+	target?: string
+	bucket?: string
+}
+
+export interface NetworkProbeChartSeries {
+	id: string
+	label: string
+	probeId: string
+	systemId: string
+	type: NetworkProbeType
+	targetLabel: string
+	points: NetworkProbeSeriesPoint[]
+}
+
+export interface NetworkProbeChartGroup {
+	id: string
+	label: string
+	type: NetworkProbeType
+	targetLabel: string
+	latest?: NetworkProbeSeriesPoint
+	series: NetworkProbeChartSeries[]
+}
+
+export interface AdminPublicSystem {
+	id: string
+	name: string
+	status: SystemRecord["status"]
+	publicEnabled: boolean
+	publicName: string
+	showCpu: boolean
+	showMemory: boolean
+	showDisk: boolean
+}
+
 export interface SystemInfo {
 	/** hostname */
 	h: string
@@ -272,7 +405,8 @@ export interface ContainerRecord extends RecordModel {
 	updated: number
 }
 
-export type ChartTimes = "1m" | "1h" | "12h" | "24h" | "1w" | "30d"
+export type ChartTimes = "1m" | "30m" | "1h" | "12h" | "24h" | "1w" | "30d"
+export type PublicChartRange = ChartTimes
 
 export interface ChartTimeData {
 	[key: string]: {

@@ -803,12 +803,12 @@ func TestInitializeDiskInfoWithCustomNames(t *testing.T) {
 			partitions := []disk.PartitionStat{}
 			for _, fs := range tc.expectedFs {
 				if strings.HasPrefix(fs, "/dev/") {
-					partitions = append(partitions, disk.PartitionStat{
+					partitions = append(partitions[:len(partitions):len(partitions)], disk.PartitionStat{
 						Device:     fs,
 						Mountpoint: fs,
 					})
 				} else {
-					partitions = append(partitions, disk.PartitionStat{
+					partitions = append(partitions[:len(partitions):len(partitions)], disk.PartitionStat{
 						Device:     "/dev/" + fs,
 						Mountpoint: "/" + fs,
 					})

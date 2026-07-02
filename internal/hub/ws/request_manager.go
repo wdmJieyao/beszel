@@ -47,12 +47,9 @@ func (rm *RequestManager) SendRequest(ctx context.Context, action common.WebSock
 
 	// Respect any caller-provided deadline. If none is set, apply a reasonable default
 	// so pending requests don't live forever if the agent never responds.
-	reqCtx := ctx
-	var cancel context.CancelFunc
+	reqCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	if _, hasDeadline := ctx.Deadline(); hasDeadline {
 		reqCtx, cancel = context.WithCancel(ctx)
-	} else {
-		reqCtx, cancel = context.WithTimeout(ctx, 5*time.Second)
 	}
 
 	req := &PendingRequest{
@@ -121,7 +118,7 @@ func (rm *RequestManager) handleResponse(message *gws.Message) {
 
 	if !exists {
 		// Request not found (might have timed out) - close the message
-		message.Close()
+		_ = message.Close()
 		return
 	}
 
@@ -131,7 +128,7 @@ func (rm *RequestManager) handleResponse(message *gws.Message) {
 		rm.deleteRequest(reqID)
 	case <-req.Context.Done():
 		// Request was cancelled/timed out - close the message
-		message.Close()
+		_ = message.Close()
 	}
 }
 
@@ -154,11 +151,11 @@ func (rm *RequestManager) routeLegacyResponse(message *gws.Message) {
 			rm.deleteRequest(oldestReq.ID)
 		case <-oldestReq.Context.Done():
 			// Request was cancelled - close the message
-			message.Close()
+			_ = message.Close()
 		}
 	} else {
 		// No pending requests - close the message
-		message.Close()
+		_ = message.Close()
 	}
 }
 

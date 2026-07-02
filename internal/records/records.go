@@ -68,7 +68,7 @@ func (rm *RecordManager) CreateLongerRecords() {
 		},
 	}
 	// wrap the operations in a transaction
-	rm.app.RunInTransaction(func(txApp core.App) error {
+	_ = rm.app.RunInTransaction(func(txApp core.App) error {
 		var err error
 		collections := [2]*core.Collection{}
 		collections[0], err = txApp.FindCachedCollectionByNameOrId("system_stats")
@@ -82,7 +82,7 @@ func (rm *RecordManager) CreateLongerRecords() {
 		var systems RecordIds
 		db := txApp.DB()
 
-		db.NewQuery("SELECT id FROM systems WHERE status='up'").All(&systems)
+		_ = db.NewQuery("SELECT id FROM systems WHERE status='up'").All(&systems)
 
 		// loop through all active systems, time periods, and collections
 		for _, system := range systems {
@@ -154,6 +154,11 @@ func (rm *RecordManager) CreateLongerRecords() {
 	// log.Println("finished creating longer records", "time (ms)", time.Since(start).Milliseconds())
 }
 
+// CreateLongerNetworkProbeRecords is an explicit no-aggregation hook for probe
+// results. Probe samples remain raw timestamped rows until a retention policy is
+// defined for the new collection.
+func (rm *RecordManager) CreateLongerNetworkProbeRecords() {}
+
 // Calculate the average stats of a list of system_stats records without reflect
 func (rm *RecordManager) AverageSystemStats(db dbx.Builder, records RecordIds) *system.Stats {
 	stats := make([]system.Stats, 0, len(records))
@@ -162,7 +167,7 @@ func (rm *RecordManager) AverageSystemStats(db dbx.Builder, records RecordIds) *
 	for _, rec := range records {
 		row.Stats = row.Stats[:0]
 		params["id"] = rec.Id
-		db.NewQuery("SELECT stats FROM system_stats WHERE id = {:id}").Bind(params).One(&row)
+		_ = db.NewQuery("SELECT stats FROM system_stats WHERE id = {:id}").Bind(params).One(&row)
 		var s system.Stats
 		if err := json.Unmarshal(row.Stats, &s); err != nil {
 			continue
@@ -451,7 +456,7 @@ func (rm *RecordManager) AverageContainerStats(db dbx.Builder, records RecordIds
 	for _, rec := range records {
 		row.Stats = row.Stats[:0]
 		params["id"] = rec.Id
-		db.NewQuery("SELECT stats FROM container_stats WHERE id = {:id}").Bind(params).One(&row)
+		_ = db.NewQuery("SELECT stats FROM container_stats WHERE id = {:id}").Bind(params).One(&row)
 		var cs []container.Stats
 		if err := json.Unmarshal(row.Stats, &cs); err != nil {
 			return []container.Stats{}

@@ -63,37 +63,37 @@ func TestCacheFreshness(t *testing.T) {
 	testCases := []struct {
 		name        string
 		cacheTimeMs uint16
-		sleepMs     time.Duration
+		sleepDelay  time.Duration
 		expectFresh bool
 	}{
 		{
 			name:        "fresh data - well within cache time",
 			cacheTimeMs: 1000, // 1 second
-			sleepMs:     100,  // 100ms
+			sleepDelay:  100,  // 100ms
 			expectFresh: true,
 		},
 		{
 			name:        "fresh data - at 50% of cache time boundary",
 			cacheTimeMs: 1000, // 1 second, 50% = 500ms
-			sleepMs:     499,  // just under 500ms
+			sleepDelay:  499,  // just under 500ms
 			expectFresh: true,
 		},
 		{
 			name:        "stale data - exactly at 50% cache time",
 			cacheTimeMs: 1000, // 1 second, 50% = 500ms
-			sleepMs:     500,  // exactly 500ms
+			sleepDelay:  500,  // exactly 500ms
 			expectFresh: false,
 		},
 		{
 			name:        "stale data - well beyond cache time",
 			cacheTimeMs: 1000, // 1 second
-			sleepMs:     800,  // 800ms
+			sleepDelay:  800,  // 800ms
 			expectFresh: false,
 		},
 		{
 			name:        "short cache time",
 			cacheTimeMs: 200, // 200ms, 50% = 100ms
-			sleepMs:     150, // 150ms > 100ms
+			sleepDelay:  150, // 150ms > 100ms
 			expectFresh: false,
 		},
 	}
@@ -105,8 +105,8 @@ func TestCacheFreshness(t *testing.T) {
 				cache.Set(data, tc.cacheTimeMs)
 
 				// Wait for the specified duration
-				if tc.sleepMs > 0 {
-					time.Sleep(tc.sleepMs * time.Millisecond)
+				if tc.sleepDelay > 0 {
+					time.Sleep(tc.sleepDelay * time.Millisecond)
 				}
 
 				// Check freshness

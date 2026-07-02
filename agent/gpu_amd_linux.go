@@ -181,7 +181,9 @@ func lookupAmdgpuNameInFile(deviceID, revisionID, filePath string) (name string,
 	if err != nil {
 		return "", false, false
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	var byDevice string
 	scanner := bufio.NewScanner(file)

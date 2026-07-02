@@ -2,6 +2,7 @@
 package hub
 
 import (
+	"context"
 	"crypto/ed25519"
 	"encoding/pem"
 	"errors"
@@ -10,6 +11,8 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/henrygd/beszel/internal/alerts"
 	"github.com/henrygd/beszel/internal/hub/config"
@@ -28,14 +31,17 @@ import (
 type Hub struct {
 	core.App
 	*alerts.AlertManager
-	um     *users.UserManager
-	rm     *records.RecordManager
-	sm     *systems.SystemManager
-	hb     *heartbeat.Heartbeat
-	hbStop chan struct{}
-	pubKey string
-	signer ssh.Signer
-	appURL string
+	um                        *users.UserManager
+	rm                        *records.RecordManager
+	sm                        *systems.SystemManager
+	hb                        *heartbeat.Heartbeat
+	hbStop                    chan struct{}
+	networkProbeSchedulerOnce sync.Once
+	networkProbeLiveOnce      sync.Once
+	networkProbeLive          *networkProbeLiveManager
+	pubKey                    string
+	signer                    ssh.Signer
+	appURL                    string
 }
 
 // NewHub creates a new Hub instance with default configuration
@@ -46,6 +52,7 @@ func NewHub(app core.App) *Hub {
 	hub.rm = records.NewRecordManager(hub)
 	hub.sm = systems.NewSystemManager(hub)
 	hub.hb = heartbeat.New(app, utils.GetEnv)
+	hub.networkProbeLive = newNetworkProbeLiveManager()
 	if hub.hb != nil {
 		hub.hbStop = make(chan struct{})
 	}
@@ -140,7 +147,39 @@ func (h *Hub) registerCronJobs(_ *core.ServeEvent) error {
 	h.Cron().MustAdd("delete old records", "8 * * * *", h.rm.DeleteOldRecords)
 	// create longer records every 10 minutes
 	h.Cron().MustAdd("create longer records", "*/10 * * * *", h.rm.CreateLongerRecords)
+	// run configured network probes from their assigned agent nodes on their own intervals
+	h.networkProbeSchedulerOnce.Do(func() {
+		go h.startNetworkProbeScheduler()
+	})
+	h.networkProbeLiveOnce.Do(func() {
+		go h.startNetworkProbeLiveScheduler()
+	})
 	return nil
+}
+
+func (h *Hub) startNetworkProbeScheduler() {
+	defer func() {
+		if r := recover(); r != nil {
+			h.Logger().Warn("Network probe scheduler stopped after panic", "err", r)
+		}
+	}()
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+	for range ticker.C {
+		ctx := context.Background()
+		if err := safeRunNetworkProbes(h, ctx); err != nil {
+			h.Logger().Warn("Error running network probes", "err", err)
+		}
+	}
+}
+
+func safeRunNetworkProbes(h *Hub, ctx context.Context) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("network probe scheduler panic: %v", r)
+		}
+	}()
+	return h.RunDueNetworkProbes(ctx)
 }
 
 // GetSSHKey generates key pair if it doesn't exist and returns signer

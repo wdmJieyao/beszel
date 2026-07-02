@@ -136,7 +136,9 @@ func (p *updater) update() (updated bool, err error) {
 	}
 
 	releaseDir := filepath.Join(p.config.DataDir, ".beszel_update")
-	defer os.RemoveAll(releaseDir)
+	defer func() {
+		_ = os.RemoveAll(releaseDir)
+	}()
 
 	ColorPrintf(ColorYellow, "Downloading %s...", asset.Name)
 
@@ -149,7 +151,9 @@ func (p *updater) update() (updated bool, err error) {
 	ColorPrintf(ColorYellow, "Extracting %s...", asset.Name)
 
 	extractDir := filepath.Join(releaseDir, "extracted_"+asset.Name)
-	defer os.RemoveAll(extractDir)
+	defer func() {
+		_ = os.RemoveAll(extractDir)
+	}()
 
 	// Extract the archive (automatically detects format)
 	if err := extract(assetPath, extractDir); err != nil {
@@ -163,7 +167,9 @@ func (p *updater) update() (updated bool, err error) {
 		return false, err
 	}
 	renamedOldExec := oldExec + ".old"
-	defer os.Remove(renamedOldExec)
+	defer func() {
+		_ = os.Remove(renamedOldExec)
+	}()
 
 	newExec := filepath.Join(extractDir, p.config.ArchiveExecutable)
 	if _, err := os.Stat(newExec); err != nil {
@@ -232,7 +238,9 @@ func FetchLatestRelease(ctx context.Context, client HttpClient, url string) (*re
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	rawBody, err := io.ReadAll(res.Body)
 	if err != nil {
@@ -275,7 +283,9 @@ func downloadFile(
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	// http.Client doesn't treat non 2xx responses as error
 	if res.StatusCode >= 400 {
@@ -291,7 +301,9 @@ func downloadFile(
 	if err != nil {
 		return err
 	}
-	defer dest.Close()
+	defer func() {
+		_ = dest.Close()
+	}()
 
 	if _, err := io.Copy(dest, res.Body); err != nil {
 		return err
@@ -312,13 +324,17 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer sourceFile.Close()
+	defer func() {
+		_ = sourceFile.Close()
+	}()
 
 	destFile, err := os.Create(dst)
 	if err != nil {
 		return err
 	}
-	defer destFile.Close()
+	defer func() {
+		_ = destFile.Close()
+	}()
 
 	// Copy the file contents
 	if _, err := io.Copy(destFile, sourceFile); err != nil {

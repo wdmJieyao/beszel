@@ -120,7 +120,7 @@ func (hb *Heartbeat) Start(stop <-chan struct{}) {
 	)
 
 	// Send an initial heartbeat immediately on startup.
-	hb.send()
+	_ = hb.send()
 
 	ticker := time.NewTicker(time.Duration(hb.config.Interval) * time.Second)
 	defer ticker.Stop()
@@ -130,7 +130,7 @@ func (hb *Heartbeat) Start(stop <-chan struct{}) {
 		case <-stop:
 			return
 		case <-ticker.C:
-			hb.send()
+			_ = hb.send()
 		}
 	}
 }
@@ -182,7 +182,9 @@ func (hb *Heartbeat) send() error {
 		hb.app.Logger().Error("Heartbeat: request failed", "url", sanitizeHeartbeatURL(hb.config.URL), "err", err)
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode >= 400 {
 		hb.app.Logger().Warn("Heartbeat: non-success response",

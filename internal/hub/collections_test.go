@@ -328,7 +328,7 @@ func TestApiCollectionsAuthRules(t *testing.T) {
 	hub, _ := beszelTests.NewTestHub(t.TempDir())
 	defer hub.Cleanup()
 
-	hub.StartHub()
+	_ = hub.StartHub()
 
 	user1, _ := beszelTests.CreateUser(hub, "user1@example.com", "password")
 	user1Token, _ := user1.NewAuthToken()
@@ -430,11 +430,11 @@ func TestApiCollectionsAuthRules(t *testing.T) {
 			TestAppFactory:  testAppFactory,
 			BeforeTestFunc: func(t testing.TB, app *pbTests.TestApp, e *core.ServeEvent) {
 				t.Setenv("SHARE_ALL_SYSTEMS", "true")
-				hub.SetCollectionAuthSettings()
+				_ = hub.SetCollectionAuthSettings()
 			},
 			AfterTestFunc: func(t testing.TB, app *pbTests.TestApp, res *http.Response) {
 				t.Setenv("SHARE_ALL_SYSTEMS", "")
-				hub.SetCollectionAuthSettings()
+				_ = hub.SetCollectionAuthSettings()
 			},
 		},
 		{
@@ -486,13 +486,13 @@ func TestApiCollectionsAuthRules(t *testing.T) {
 			TestAppFactory:  testAppFactory,
 			BeforeTestFunc: func(t testing.TB, app *pbTests.TestApp, e *core.ServeEvent) {
 				t.Setenv("SHARE_ALL_SYSTEMS", "true")
-				hub.SetCollectionAuthSettings()
+				_ = hub.SetCollectionAuthSettings()
 				systemsCount, _ := app.CountRecords("systems")
 				assert.EqualValues(t, 2, systemsCount)
 			},
 			AfterTestFunc: func(t testing.TB, app *pbTests.TestApp, res *http.Response) {
 				t.Setenv("SHARE_ALL_SYSTEMS", "")
-				hub.SetCollectionAuthSettings()
+				_ = hub.SetCollectionAuthSettings()
 				systemsCount, _ := app.CountRecords("systems")
 				assert.EqualValues(t, 2, systemsCount)
 			},
@@ -508,13 +508,13 @@ func TestApiCollectionsAuthRules(t *testing.T) {
 			TestAppFactory: testAppFactory,
 			BeforeTestFunc: func(t testing.TB, app *pbTests.TestApp, e *core.ServeEvent) {
 				t.Setenv("SHARE_ALL_SYSTEMS", "true")
-				hub.SetCollectionAuthSettings()
+				_ = hub.SetCollectionAuthSettings()
 				systemsCount, _ := app.CountRecords("systems")
 				assert.EqualValues(t, 2, systemsCount)
 			},
 			AfterTestFunc: func(t testing.TB, app *pbTests.TestApp, res *http.Response) {
 				t.Setenv("SHARE_ALL_SYSTEMS", "")
-				hub.SetCollectionAuthSettings()
+				_ = hub.SetCollectionAuthSettings()
 				systemsCount, _ := app.CountRecords("systems")
 				assert.EqualValues(t, 1, systemsCount)
 			},

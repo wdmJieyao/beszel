@@ -5,7 +5,7 @@ import { timeDay, timeHour, timeMinute } from "d3-time"
 import { useEffect, useState } from "react"
 import { twMerge } from "tailwind-merge"
 import { toast } from "@/components/ui/use-toast"
-import type { ChartTimeData, FingerprintRecord, SemVer, SystemRecord } from "@/types"
+import type { ChartTimeData, FingerprintRecord, PublicChartRange, SemVer, SystemRecord } from "@/types"
 import { HourFormat, Unit } from "./enums"
 import { $copyContent, $userSettings } from "./stores"
 
@@ -111,17 +111,18 @@ export const updateFavicon = (() => {
     </linearGradient>
   </defs>
   <path fill="url(#gradient)" d="M35 70H0V0h35q4.4 0 8.2 1.7a21.4 21.4 0 0 1 6.6 4.5q2.9 2.8 4.5 6.6Q56 16.7 56 21a15.4 15.4 0 0 1-.3 3.2 17.6 17.6 0 0 1-.2.8 19.4 19.4 0 0 1-1.5 4 17 17 0 0 1-2.4 3.4 13.5 13.5 0 0 1-2.6 2.3 12.5 12.5 0 0 1-.4.3q1.7 1 3 2.5Q53 39.1 54 41a18.3 18.3 0 0 1 1.5 4 17.4 17.4 0 0 1 .5 3 15.3 15.3 0 0 1 0 1q0 4.4-1.7 8.2a21.4 21.4 0 0 1-4.5 6.6q-2.8 2.9-6.6 4.6Q39.4 70 35 70ZM14 14v14h21a7 7 0 0 0 2.3-.3 6.6 6.6 0 0 0 .4-.2Q39 27 40 26a6.9 6.9 0 0 0 1.5-2.2q.5-1.3.5-2.8a7 7 0 0 0-.4-2.3 6.6 6.6 0 0 0-.1-.4Q40.9 17 40 16a7 7 0 0 0-2.3-1.4 6.9 6.9 0 0 0-2.5-.6 7.9 7.9 0 0 0-.2 0H14Zm0 28v14h21a7 7 0 0 0 2.3-.4 6.6 6.6 0 0 0 .4-.1Q39 54.9 40 54a7 7 0 0 0 1.5-2.2 6.9 6.9 0 0 0 .5-2.6 7.9 7.9 0 0 0 0-.2 7 7 0 0 0-.4-2.3 6.6 6.6 0 0 0-.1-.4Q40.9 45 40 44a7 7 0 0 0-2.3-1.5 6.9 6.9 0 0 0-2.5-.6 7.9 7.9 0 0 0-.2 0H14Z"/>
-  ${downCount > 0 &&
-			`
+  ${
+		downCount > 0 &&
+		`
 		<circle cx="40" cy="50" r="22" fill="#f00"/>
   	<text x="40" y="60" font-size="34" text-anchor="middle" fill="#fff" font-family="Arial" font-weight="bold">${downCount}</text>
 	`
-			}
+	}
 </svg>
 	`
 		const blob = new Blob([svg], { type: "image/svg+xml" })
 		const url = URL.createObjectURL(blob)
-			; (document.querySelector("link[rel='icon']") as HTMLLinkElement).href = url
+		;(document.querySelector("link[rel='icon']") as HTMLLinkElement).href = url
 	}
 })()
 
@@ -134,6 +135,14 @@ export const chartTimeData: ChartTimeData = {
 		ticks: 3,
 		getOffset: (endTime: Date) => timeMinute.offset(endTime, -1),
 		minVersion: "0.13.0",
+	},
+	"30m": {
+		type: "1m",
+		expectedInterval: 60_000,
+		label: () => "30分钟",
+		format: (timestamp: string) => hourWithSeconds(timestamp),
+		ticks: 6,
+		getOffset: (endTime: Date) => timeMinute.offset(endTime, -30),
 	},
 	"1h": {
 		type: "1m",
@@ -174,6 +183,51 @@ export const chartTimeData: ChartTimeData = {
 		format: (timestamp: string) => formatDay(timestamp),
 		getOffset: (endTime: Date) => timeDay.offset(endTime, -30),
 	},
+}
+
+export const publicChartRangeOptions: PublicChartRange[] = ["30m", "1h", "12h", "24h", "1w", "30d"]
+
+export const publicChartTimeData = {
+	...chartTimeData,
+	"1m": {
+		...chartTimeData["1m"],
+		label: () => "1分钟",
+		format: (timestamp: string) => hourWithSeconds(timestamp),
+	},
+	"30m": {
+		...chartTimeData["30m"],
+		label: () => "30分钟",
+		format: (timestamp: string) => hourWithSeconds(timestamp),
+	},
+	"1h": {
+		...chartTimeData["1h"],
+		label: () => "1小时",
+		format: (timestamp: string) => hourWithSeconds(timestamp),
+	},
+	"12h": {
+		...chartTimeData["12h"],
+		label: () => "12小时",
+		format: (timestamp: string) => hourWithMinutes(timestamp),
+	},
+	"24h": {
+		...chartTimeData["24h"],
+		label: () => "24小时",
+		format: (timestamp: string) => hourWithMinutes(timestamp),
+	},
+	"1w": {
+		...chartTimeData["1w"],
+		label: () => "1周",
+		format: (timestamp: string) => formatDay(timestamp),
+	},
+	"30d": {
+		...chartTimeData["30d"],
+		label: () => "30天",
+		format: (timestamp: string) => formatDay(timestamp),
+	},
+} satisfies Record<PublicChartRange, ChartTimeData[string]>
+
+export function getPublicChartTimeData(range: PublicChartRange) {
+	return publicChartTimeData[range] ?? publicChartTimeData["30m"]
 }
 
 /** Format number to x decimal places, without trailing zeros */
@@ -365,12 +419,12 @@ export function formatDuration(
 		.join(" ")
 }
 
-/** Parse semver string into major, minor, and patch numbers 
+/** Parse semver string into major, minor, and patch numbers
  * @example
  * const semVer = "1.2.3"
  * const { major, minor, patch } = parseSemVer(semVer)
  * console.log(major, minor, patch) // 1, 2, 3
-*/
+ */
 export const parseSemVer = (semVer = ""): SemVer => {
 	// if (semVer.startsWith("v")) {
 	// 	semVer = semVer.slice(1)
@@ -452,7 +506,12 @@ export function secondsToString(seconds: number, unit: "hour" | "minute" | "day"
 	const countString = count.toLocaleString()
 	switch (unit) {
 		case "minute":
-			return plural(count, { one: `${countString} minute`, few: `${countString} minutes`, many: `${countString} minutes`, other: `${countString} minutes` })
+			return plural(count, {
+				one: `${countString} minute`,
+				few: `${countString} minutes`,
+				many: `${countString} minutes`,
+				other: `${countString} minutes`,
+			})
 		case "hour":
 			return plural(count, { one: `${countString} hour`, other: `${countString} hours` })
 		case "day":

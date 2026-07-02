@@ -124,7 +124,9 @@ func TestStartServer(t *testing.T) {
 			}
 
 			if tt.cleanup != nil {
-				defer tt.cleanup()
+				defer func() {
+					_ = tt.cleanup()
+				}()
 			}
 
 			agent, err := NewAgent("")
@@ -177,7 +179,7 @@ func TestStartServer(t *testing.T) {
 
 			require.NoError(t, err)
 			require.NotNil(t, client)
-			client.Close()
+			_ = client.Close()
 		})
 	}
 }
@@ -208,7 +210,9 @@ func createTempFile(content string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to create temp file: %w", err)
 	}
-	defer tmpFile.Close()
+	defer func() {
+		_ = tmpFile.Close()
+	}()
 
 	if _, err := tmpFile.WriteString(content); err != nil {
 		return "", fmt.Errorf("failed to write to temp file: %w", err)
@@ -254,7 +258,7 @@ func TestParseSingleKeyFromFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
 	}
-	defer os.Remove(filePath) // Clean up the file after the test
+	defer func() { _ = os.Remove(filePath) }() // Clean up the file after the test
 
 	// Read the file content
 	fileContent, err := os.ReadFile(filePath)

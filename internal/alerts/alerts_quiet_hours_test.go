@@ -24,7 +24,7 @@ func TestAlertSilencedOneTime(t *testing.T) {
 	system := systems[0]
 
 	// Create an alert
-	alert, err := beszelTests.CreateRecord(hub, "alerts", map[string]any{
+	_, err = beszelTests.CreateRecord(hub, "alerts", map[string]any{
 		"name":   "CPU",
 		"system": system.Id,
 		"user":   user.Id,
@@ -91,8 +91,6 @@ func TestAlertSilencedOneTime(t *testing.T) {
 	// Alert should NOT be silenced (window hasn't started yet)
 	silenced = am.IsNotificationSilenced(user.Id, system.Id)
 	assert.False(t, silenced, "Alert should not be silenced (window hasn't started)")
-
-	_ = alert
 }
 
 func TestAlertSilencedDaily(t *testing.T) {
@@ -343,7 +341,7 @@ func TestAlertSilencedWithActualAlert(t *testing.T) {
 		// Create user settings with email
 		userSettings, err := hub.FindFirstRecordByFilter("user_settings", "user={:user}", dbx.Params{"user": user.Id})
 		if err != nil || userSettings == nil {
-			userSettings, err = beszelTests.CreateRecord(hub, "user_settings", map[string]any{
+			_, err = beszelTests.CreateRecord(hub, "user_settings", map[string]any{
 				"user": user.Id,
 				"settings": map[string]any{
 					"emails": []string{"test@example.com"},

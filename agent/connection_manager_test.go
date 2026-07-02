@@ -34,7 +34,7 @@ func createTestServerOptions(t *testing.T) ServerOptions {
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
 	port := listener.Addr().(*net.TCPAddr).Port
-	listener.Close()
+	require.NoError(t, listener.Close())
 
 	return ServerOptions{
 		Network: "tcp",

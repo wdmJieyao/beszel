@@ -55,28 +55,35 @@ func TestIsInternalURL(t *testing.T) {
 }
 
 func TestUserAlertsApi(t *testing.T) {
-	hub, _ := beszelTests.NewTestHub(t.TempDir())
+	hub, err := beszelTests.NewTestHub(t.TempDir())
+	assert.NoError(t, err)
 	defer hub.Cleanup()
 
-	hub.StartHub()
+	_ = hub.StartHub()
 
-	user1, _ := beszelTests.CreateUser(hub, "alertstest@example.com", "password")
-	user1Token, _ := user1.NewAuthToken()
+	user1, err := beszelTests.CreateUser(hub, "alertstest@example.com", "password")
+	assert.NoError(t, err)
+	user1Token, err := user1.NewAuthToken()
+	assert.NoError(t, err)
 
-	user2, _ := beszelTests.CreateUser(hub, "alertstest2@example.com", "password")
-	user2Token, _ := user2.NewAuthToken()
+	user2, err := beszelTests.CreateUser(hub, "alertstest2@example.com", "password")
+	assert.NoError(t, err)
+	user2Token, err := user2.NewAuthToken()
+	assert.NoError(t, err)
 
-	system1, _ := beszelTests.CreateRecord(hub, "systems", map[string]any{
+	system1, err := beszelTests.CreateRecord(hub, "systems", map[string]any{
 		"name":  "system1",
 		"users": []string{user1.Id},
 		"host":  "127.0.0.1",
 	})
+	assert.NoError(t, err)
 
-	system2, _ := beszelTests.CreateRecord(hub, "systems", map[string]any{
+	system2, err := beszelTests.CreateRecord(hub, "systems", map[string]any{
 		"name":  "system2",
 		"users": []string{user1.Id, user2.Id},
 		"host":  "127.0.0.2",
 	})
+	assert.NoError(t, err)
 
 	userRecords, _ := hub.CountRecords("users")
 	assert.EqualValues(t, 2, userRecords, "all users should be created")
@@ -208,14 +215,15 @@ func TestUserAlertsApi(t *testing.T) {
 				"overwrite": false,
 			}),
 			BeforeTestFunc: func(t testing.TB, app *pbTests.TestApp, e *core.ServeEvent) {
-				beszelTests.ClearCollection(t, app, "alerts")
-				beszelTests.CreateRecord(app, "alerts", map[string]any{
+				assert.NoError(t, beszelTests.ClearCollection(t, app, "alerts"))
+				_, err := beszelTests.CreateRecord(app, "alerts", map[string]any{
 					"name":   "CPU",
 					"system": system1.Id,
 					"user":   user1.Id,
 					"value":  80,
 					"min":    10,
 				})
+				assert.NoError(t, err)
 			},
 			AfterTestFunc: func(t testing.TB, app *pbTests.TestApp, res *http.Response) {
 				alerts, _ := app.CountRecords("alerts")
@@ -242,14 +250,15 @@ func TestUserAlertsApi(t *testing.T) {
 				"overwrite": true,
 			}),
 			BeforeTestFunc: func(t testing.TB, app *pbTests.TestApp, e *core.ServeEvent) {
-				beszelTests.ClearCollection(t, app, "alerts")
-				beszelTests.CreateRecord(app, "alerts", map[string]any{
+				assert.NoError(t, beszelTests.ClearCollection(t, app, "alerts"))
+				_, err := beszelTests.CreateRecord(app, "alerts", map[string]any{
 					"name":   "CPU",
 					"system": system2.Id,
 					"user":   user2.Id,
 					"value":  80,
 					"min":    10,
 				})
+				assert.NoError(t, err)
 			},
 			AfterTestFunc: func(t testing.TB, app *pbTests.TestApp, res *http.Response) {
 				alerts, _ := app.CountRecords("alerts")
@@ -270,14 +279,15 @@ func TestUserAlertsApi(t *testing.T) {
 				"systems": []string{system1.Id},
 			}),
 			BeforeTestFunc: func(t testing.TB, app *pbTests.TestApp, e *core.ServeEvent) {
-				beszelTests.ClearCollection(t, app, "alerts")
-				beszelTests.CreateRecord(app, "alerts", map[string]any{
+				assert.NoError(t, beszelTests.ClearCollection(t, app, "alerts"))
+				_, err := beszelTests.CreateRecord(app, "alerts", map[string]any{
 					"name":   "CPU",
 					"system": system1.Id,
 					"user":   user1.Id,
 					"value":  80,
 					"min":    10,
 				})
+				assert.NoError(t, err)
 			},
 			AfterTestFunc: func(t testing.TB, app *pbTests.TestApp, res *http.Response) {
 				alerts, _ := app.CountRecords("alerts")
@@ -299,14 +309,15 @@ func TestUserAlertsApi(t *testing.T) {
 				"systems": []string{system1.Id},
 			}),
 			BeforeTestFunc: func(t testing.TB, app *pbTests.TestApp, e *core.ServeEvent) {
-				beszelTests.ClearCollection(t, app, "alerts")
-				beszelTests.CreateRecord(app, "alerts", map[string]any{
+				assert.NoError(t, beszelTests.ClearCollection(t, app, "alerts"))
+				_, err := beszelTests.CreateRecord(app, "alerts", map[string]any{
 					"name":   "CPU",
 					"system": system1.Id,
 					"user":   user1.Id,
 					"value":  80,
 					"min":    10,
 				})
+				assert.NoError(t, err)
 			},
 			AfterTestFunc: func(t testing.TB, app *pbTests.TestApp, res *http.Response) {
 				alerts, _ := app.CountRecords("alerts")
@@ -328,7 +339,7 @@ func TestUserAlertsApi(t *testing.T) {
 				"systems": []string{system1.Id, system2.Id},
 			}),
 			BeforeTestFunc: func(t testing.TB, app *pbTests.TestApp, e *core.ServeEvent) {
-				beszelTests.ClearCollection(t, app, "alerts")
+				assert.NoError(t, beszelTests.ClearCollection(t, app, "alerts"))
 				for _, systemId := range []string{system1.Id, system2.Id} {
 					_, err := beszelTests.CreateRecord(app, "alerts", map[string]any{
 						"name":   "Memory",
@@ -362,15 +373,16 @@ func TestUserAlertsApi(t *testing.T) {
 				"systems": []string{system2.Id},
 			}),
 			BeforeTestFunc: func(t testing.TB, app *pbTests.TestApp, e *core.ServeEvent) {
-				beszelTests.ClearCollection(t, app, "alerts")
+				assert.NoError(t, beszelTests.ClearCollection(t, app, "alerts"))
 				for _, user := range []string{user1.Id, user2.Id} {
-					beszelTests.CreateRecord(app, "alerts", map[string]any{
+					_, err := beszelTests.CreateRecord(app, "alerts", map[string]any{
 						"name":   "CPU",
 						"system": system2.Id,
 						"user":   user,
 						"value":  80,
 						"min":    10,
 					})
+					assert.NoError(t, err)
 				}
 				alerts, _ := app.CountRecords("alerts")
 				assert.EqualValues(t, 2, alerts, "should have 2 alerts")
@@ -397,10 +409,12 @@ func TestSendTestNotification(t *testing.T) {
 	defer hub.Cleanup()
 
 	userToken, err := user.NewAuthToken()
+	assert.NoError(t, err, "Failed to create user auth token")
 
 	adminUser, err := beszelTests.CreateUserWithRole(hub, "admin@example.com", "password123", "admin")
 	assert.NoError(t, err, "Failed to create admin user")
 	adminUserToken, err := adminUser.NewAuthToken()
+	assert.NoError(t, err, "Failed to create admin auth token")
 
 	superuser, err := beszelTests.CreateSuperuser(hub, "superuser@example.com", "password123")
 	assert.NoError(t, err, "Failed to create superuser")

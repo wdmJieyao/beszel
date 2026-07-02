@@ -59,7 +59,9 @@ func downloadFile(url, dest, shaHex string) error {
 	if err != nil {
 		return fmt.Errorf("http get: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected HTTP status: %s", resp.Status)
@@ -81,8 +83,8 @@ func downloadFile(url, dest, shaHex string) error {
 		case 64:
 			hasher = sha256.New()
 		default:
-			f.Close()
-			os.Remove(tmp)
+			_ = f.Close()
+			_ = os.Remove(tmp)
 			return fmt.Errorf("unsupported hash length: %d (expected 40 for SHA1 or 64 for SHA256)", len(cleanSha))
 		}
 	}
@@ -92,12 +94,12 @@ func downloadFile(url, dest, shaHex string) error {
 		mw = io.MultiWriter(f, hasher)
 	}
 	if _, err := io.Copy(mw, resp.Body); err != nil {
-		f.Close()
-		os.Remove(tmp)
+		_ = f.Close()
+		_ = os.Remove(tmp)
 		return fmt.Errorf("write tmp: %w", err)
 	}
 	if err := f.Close(); err != nil {
-		os.Remove(tmp)
+		_ = os.Remove(tmp)
 		return fmt.Errorf("close tmp: %w", err)
 	}
 
@@ -105,18 +107,18 @@ func downloadFile(url, dest, shaHex string) error {
 		cleanSha := strings.ToLower(strings.ReplaceAll(strings.TrimSpace(shaHex), " ", ""))
 		got := strings.ToLower(hex.EncodeToString(hasher.Sum(nil)))
 		if got != cleanSha {
-			os.Remove(tmp)
+			_ = os.Remove(tmp)
 			return fmt.Errorf("hash mismatch: got %s want %s", got, cleanSha)
 		}
 	}
 
 	// Make executable and move into place
 	if err := os.Chmod(tmp, 0o755); err != nil {
-		os.Remove(tmp)
+		_ = os.Remove(tmp)
 		return fmt.Errorf("chmod: %w", err)
 	}
 	if err := os.Rename(tmp, dest); err != nil {
-		os.Remove(tmp)
+		_ = os.Remove(tmp)
 		return fmt.Errorf("rename: %w", err)
 	}
 

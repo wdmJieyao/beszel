@@ -22,6 +22,8 @@ const (
 	GetSmartData
 	// Request detailed systemd service info from agent
 	GetSystemdInfo
+	// Request network probe execution from agent
+	RunNetworkProbe
 	// Add new actions here...
 )
 
@@ -73,4 +75,45 @@ type ContainerInfoRequest struct {
 
 type SystemdInfoRequest struct {
 	ServiceName string `cbor:"0,keyasint"`
+}
+
+type NetworkProbeType string
+
+const (
+	NetworkProbeTCPing   NetworkProbeType = "tcping"
+	NetworkProbeICMPPing NetworkProbeType = "icmp_ping"
+	NetworkProbeHTTPGet  NetworkProbeType = "http_get"
+)
+
+type NetworkProbeFailureCategory string
+
+const (
+	NetworkProbeFailureInvalidTarget            NetworkProbeFailureCategory = "invalid_target"
+	NetworkProbeFailureDNSFailure               NetworkProbeFailureCategory = "dns_failure"
+	NetworkProbeFailureTimeout                  NetworkProbeFailureCategory = "timeout"
+	NetworkProbeFailureConnectionRefused        NetworkProbeFailureCategory = "connection_refused"
+	NetworkProbeFailureTargetUnreachable        NetworkProbeFailureCategory = "target_unreachable"
+	NetworkProbeFailureExecutionNodeUnavailable NetworkProbeFailureCategory = "execution_node_unavailable"
+	NetworkProbeFailureUnsupported              NetworkProbeFailureCategory = "unsupported"
+	NetworkProbeFailureUnknown                  NetworkProbeFailureCategory = "unknown_failure"
+)
+
+type NetworkProbeRequest struct {
+	ProbeID        string           `json:"probeId" cbor:"0,keyasint"`
+	Type           NetworkProbeType `json:"type" cbor:"1,keyasint"`
+	Target         string           `json:"target" cbor:"2,keyasint"`
+	TimeoutSeconds uint16           `json:"timeoutSeconds" cbor:"3,keyasint"`
+}
+
+type NetworkProbeResult struct {
+	ProbeID           string           `json:"probeId" cbor:"0,keyasint"`
+	Type              NetworkProbeType `json:"type" cbor:"1,keyasint"`
+	Target            string           `json:"target" cbor:"2,keyasint"`
+	Success           bool             `json:"success" cbor:"3,keyasint"`
+	LatencyMs         float64          `json:"latencyMs,omitempty" cbor:"4,keyasint,omitempty,omitzero"`
+	PacketLossPercent *float64         `json:"packetLossPercent,omitempty" cbor:"5,keyasint,omitempty,omitzero"`
+	HTTPStatus        *int             `json:"httpStatus,omitempty" cbor:"6,keyasint,omitempty,omitzero"`
+	Error             string           `json:"error,omitempty" cbor:"7,keyasint,omitempty,omitzero"`
+	FailureCategory   string           `json:"failureCategory,omitempty" cbor:"8,keyasint,omitempty,omitzero"`
+	CheckedAt         string           `json:"checkedAt" cbor:"9,keyasint"`
 }

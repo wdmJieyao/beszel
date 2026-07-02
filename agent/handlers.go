@@ -51,6 +51,7 @@ func NewHandlerRegistry() *HandlerRegistry {
 	registry.Register(common.GetContainerInfo, &GetContainerInfoHandler{})
 	registry.Register(common.GetSmartData, &GetSmartDataHandler{})
 	registry.Register(common.GetSystemdInfo, &GetSystemdInfoHandler{})
+	registry.Register(common.RunNetworkProbe, &RunNetworkProbeHandler{})
 
 	return registry
 }
@@ -202,4 +203,19 @@ func (h *GetSystemdInfoHandler) Handle(hctx *HandlerContext) error {
 	}
 
 	return hctx.SendResponse(details, hctx.RequestID)
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+// RunNetworkProbeHandler handles hub-requested network probe checks.
+type RunNetworkProbeHandler struct{}
+
+func (h *RunNetworkProbeHandler) Handle(hctx *HandlerContext) error {
+	var req common.NetworkProbeRequest
+	if err := cbor.Unmarshal(hctx.Request.Data, &req); err != nil {
+		return err
+	}
+	result := runNetworkProbe(context.Background(), req)
+	return hctx.SendResponse(result, hctx.RequestID)
 }

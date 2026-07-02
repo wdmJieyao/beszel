@@ -20,4 +20,18 @@ internal/site/src/locales/**/*.ts
 __debug_*
 agent/lhm/obj
 agent/lhm/bin
+
+# Spec Kit implementation guardrails
+*.log
+.env*
+*.test
+vendor/
+*.out
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
 dockerfile_agent_dev
+docker_data/
+test-results/
+.codex

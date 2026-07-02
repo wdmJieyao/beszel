@@ -107,7 +107,7 @@ func TestReadUintFile(t *testing.T) {
 
 	t.Run("valid uint", func(t *testing.T) {
 		path := filepath.Join(tmpDir, "uint.txt")
-		os.WriteFile(path, []byte(" 12345\n"), 0644)
+		assert.NoError(t, os.WriteFile(path, []byte(" 12345\n"), 0644))
 		val, ok := ReadUintFile(path)
 		assert.True(t, ok)
 		assert.Equal(t, uint64(12345), val)
@@ -115,7 +115,7 @@ func TestReadUintFile(t *testing.T) {
 
 	t.Run("invalid uint", func(t *testing.T) {
 		path := filepath.Join(tmpDir, "invalid.txt")
-		os.WriteFile(path, []byte("abc"), 0644)
+		assert.NoError(t, os.WriteFile(path, []byte("abc"), 0644))
 		val, ok := ReadUintFile(path)
 		assert.False(t, ok)
 		assert.Equal(t, uint64(0), val)

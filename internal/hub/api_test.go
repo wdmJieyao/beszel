@@ -41,6 +41,7 @@ func TestApiRoutesAuthentication(t *testing.T) {
 	adminUser, err := beszelTests.CreateUserWithRole(hub, "admin@example.com", "password123", "admin")
 	require.NoError(t, err, "Failed to create admin user")
 	adminUserToken, err := adminUser.NewAuthToken()
+	require.NoError(t, err, "Failed to create admin auth token")
 
 	readOnlyUser, err := beszelTests.CreateUserWithRole(hub, "readonly@example.com", "password123", "readonly")
 	require.NoError(t, err, "Failed to create readonly user")
@@ -305,7 +306,7 @@ func TestApiRoutesAuthentication(t *testing.T) {
 			}),
 			BeforeTestFunc: func(t testing.TB, app *pbTests.TestApp, e *core.ServeEvent) {
 				// Create an alert to delete
-				beszelTests.CreateRecord(app, "alerts", map[string]any{
+				_, _ = beszelTests.CreateRecord(app, "alerts", map[string]any{
 					"name":   "CPU",
 					"system": system.Id,
 					"user":   user.Id,
@@ -524,7 +525,7 @@ func TestApiRoutesAuthentication(t *testing.T) {
 			ExpectedContent: []string{"Something went wrong while processing your request."},
 			TestAppFactory:  testAppFactory,
 			BeforeTestFunc: func(t testing.TB, app *pbTests.TestApp, e *core.ServeEvent) {
-				beszelTests.CreateRecord(app, "systemd_services", map[string]any{
+				_, _ = beszelTests.CreateRecord(app, "systemd_services", map[string]any{
 					"system": system.Id,
 					"name":   "nginx.service",
 					"state":  0,
@@ -645,7 +646,7 @@ func TestFirstUserCreation(t *testing.T) {
 		hub, _ := beszelTests.NewTestHub(t.TempDir())
 		defer hub.Cleanup()
 
-		hub.StartHub()
+		_ = hub.StartHub()
 
 		testAppFactoryExisting := func(t testing.TB) *pbTests.TestApp {
 			return hub.TestApp
@@ -708,7 +709,7 @@ func TestFirstUserCreation(t *testing.T) {
 		hub, _ := beszelTests.NewTestHub(t.TempDir())
 		defer hub.Cleanup()
 
-		hub.StartHub()
+		_ = hub.StartHub()
 
 		testAppFactory := func(t testing.TB) *pbTests.TestApp {
 			return hub.TestApp
@@ -757,7 +758,7 @@ func TestCreateUserEndpointAvailability(t *testing.T) {
 		require.NoError(t, err)
 		require.Zero(t, userCount, "Should start with no users")
 
-		hub.StartHub()
+		_ = hub.StartHub()
 
 		testAppFactory := func(t testing.TB) *pbTests.TestApp {
 			return hub.TestApp
@@ -792,7 +793,7 @@ func TestCreateUserEndpointAvailability(t *testing.T) {
 		_, err := beszelTests.CreateUser(hub, "existing@example.com", "password")
 		require.NoError(t, err)
 
-		hub.StartHub()
+		_ = hub.StartHub()
 
 		testAppFactory := func(t testing.TB) *pbTests.TestApp {
 			return hub.TestApp
@@ -829,7 +830,7 @@ func TestAutoLoginMiddleware(t *testing.T) {
 	testAppFactory := func(t testing.TB) *pbTests.TestApp {
 		hub, _ := beszelTests.NewTestHub(t.TempDir())
 		hubs = append(hubs, hub)
-		hub.StartHub()
+		_ = hub.StartHub()
 		return hub.TestApp
 	}
 
@@ -858,7 +859,7 @@ func TestAutoLoginMiddleware(t *testing.T) {
 			ExpectedContent: []string{"\"key\":", "\"v\":"},
 			TestAppFactory:  testAppFactory,
 			BeforeTestFunc: func(t testing.TB, app *pbTests.TestApp, e *core.ServeEvent) {
-				beszelTests.CreateUser(app, "user@test.com", "password123")
+				_, _ = beszelTests.CreateUser(app, "user@test.com", "password123")
 			},
 		},
 	}
@@ -882,7 +883,7 @@ func TestTrustedHeaderMiddleware(t *testing.T) {
 	testAppFactory := func(t testing.TB) *pbTests.TestApp {
 		hub, _ := beszelTests.NewTestHub(t.TempDir())
 		hubs = append(hubs, hub)
-		hub.StartHub()
+		_ = hub.StartHub()
 		return hub.TestApp
 	}
 
@@ -917,7 +918,7 @@ func TestTrustedHeaderMiddleware(t *testing.T) {
 			ExpectedContent: []string{"\"key\":", "\"v\":"},
 			TestAppFactory:  testAppFactory,
 			BeforeTestFunc: func(t testing.TB, app *pbTests.TestApp, e *core.ServeEvent) {
-				beszelTests.CreateUser(app, "user@test.com", "password123")
+				_, _ = beszelTests.CreateUser(app, "user@test.com", "password123")
 			},
 		},
 	}
@@ -932,7 +933,7 @@ func TestUpdateEndpoint(t *testing.T) {
 
 	hub, _ := beszelTests.NewTestHub(t.TempDir())
 	defer hub.Cleanup()
-	hub.StartHub()
+	_ = hub.StartHub()
 
 	// Create test user and get auth token
 	// user, err := beszelTests.CreateUser(hub, "testuser@example.com", "password123")

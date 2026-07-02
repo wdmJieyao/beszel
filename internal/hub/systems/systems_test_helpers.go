@@ -102,17 +102,13 @@ func (sm *SystemManager) SetSystemStatusInDB(systemID string, status string) boo
 
 	record.Set("status", status)
 	err = sm.hub.Save(record)
-	if err != nil {
-		return false
-	}
-
-	return true
+	return err == nil
 }
 
 // TESTING ONLY: RemoveAllSystems removes all systems from the store
 func (sm *SystemManager) RemoveAllSystems() {
 	for _, system := range sm.systems.GetAll() {
-		sm.RemoveSystem(system.Id)
+		_ = sm.RemoveSystem(system.Id)
 	}
 	sm.smartFetchMap.StopCleaner()
 }

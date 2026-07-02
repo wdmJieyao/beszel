@@ -58,7 +58,9 @@ func (a *Agent) StartServer(opts ServerOptions) error {
 	if err != nil {
 		return err
 	}
-	defer ln.Close()
+	defer func() {
+		_ = ln.Close()
+	}()
 
 	// base config (limit to allowed algorithms)
 	config := &gossh.ServerConfig{
@@ -135,7 +137,7 @@ func (a *Agent) handleSession(s ssh.Session) {
 	if hubVersion.LT(beszel.MinVersionAgentResponse) {
 		if err := a.handleLegacyStats(s, hubVersion); err != nil {
 			slog.Error("Error encoding stats", "err", err)
-			s.Exit(1)
+			_ = s.Exit(1)
 			return
 		}
 	}
@@ -145,18 +147,18 @@ func (a *Agent) handleSession(s ssh.Session) {
 		// Fallback to legacy one-shot if the first decode fails
 		if err2 := a.handleLegacyStats(s, hubVersion); err2 != nil {
 			slog.Error("Error encoding stats (fallback)", "err", err2)
-			s.Exit(1)
+			_ = s.Exit(1)
 			return
 		}
-		s.Exit(0)
+		_ = s.Exit(0)
 		return
 	}
 	if err := a.handleSSHRequest(s, &req); err != nil {
 		slog.Error("SSH request handling failed", "err", err)
-		s.Exit(1)
+		_ = s.Exit(1)
 		return
 	}
-	s.Exit(0)
+	_ = s.Exit(0)
 }
 
 // handleSSHRequest builds a handler context and dispatches to the shared registry

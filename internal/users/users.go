@@ -39,7 +39,7 @@ func (um *UserManager) InitializeUserSettings(e *core.RecordEvent) error {
 	}{
 		ChartTime: "1h",
 	}
-	record.UnmarshalJSONField("settings", &settings)
+	_ = record.UnmarshalJSONField("settings", &settings)
 	// get user email from auth record
 	var user struct {
 		Email string `db:"email"`

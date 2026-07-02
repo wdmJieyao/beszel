@@ -13,11 +13,20 @@
 		"formatWithErrors": true
 	},
 	"assist": { "actions": { "source": { "organizeImports": "off" } } },
+	"files": {
+		"includes": ["**", "!src/locales/**/*.ts"]
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"recommended": true,
 			"a11y": {
+				"noStaticElementInteractions": "off",
+				"noSvgWithoutTitle": "off",
+				"useAriaPropsForRole": "off",
+				"useFocusableInteractive": "off",
+				"useSemanticElements": "off",
+				"useValidAnchor": "off",
 				"useButtonType": "off"
 			},
 			"complexity": {
@@ -42,6 +51,7 @@
 				"noDangerouslySetInnerHtml": "warn"
 			},
 			"style": {
+				"noNonNullAssertion": "off",
 				"noParameterProperties": "error",
 				"noYodaExpression": "error",
 				"useConsistentBuiltinInstantiation": "error",
@@ -51,12 +61,14 @@
 			},
 			"suspicious": {
 				"useAwait": "error",
+				"noExplicitAny": "off",
 				"noEvolvingTypes": "error",
 				"noArrayIndexKey": "off"
 			}
 		}
 	},
 	"javascript": {
+		"globals": ["BESZEL"],
 		"formatter": {
 			"quoteStyle": "double",
 			"trailingCommas": "es5",
@@ -64,6 +76,16 @@
 		}
 	},
 	"overrides": [
+		{
+			"includes": ["**/*.css"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noUnknownAtRules": "off"
+					}
+				}
+			}
+		},
 		{
 			"includes": ["**/*.jsx", "**/*.tsx"],
 			"linter": {

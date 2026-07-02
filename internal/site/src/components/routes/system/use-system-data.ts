@@ -133,9 +133,9 @@ export function useSystemData(id: string) {
 						setContainerData(containerPoint ? [containerPoint] : [])
 						return
 					}
-					setSystemStats((prev) => appendData(prev, [statsPoint], 1000, 60))
+					setSystemStats((prev) => appendData(prev, [statsPoint], chartTimeData["1m"].expectedInterval, 60))
 					if (containerPoint) {
-						setContainerData((prev) => appendData(prev, [containerPoint], 1000, 60))
+						setContainerData((prev) => appendData(prev, [containerPoint], chartTimeData["1m"].expectedInterval, 60))
 					}
 				},
 				{ query: { system: system.id } }

@@ -231,7 +231,7 @@ func TestDirectoryIsWritable(t *testing.T) {
 
 		// Restore permissions after test for cleanup
 		defer func() {
-			os.Chmod(readOnlyDir, 0755)
+			assert.NoError(t, os.Chmod(readOnlyDir, 0755))
 		}()
 
 		writable, err := directoryIsWritable(readOnlyDir)

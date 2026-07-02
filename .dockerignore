@@ -32,12 +32,22 @@ freebsd-port
 coverage
 
 # Docker files
+Dockerfile*
+.dockerignore
 dockerfile_*
 
 # Temporary files
 *.tmp
 *.bak
 *.log
+*.log*
+.env*
+coverage/
+node_modules/
+.git/
+docker_data/
+test-results/
+.codex
 
 # OS specific files
 .DS_Store

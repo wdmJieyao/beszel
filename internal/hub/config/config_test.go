@@ -175,14 +175,14 @@ func TestConfigSyncWithTokens(t *testing.T) {
 
 			// Cleanup for next test
 			if existingSystem != nil {
-				testHub.Delete(existingSystem)
+				_ = testHub.Delete(existingSystem)
 			}
 			if existingFingerprint != nil {
-				testHub.Delete(existingFingerprint)
+				_ = testHub.Delete(existingFingerprint)
 			}
 			// Clean up the new records
-			testHub.Delete(system)
-			testHub.Delete(fingerprint)
+			_ = testHub.Delete(system)
+			_ = testHub.Delete(fingerprint)
 		})
 	}
 }

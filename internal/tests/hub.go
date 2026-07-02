@@ -79,7 +79,10 @@ func CreateUser(app core.App, email string, password string) (*core.Record, erro
 
 // Helper function to create a test superuser for config tests
 func CreateSuperuser(app core.App, email string, password string) (*core.Record, error) {
-	superusersCollection, _ := app.FindCachedCollectionByNameOrId(core.CollectionNameSuperusers)
+	superusersCollection, err := app.FindCachedCollectionByNameOrId(core.CollectionNameSuperusers)
+	if err != nil {
+		return nil, err
+	}
 	superuser := core.NewRecord(superusersCollection)
 	superuser.Set("email", email)
 	superuser.Set("password", password)
@@ -112,6 +115,9 @@ func CreateRecord(app core.App, collectionName string, fields map[string]any) (*
 
 func ClearCollection(t testing.TB, app core.App, collectionName string) error {
 	_, err := app.DB().NewQuery(fmt.Sprintf("DELETE from %s", collectionName)).Execute()
+	if err != nil {
+		return err
+	}
 	recordCount, err := app.CountRecords(collectionName)
 	assert.EqualValues(t, recordCount, 0, "should have 0 records after clearing")
 	return err
@@ -149,7 +155,7 @@ func CreateSystems(app core.App, count int, userId string, status string) ([]*co
 func GetHubWithUser(t *testing.T) (*TestHub, *core.Record) {
 	hub, err := NewTestHub(t.TempDir())
 	assert.NoError(t, err)
-	hub.StartHub()
+	_ = hub.StartHub()
 
 	// Manually initialize the system manager to bind event hooks
 	err = hub.GetSystemManager().Initialize()

@@ -79,7 +79,7 @@ func newHealthCmd() *cobra.Command {
 		},
 	}
 	healthCmd.Flags().StringVar(&baseURL, "url", "", "base URL")
-	healthCmd.MarkFlagRequired("url")
+	_ = healthCmd.MarkFlagRequired("url")
 	return healthCmd
 }
 
@@ -93,7 +93,9 @@ func checkHealth(baseURL string) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("%s returned status %d", healthURL, resp.StatusCode)

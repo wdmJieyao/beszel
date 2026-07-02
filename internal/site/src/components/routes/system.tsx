@@ -5,6 +5,7 @@ import type { GPUData } from "@/types"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import InfoBar from "./system/info-bar"
 import { useSystemData } from "./system/use-system-data"
+import { useNetworkProbeData } from "./system/use-network-probe-data"
 import { CpuChart, ContainerCpuChart } from "./system/charts/cpu-charts"
 import { MemoryChart, ContainerMemoryChart, SwapChart } from "./system/charts/memory-charts"
 import { RootDiskCharts, ExtraFsCharts } from "./system/charts/disk-charts"
@@ -17,12 +18,14 @@ import { ContainerIcon, CpuIcon, HardDriveIcon, TerminalSquareIcon } from "lucid
 import { GpuIcon } from "../ui/icons"
 import SystemdTable from "../systemd-table/systemd-table"
 import ContainersTable from "../containers-table/containers-table"
+import { NetworkProbeChart, NetworkProbeStatus } from "../charts/network-probe-chart"
 
 const SEMVER_0_14_0 = parseSemVer("0.14.0")
 const SEMVER_0_15_0 = parseSemVer("0.15.0")
 
 export default memo(function SystemDetail({ id }: { id: string }) {
 	const systemData = useSystemData(id)
+	const probeData = useNetworkProbeData(id, systemData.chartData.chartTime)
 
 	const {
 		system,
@@ -61,8 +64,11 @@ export default memo(function SystemDetail({ id }: { id: string }) {
 	const hasContainers = containerData.length > 0
 	const maybeHasSmartData = compareSemVer(chartData.agentVersion, SEMVER_0_15_0) >= 0
 	const hasContainersTable = hasContainers && compareSemVer(chartData.agentVersion, SEMVER_0_14_0) >= 0
-	const hasSystemd = system.info.sv
+	const hasSystemd = !!system.info?.sv
 	const hasGpu = hasGpuData || hasGpuPowerData
+	const latencyProbeGroups = probeData.groups.filter((group) => group.type === "tcping" || group.type === "icmp_ping")
+	const summaryProbeGroups = probeData.groups.filter((group) => group.type === "http_get")
+	const latencySeries = latencyProbeGroups.flatMap((group) => group.series)
 
 	// keep tabsRef in sync for keyboard navigation
 	const tabs = ["core", "disk"]
@@ -277,6 +283,34 @@ export default memo(function SystemDetail({ id }: { id: string }) {
 				setDisplayMode={setDisplayMode}
 				details={details}
 			/>
+
+			{latencySeries.length > 0 && (
+				<div className="space-y-3 rounded-md border bg-card p-4">
+					<div className="flex items-center justify-between gap-2">
+						<div>
+							<div className="font-medium">线路检测</div>
+							<div className="text-sm text-muted-foreground">点击图例显示或隐藏对应线路。</div>
+						</div>
+						<div className="text-sm text-muted-foreground">{latencySeries.length} 条线路</div>
+					</div>
+					<NetworkProbeChart series={latencySeries} range={chartData.chartTime} />
+				</div>
+			)}
+
+			{summaryProbeGroups.length > 0 && (
+				<div className="grid gap-3 md:grid-cols-2">
+					{summaryProbeGroups.map((group) => (
+						<div key={group.id} className="rounded-md border bg-card p-4">
+							<div className="flex items-center justify-between gap-2">
+								<div className="min-w-0">
+									<div className="truncate font-medium">{group.label}</div>
+								</div>
+								<NetworkProbeStatus latest={group.latest} />
+							</div>
+						</div>
+					))}
+				</div>
+			)}
 
 			{displayMode === "tabs" ? tabbedLayout() : defaultLayout()}
 		</div>

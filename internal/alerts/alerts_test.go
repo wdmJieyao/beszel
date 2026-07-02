@@ -147,7 +147,7 @@ func TestSetAlertTriggered(t *testing.T) {
 	hub, _ := beszelTests.NewTestHub(t.TempDir())
 	defer hub.Cleanup()
 
-	hub.StartHub()
+	_ = hub.StartHub()
 
 	user, _ := beszelTests.CreateUser(hub, "test@example.com", "password")
 	system, _ := beszelTests.CreateRecord(hub, "systems", map[string]any{

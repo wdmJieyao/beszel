@@ -45,6 +45,18 @@ func (h *fingerprintHandler) Handle(agentResponse common.AgentResponse) error {
 	return errors.New("no fingerprint data in response")
 }
 
+type networkProbeHandler struct {
+	BaseHandler
+	result *common.NetworkProbeResult
+}
+
+func (h *networkProbeHandler) Handle(agentResponse common.AgentResponse) error {
+	if len(agentResponse.Data) == 0 {
+		return errors.New("no network probe data in response")
+	}
+	return cbor.Unmarshal(agentResponse.Data, h.result)
+}
+
 // GetFingerprint authenticates with the agent using SSH signature and returns the agent's fingerprint.
 func (ws *WsConn) GetFingerprint(ctx context.Context, token string, signer ssh.Signer, needSysInfo bool) (common.FingerprintResponse, error) {
 	if !ws.IsConnected() {
@@ -67,6 +79,21 @@ func (ws *WsConn) GetFingerprint(ctx context.Context, token string, signer ssh.S
 
 	var result common.FingerprintResponse
 	handler := &fingerprintHandler{result: &result}
+	err = ws.handleAgentRequest(req, handler)
+	return result, err
+}
+
+// RunNetworkProbe requests one network probe execution from a connected agent.
+func (ws *WsConn) RunNetworkProbe(ctx context.Context, probe common.NetworkProbeRequest) (common.NetworkProbeResult, error) {
+	if !ws.IsConnected() {
+		return common.NetworkProbeResult{}, gws.ErrConnClosed
+	}
+	req, err := ws.requestManager.SendRequest(ctx, common.RunNetworkProbe, probe)
+	if err != nil {
+		return common.NetworkProbeResult{}, err
+	}
+	var result common.NetworkProbeResult
+	handler := &networkProbeHandler{result: &result}
 	err = ws.handleAgentRequest(req, handler)
 	return result, err
 }

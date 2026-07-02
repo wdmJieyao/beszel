@@ -79,6 +79,10 @@ msgstr "24 hours"
 msgid "30 days"
 msgstr "30 days"
 
+#: src/lib/utils.ts
+#~ msgid "30 minutes"
+#~ msgstr "30 minutes"
+
 #. Load average
 #: src/components/routes/system/charts/load-average-chart.tsx
 msgid "5 min"
@@ -405,6 +409,10 @@ msgstr "Command line instructions"
 msgid "Configure how you receive alert notifications."
 msgstr "Configure how you receive alert notifications."
 
+#: src/components/routes/settings/network-probes.tsx
+#~ msgid "Configure TCPing, ICMP Ping, and HTTP GET checks executed by selected agents."
+#~ msgstr "Configure TCPing, ICMP Ping, and HTTP GET checks executed by selected agents."
+
 #: src/components/login/auth-form.tsx
 #: src/components/login/auth-form.tsx
 msgid "Confirm password"
@@ -712,7 +720,6 @@ msgstr "Enter your one-time password."
 msgid "Ephemeral"
 msgstr "Ephemeral"
 
-#: src/components/login/auth-form.tsx
 #: src/components/routes/settings/alerts-history-data-table.tsx
 #: src/components/routes/settings/config-yaml.tsx
 #: src/components/routes/settings/heartbeat.tsx
@@ -952,6 +959,10 @@ msgstr "Invalid email address."
 msgid "Language"
 msgstr "Language"
 
+#: src/components/routes/public-status.tsx
+#~ msgid "Last updated"
+#~ msgstr "Last updated"
+
 #: src/components/systems-table/systems-table.tsx
 msgid "Layout"
 msgstr "Layout"
@@ -1004,8 +1015,8 @@ msgid "Log Out"
 msgstr "Log Out"
 
 #: src/components/login/login.tsx
-msgid "Login"
-msgstr "Login"
+#~ msgid "Login"
+#~ msgstr "Login"
 
 #: src/components/login/auth-form.tsx
 #: src/components/login/forgot-pass-form.tsx
@@ -1084,6 +1095,11 @@ msgstr "Name"
 msgid "Net"
 msgstr "Net"
 
+#: src/components/routes/settings/layout.tsx
+#: src/components/routes/settings/network-probes.tsx
+#~ msgid "Network Probes"
+#~ msgstr "Network Probes"
+
 #: src/components/routes/system/charts/network-charts.tsx
 msgid "Network traffic of docker containers"
 msgstr "Network traffic of docker containers"
@@ -1105,6 +1121,10 @@ msgstr "Network unit"
 #: src/components/systemd-table/systemd-table.tsx
 msgid "No"
 msgstr "No"
+
+#: src/components/routes/public-status.tsx
+#~ msgid "No public systems are currently available."
+#~ msgstr "No public systems are currently available."
 
 #: src/components/command-palette.tsx
 #: src/components/systemd-table/systemd-table.tsx
@@ -1311,6 +1331,12 @@ msgstr "Process started"
 msgid "Public Key"
 msgstr "Public Key"
 
+#: src/components/routes/public-status.tsx
+#: src/components/routes/settings/layout.tsx
+#: src/components/routes/settings/public-status.tsx
+#~ msgid "Public Status"
+#~ msgstr "Public Status"
+
 #: src/components/routes/system/disk-io-sheet.tsx
 msgctxt "Disk I/O average queue depth"
 msgid "Queue Depth"
@@ -1401,6 +1427,10 @@ msgstr "S.M.A.R.T. Details"
 msgid "S.M.A.R.T. Self-Test"
 msgstr "S.M.A.R.T. Self-Test"
 
+#: src/components/routes/settings/network-probes.tsx
+#~ msgid "Save"
+#~ msgstr "Save"
+
 #: src/components/add-system.tsx
 msgid "Save {foo}"
 msgstr "Save {foo}"
@@ -1449,6 +1479,10 @@ msgstr "See <0>notification settings</0> to configure how you receive alerts."
 #: src/components/routes/settings/quiet-hours.tsx
 msgid "Select {foo}"
 msgstr "Select {foo}"
+
+#: src/components/routes/settings/public-status.tsx
+#~ msgid "Select which systems are visible on the anonymous public status page."
+#~ msgstr "Select which systems are visible on the anonymous public status page."
 
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Send a single heartbeat ping to verify your endpoint is working."
@@ -1544,6 +1578,11 @@ msgstr "Swap space used by the system"
 #: src/components/routes/system/charts/memory-charts.tsx
 msgid "Swap Usage"
 msgstr "Swap Usage"
+
+#: src/components/mode-toggle.tsx
+#: src/components/mode-toggle.tsx
+msgid "Switch theme"
+msgstr "Switch theme"
 
 #: src/components/add-system.tsx
 #: src/components/alerts-history-columns.tsx
@@ -1654,8 +1693,8 @@ msgstr "To email(s)"
 
 #: src/components/mode-toggle.tsx
 #: src/components/mode-toggle.tsx
-msgid "Toggle theme"
-msgstr "Toggle theme"
+#~ msgid "Toggle theme"
+#~ msgstr "Toggle theme"
 
 #: src/components/add-system.tsx
 #: src/components/routes/settings/tokens-fingerprints.tsx
@@ -1926,3 +1965,100 @@ msgstr "Yes"
 #: src/components/routes/settings/layout.tsx
 msgid "Your user settings have been updated."
 msgstr "Your user settings have been updated."
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "仅后台"
+msgstr "仅后台"
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "保存线路"
+msgstr "保存线路"
+
+#: src/components/routes/public-status.tsx
+#: src/components/routes/settings/layout.tsx
+#: src/components/routes/settings/public-status.tsx
+msgid "公共看板"
+msgstr "公共看板"
+
+#: src/components/routes/public-status.tsx
+msgid "公共看板加载失败。"
+msgstr "公共看板加载失败。"
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "公开展示"
+msgstr "公开展示"
+
+#: src/components/routes/public-status.tsx
+msgid "公开节点状态与线路检测走势。"
+msgstr "公开节点状态与线路检测走势。"
+
+#: src/components/routes/public-status.tsx
+#: src/components/routes/public-status.tsx
+#~ msgid "最后上报"
+#~ msgstr "最后上报"
+
+#: src/components/routes/public-status.tsx
+msgid "最新刷新失败，正在保留当前数据。"
+msgstr "最新刷新失败，正在保留当前数据。"
+
+#: src/components/routes/settings/public-status.tsx
+msgid "已展示"
+msgstr "已展示"
+
+#: src/components/routes/settings/public-status.tsx
+msgid "当前公开节点"
+msgstr "当前公开节点"
+
+#: src/components/routes/public-status.tsx
+msgid "当前没有公开展示的节点。"
+msgstr "当前没有公开展示的节点。"
+
+#: src/components/routes/settings/public-status.tsx
+msgid "暂无可配置节点。"
+msgstr "暂无可配置节点。"
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "暂无线路检测配置。"
+msgstr "暂无线路检测配置。"
+
+#: src/components/routes/public-status.tsx
+#~ msgid "更新时间"
+#~ msgstr "更新时间"
+
+#: src/components/routes/public-status.tsx
+msgid "正在加载..."
+msgstr "正在加载..."
+
+#: src/components/routes/public-status.tsx
+msgid "管理登录"
+msgstr "管理登录"
+
+#: src/components/routes/settings/layout.tsx
+#: src/components/routes/settings/network-probes.tsx
+msgid "线路检测"
+msgstr "线路检测"
+
+#: src/components/routes/public-status.tsx
+#: src/components/routes/public-status.tsx
+msgid "节点最后上报"
+msgstr "节点最后上报"
+
+#: src/components/routes/settings/public-status.tsx
+msgid "选择匿名首页展示哪些节点，并控制公开指标范围。"
+msgstr "选择匿名首页展示哪些节点，并控制公开指标范围。"
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "配置线路、观测点和检测目标，系统会定期记录延迟走势。"
+msgstr "配置线路、观测点和检测目标，系统会定期记录延迟走势。"
+
+#: src/components/routes/settings/public-status.tsx
+msgid "隐藏"
+msgstr "隐藏"
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "高级设置"
+msgstr "高级设置"
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "默认由所有可用节点定期检测。"
+msgstr "默认由所有可用节点定期检测。"

@@ -27,7 +27,7 @@ var (
 // It cleans up existing subscriptions when a client connects.
 func (sm *SystemManager) onRealtimeConnectRequest(e *core.RealtimeConnectRequestEvent) error {
 	// after e.Next() is the client disconnection
-	e.Next()
+	_ = e.Next()
 	subscriptions := e.Client.Subscriptions()
 	for k := range subscriptions {
 		sm.removeRealtimeSubscription(k, subscriptions[k])
@@ -153,7 +153,7 @@ func (sm *SystemManager) fetchRealtimeDataAndNotify() {
 			}
 			bytes, err := json.Marshal(data)
 			if err == nil {
-				notify(sm.hub, info.subscription, bytes)
+				_ = notify(sm.hub, info.subscription, bytes)
 			}
 		}()
 	}

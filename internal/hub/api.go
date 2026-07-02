@@ -114,10 +114,24 @@ func (h *Hub) registerApiRoutes(se *core.ServeEvent) error {
 	// heartbeat status and test
 	apiAuth.GET("/heartbeat-status", h.getHeartbeatStatus).BindFunc(requireAdminRole)
 	apiAuth.POST("/test-heartbeat", h.testHeartbeat).BindFunc(requireAdminRole)
+	// public status page settings
+	apiAuth.GET("/public/systems", h.listPublicSystems)
+	apiAuth.PATCH("/public/systems/{systemId}", h.updatePublicSystem).BindFunc(excludeReadOnlyRole)
 	// get config.yml content
 	apiAuth.GET("/config-yaml", config.GetYamlConfig).BindFunc(requireAdminRole)
 	// handle agent websocket connection
 	apiNoAuth.GET("/agent-connect", h.handleAgentConnect)
+	// anonymous public status page
+	apiNoAuth.GET("/public/status", h.getPublicStatus)
+	// network probes
+	apiAuth.GET("/network-probes", h.listNetworkProbes)
+	apiAuth.POST("/network-probes", h.createNetworkProbe).BindFunc(excludeReadOnlyRole)
+	apiAuth.PATCH("/network-probes/{probeId}", h.updateNetworkProbe).BindFunc(excludeReadOnlyRole)
+	apiAuth.DELETE("/network-probes/{probeId}", h.deleteNetworkProbe).BindFunc(excludeReadOnlyRole)
+	apiAuth.GET("/network-probes/{probeId}/results", h.getNetworkProbeResults)
+	apiAuth.POST("/systems/{systemId}/network-probe-live-sessions", h.createNetworkProbeLiveSession)
+	apiAuth.PATCH("/systems/{systemId}/network-probe-live-sessions/{sessionId}", h.renewNetworkProbeLiveSession)
+	apiAuth.DELETE("/systems/{systemId}/network-probe-live-sessions/{sessionId}", h.endNetworkProbeLiveSession)
 	// get or create universal tokens
 	apiAuth.GET("/universal-token", h.getUniversalToken).BindFunc(excludeReadOnlyRole)
 	// update / delete user alerts

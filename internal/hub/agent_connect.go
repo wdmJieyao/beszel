@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/henrygd/beszel/internal/common"
+	"github.com/henrygd/beszel/internal/entities/system"
 	"github.com/henrygd/beszel/internal/hub/expirymap"
 	"github.com/henrygd/beszel/internal/hub/ws"
 
@@ -95,7 +96,9 @@ func (acr *agentConnectRequest) agentConnect() (err error) {
 		return acr.sendResponseError(acr.res, http.StatusInternalServerError, "WebSocket upgrade failed")
 	}
 
-	go acr.verifyWsConn(conn, fpRecords)
+	go func() {
+		_ = acr.verifyWsConn(conn, fpRecords)
+	}()
 
 	return nil
 }
@@ -151,7 +154,7 @@ func (acr *agentConnectRequest) validateAgentHeaders(headers http.Header) (strin
 func (acr *agentConnectRequest) sendResponseError(res http.ResponseWriter, code int, message string) error {
 	res.WriteHeader(code)
 	if message != "" {
-		res.Write([]byte(message))
+		_, _ = res.Write([]byte(message))
 	}
 	return nil
 }
@@ -286,6 +289,8 @@ func (acr *agentConnectRequest) createSystem(agentFingerprint common.Fingerprint
 	systemRecord.Set("host", remoteAddr)
 	systemRecord.Set("port", agentFingerprint.Port)
 	systemRecord.Set("users", []string{acr.userId})
+	systemRecord.Set("status", "pending")
+	systemRecord.Set("info", system.Info{})
 
 	return systemRecord.Id, acr.hub.Save(systemRecord)
 }

@@ -28,7 +28,7 @@ func (h *Hub) startServer(se *core.ServeEvent) error {
 		// serve static assets if path is in staticPaths
 		for i := range staticPaths {
 			if strings.Contains(e.Request.URL.Path, staticPaths[i]) {
-				e.Response.Header().Set("Cache-Control", "public, max-age=2592000")
+				e.Response.Header().Set("Cache-Control", "public, max-age=60")
 				return serveStatic(e)
 			}
 		}

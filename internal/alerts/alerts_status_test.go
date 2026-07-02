@@ -115,7 +115,7 @@ func TestStatusAlertRecoveryBeforeDeadline(t *testing.T) {
 	// Ensure user settings have an email
 	userSettings, _ := hub.FindFirstRecordByFilter("user_settings", "user={:user}", map[string]any{"user": user.Id})
 	userSettings.Set("settings", `{"emails":["test@example.com"],"webhooks":[]}`)
-	hub.Save(userSettings)
+	_ = hub.Save(userSettings)
 
 	// Initial email count
 	initialEmailCount := hub.TestMailer.TotalSend()
@@ -126,7 +126,7 @@ func TestStatusAlertRecoveryBeforeDeadline(t *testing.T) {
 	system.Set("status", "up")
 	system.Set("host", "127.0.0.1")
 	system.Set("users", []string{user.Id})
-	hub.Save(system)
+	_ = hub.Save(system)
 
 	alertCollection, _ := hub.FindCollectionByNameOrId("alerts")
 	alert := core.NewRecord(alertCollection)
@@ -135,17 +135,17 @@ func TestStatusAlertRecoveryBeforeDeadline(t *testing.T) {
 	alert.Set("name", "Status")
 	alert.Set("triggered", false)
 	alert.Set("min", 1)
-	hub.Save(alert)
+	_ = hub.Save(alert)
 
 	am := hub.AlertManager
 
 	// 1. System goes down
-	am.HandleStatusAlerts("down", system)
+	_ = am.HandleStatusAlerts("down", system)
 	assert.Equal(t, 1, am.GetPendingAlertsCount(), "Alert should be scheduled")
 
 	// 2. System goes up BEFORE delay expires
 	// Triggering HandleStatusAlerts("up") SHOULD NOT send an alert.
-	am.HandleStatusAlerts("up", system)
+	_ = am.HandleStatusAlerts("up", system)
 
 	assert.Equal(t, 0, am.GetPendingAlertsCount(), "Alert should be canceled if system recovers before delay expires")
 
@@ -161,7 +161,7 @@ func TestStatusAlertNormalRecovery(t *testing.T) {
 	// Ensure user settings have an email
 	userSettings, _ := hub.FindFirstRecordByFilter("user_settings", "user={:user}", map[string]any{"user": user.Id})
 	userSettings.Set("settings", `{"emails":["test@example.com"],"webhooks":[]}`)
-	hub.Save(userSettings)
+	_ = hub.Save(userSettings)
 
 	systemCollection, _ := hub.FindCollectionByNameOrId("systems")
 	system := core.NewRecord(systemCollection)
@@ -169,7 +169,7 @@ func TestStatusAlertNormalRecovery(t *testing.T) {
 	system.Set("status", "up")
 	system.Set("host", "127.0.0.1")
 	system.Set("users", []string{user.Id})
-	hub.Save(system)
+	_ = hub.Save(system)
 
 	alertCollection, _ := hub.FindCollectionByNameOrId("alerts")
 	alert := core.NewRecord(alertCollection)
@@ -177,13 +177,13 @@ func TestStatusAlertNormalRecovery(t *testing.T) {
 	alert.Set("system", system.Id)
 	alert.Set("name", "Status")
 	alert.Set("triggered", true) // System was confirmed DOWN
-	hub.Save(alert)
+	_ = hub.Save(alert)
 
 	am := hub.AlertManager
 	initialEmailCount := hub.TestMailer.TotalSend()
 
 	// System goes up
-	am.HandleStatusAlerts("up", system)
+	_ = am.HandleStatusAlerts("up", system)
 
 	// Verify that an email WAS sent (normal recovery).
 	assert.Equal(t, initialEmailCount+1, hub.TestMailer.TotalSend(), "Recovery notification should be sent if system was triggered as down")
@@ -894,7 +894,7 @@ func TestStatusAlertClearedBeforeSend(t *testing.T) {
 		// Ensure user settings have an email
 		userSettings, _ := hub.FindFirstRecordByFilter("user_settings", "user={:user}", map[string]any{"user": user.Id})
 		userSettings.Set("settings", `{"emails":["test@example.com"],"webhooks":[]}`)
-		hub.Save(userSettings)
+		_ = hub.Save(userSettings)
 
 		// Initial email count
 		initialEmailCount := hub.TestMailer.TotalSend()

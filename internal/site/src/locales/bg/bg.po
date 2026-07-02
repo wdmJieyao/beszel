@@ -84,6 +84,10 @@ msgstr "24 часа"
 msgid "30 days"
 msgstr "30 дни"
 
+#: src/lib/utils.ts
+#~ msgid "30 minutes"
+#~ msgstr ""
+
 #. Load average
 #: src/components/routes/system/charts/load-average-chart.tsx
 msgid "5 min"
@@ -410,6 +414,10 @@ msgstr "Инструкции за командната линия"
 msgid "Configure how you receive alert notifications."
 msgstr "Настрой как получаваш нотификации за тревоги."
 
+#: src/components/routes/settings/network-probes.tsx
+#~ msgid "Configure TCPing, ICMP Ping, and HTTP GET checks executed by selected agents."
+#~ msgstr ""
+
 #: src/components/login/auth-form.tsx
 #: src/components/login/auth-form.tsx
 msgid "Confirm password"
@@ -717,7 +725,6 @@ msgstr "Въведете Вашата еднократна парола."
 msgid "Ephemeral"
 msgstr "Ефимерен"
 
-#: src/components/login/auth-form.tsx
 #: src/components/routes/settings/alerts-history-data-table.tsx
 #: src/components/routes/settings/config-yaml.tsx
 #: src/components/routes/settings/heartbeat.tsx
@@ -957,6 +964,10 @@ msgstr "Невалиден имейл адрес."
 msgid "Language"
 msgstr "Език"
 
+#: src/components/routes/public-status.tsx
+#~ msgid "Last updated"
+#~ msgstr ""
+
 #: src/components/systems-table/systems-table.tsx
 msgid "Layout"
 msgstr "Подреждане"
@@ -1009,8 +1020,8 @@ msgid "Log Out"
 msgstr "Изход"
 
 #: src/components/login/login.tsx
-msgid "Login"
-msgstr "Вход"
+#~ msgid "Login"
+#~ msgstr "Вход"
 
 #: src/components/login/auth-form.tsx
 #: src/components/login/forgot-pass-form.tsx
@@ -1089,6 +1100,11 @@ msgstr "Име"
 msgid "Net"
 msgstr "Мрежа"
 
+#: src/components/routes/settings/layout.tsx
+#: src/components/routes/settings/network-probes.tsx
+#~ msgid "Network Probes"
+#~ msgstr ""
+
 #: src/components/routes/system/charts/network-charts.tsx
 msgid "Network traffic of docker containers"
 msgstr "Мрежов трафик на docker контейнери"
@@ -1110,6 +1126,10 @@ msgstr "Единица за измерване на скорост"
 #: src/components/systemd-table/systemd-table.tsx
 msgid "No"
 msgstr "Не"
+
+#: src/components/routes/public-status.tsx
+#~ msgid "No public systems are currently available."
+#~ msgstr ""
 
 #: src/components/command-palette.tsx
 #: src/components/systemd-table/systemd-table.tsx
@@ -1316,6 +1336,12 @@ msgstr "Процесът стартира"
 msgid "Public Key"
 msgstr "Публичен ключ"
 
+#: src/components/routes/public-status.tsx
+#: src/components/routes/settings/layout.tsx
+#: src/components/routes/settings/public-status.tsx
+#~ msgid "Public Status"
+#~ msgstr ""
+
 #: src/components/routes/system/disk-io-sheet.tsx
 msgctxt "Disk I/O average queue depth"
 msgid "Queue Depth"
@@ -1406,6 +1432,10 @@ msgstr "S.M.A.R.T. Детайли"
 msgid "S.M.A.R.T. Self-Test"
 msgstr "S.M.A.R.T. Самотест"
 
+#: src/components/routes/settings/network-probes.tsx
+#~ msgid "Save"
+#~ msgstr ""
+
 #: src/components/add-system.tsx
 msgid "Save {foo}"
 msgstr "Запази {foo}"
@@ -1454,6 +1484,10 @@ msgstr "Виж <0>настройките за нотификациите</0> з�
 #: src/components/routes/settings/quiet-hours.tsx
 msgid "Select {foo}"
 msgstr "Избери {foo}"
+
+#: src/components/routes/settings/public-status.tsx
+#~ msgid "Select which systems are visible on the anonymous public status page."
+#~ msgstr ""
 
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Send a single heartbeat ping to verify your endpoint is working."
@@ -1549,6 +1583,11 @@ msgstr "Изполван swap от системата"
 #: src/components/routes/system/charts/memory-charts.tsx
 msgid "Swap Usage"
 msgstr "Използване на swap"
+
+#: src/components/mode-toggle.tsx
+#: src/components/mode-toggle.tsx
+msgid "Switch theme"
+msgstr ""
 
 #: src/components/add-system.tsx
 #: src/components/alerts-history-columns.tsx
@@ -1659,8 +1698,8 @@ msgstr "До имейл(ите)"
 
 #: src/components/mode-toggle.tsx
 #: src/components/mode-toggle.tsx
-msgid "Toggle theme"
-msgstr "Включи тема"
+#~ msgid "Toggle theme"
+#~ msgstr "Включи тема"
 
 #: src/components/add-system.tsx
 #: src/components/routes/settings/tokens-fingerprints.tsx
@@ -1931,3 +1970,100 @@ msgstr "Да"
 #: src/components/routes/settings/layout.tsx
 msgid "Your user settings have been updated."
 msgstr "Настройките за потребителя ти са обновени."
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "仅后台"
+msgstr ""
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "保存线路"
+msgstr ""
+
+#: src/components/routes/public-status.tsx
+#: src/components/routes/settings/layout.tsx
+#: src/components/routes/settings/public-status.tsx
+msgid "公共看板"
+msgstr ""
+
+#: src/components/routes/public-status.tsx
+msgid "公共看板加载失败。"
+msgstr ""
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "公开展示"
+msgstr ""
+
+#: src/components/routes/public-status.tsx
+msgid "公开节点状态与线路检测走势。"
+msgstr ""
+
+#: src/components/routes/public-status.tsx
+#: src/components/routes/public-status.tsx
+#~ msgid "最后上报"
+#~ msgstr ""
+
+#: src/components/routes/public-status.tsx
+msgid "最新刷新失败，正在保留当前数据。"
+msgstr ""
+
+#: src/components/routes/settings/public-status.tsx
+msgid "已展示"
+msgstr ""
+
+#: src/components/routes/settings/public-status.tsx
+msgid "当前公开节点"
+msgstr ""
+
+#: src/components/routes/public-status.tsx
+msgid "当前没有公开展示的节点。"
+msgstr ""
+
+#: src/components/routes/settings/public-status.tsx
+msgid "暂无可配置节点。"
+msgstr ""
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "暂无线路检测配置。"
+msgstr ""
+
+#: src/components/routes/public-status.tsx
+#~ msgid "更新时间"
+#~ msgstr ""
+
+#: src/components/routes/public-status.tsx
+msgid "正在加载..."
+msgstr ""
+
+#: src/components/routes/public-status.tsx
+msgid "管理登录"
+msgstr ""
+
+#: src/components/routes/settings/layout.tsx
+#: src/components/routes/settings/network-probes.tsx
+msgid "线路检测"
+msgstr ""
+
+#: src/components/routes/public-status.tsx
+#: src/components/routes/public-status.tsx
+msgid "节点最后上报"
+msgstr ""
+
+#: src/components/routes/settings/public-status.tsx
+msgid "选择匿名首页展示哪些节点，并控制公开指标范围。"
+msgstr ""
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "配置线路、观测点和检测目标，系统会定期记录延迟走势。"
+msgstr ""
+
+#: src/components/routes/settings/public-status.tsx
+msgid "隐藏"
+msgstr ""
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "高级设置"
+msgstr ""
+
+#: src/components/routes/settings/network-probes.tsx
+msgid "默认由所有可用节点定期检测。"
+msgstr ""

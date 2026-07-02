@@ -28,6 +28,7 @@ import type { BeszelInfo, UpdateInfo } from "./types"
 
 const LoginPage = lazy(() => import("@/components/login/login.tsx"))
 const Home = lazy(() => import("@/components/routes/home.tsx"))
+const PublicStatus = lazy(() => import("@/components/routes/public-status.tsx"))
 const Containers = lazy(() => import("@/components/routes/containers.tsx"))
 const Smart = lazy(() => import("@/components/routes/smart.tsx"))
 const SystemDetail = lazy(() => import("@/components/routes/system.tsx"))
@@ -37,6 +38,9 @@ const App = memo(() => {
 	const page = useStore($router)
 
 	useEffect(() => {
+		if (page?.route === "public_status" || (page?.route === "home" && !pb.authStore.isValid)) {
+			return
+		}
 		// change auth store on auth change
 		const unsubscribeAuth = pb.authStore.onChange(() => {
 			$authenticated.set(pb.authStore.isValid)
@@ -67,11 +71,16 @@ const App = memo(() => {
 			alertManager.unsubscribe()
 			systemsManager.unsubscribe()
 		}
-	}, [])
+	}, [page?.route])
 
 	if (!page) {
 		return <h1 className="text-3xl text-center my-14">404</h1>
+	} else if (page.route === "public_status") {
+		return <PublicStatus />
 	} else if (page.route === "home") {
+		if (!pb.authStore.isValid) {
+			return <PublicStatus />
+		}
 		return <Home />
 	} else if (page.route === "system") {
 		return <SystemDetail id={page.params.id} />
@@ -88,6 +97,7 @@ const Layout = () => {
 	const authenticated = useStore($authenticated)
 	const copyContent = useStore($copyContent)
 	const direction = useStore($direction)
+	const page = useStore($router)
 	const { layoutWidth } = useStore($userSettings, { keys: ["layoutWidth"] })
 
 	useEffect(() => {
@@ -96,7 +106,11 @@ const Layout = () => {
 
 	return (
 		<DirectionProvider dir={direction}>
-			{!authenticated ? (
+			{page?.route === "public_status" || (page?.route === "home" && !authenticated) ? (
+				<Suspense>
+					<App />
+				</Suspense>
+			) : !authenticated ? (
 				<Suspense>
 					<LoginPage />
 				</Suspense>

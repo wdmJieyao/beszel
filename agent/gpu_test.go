@@ -3,6 +3,7 @@
 package agent
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -214,10 +215,6 @@ func TestParseAmdData(t *testing.T) {
 			wantValid: true,
 		},
 		{
-			name:  "invalid json",
-			input: "{bad json",
-		},
-		{
 			name:      "invalid json",
 			input:     "{bad json",
 			wantData:  map[string]system.GPUData{},
@@ -423,7 +420,7 @@ func TestParseJetsonData(t *testing.T) {
 			}
 			parser := gm.getJetsonParser()
 			valid := parser([]byte(tt.input))
-			assert.Equal(t, true, valid)
+			assert.True(t, valid)
 
 			got := gm.GpuDataMap["0"]
 			require.NotNil(t, got)
@@ -1195,7 +1192,7 @@ echo "[]"`
 			caps := gm.discoverGpuCapabilities()
 			var err error
 			if !hasAnyGpuCollector(caps) {
-				err = fmt.Errorf(noGPUFoundMsg)
+				err = errors.New(noGPUFoundMsg)
 			}
 			priorities := gm.resolveLegacyCollectorPriority(caps)
 			hasPriority := func(source collectorSource) bool {

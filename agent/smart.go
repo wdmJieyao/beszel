@@ -200,14 +200,12 @@ func (sm *SmartManager) ScanDevices(force bool) error {
 	// require smartctl and does not scan the whole device.
 	if emmcDevices := scanEmmcDevices(); len(emmcDevices) > 0 {
 		scannedDevices = append(scannedDevices, emmcDevices...)
-		hasValidScan = true
 	}
 
 	// Add Linux mdraid arrays by reading sysfs health fields. This does not
 	// require smartctl and does not scan the whole device.
 	if raidDevices := scanMdraidDevices(); len(raidDevices) > 0 {
 		scannedDevices = append(scannedDevices, raidDevices...)
-		hasValidScan = true
 	}
 
 	finalDevices := mergeDeviceLists(currentDevices, scannedDevices, configuredDevices)

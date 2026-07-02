@@ -599,7 +599,7 @@ func TestCheckDockerVersion(t *testing.T) {
 					w.Header().Set("Server", tt.server)
 				}
 				w.WriteHeader(tt.statusCode)
-				fmt.Fprint(w, tt.body)
+				_, _ = fmt.Fprint(w, tt.body)
 			}))
 			defer server.Close()
 
@@ -712,13 +712,13 @@ func TestGetDockerStatsChecksDockerVersionAfterContainerList(t *testing.T) {
 						w.Header().Set("Server", tt.containerServer)
 					}
 					w.WriteHeader(http.StatusOK)
-					fmt.Fprint(w, `[]`)
+					_, _ = fmt.Fprint(w, `[]`)
 				case "/version":
 					if tt.versionServer != "" {
 						w.Header().Set("Server", tt.versionServer)
 					}
 					w.WriteHeader(http.StatusOK)
-					fmt.Fprint(w, tt.versionBody)
+					_, _ = fmt.Fprint(w, tt.versionBody)
 				default:
 					t.Fatalf("unexpected path: %s", r.URL.EscapedPath())
 				}
@@ -766,14 +766,14 @@ func TestGetDockerStatsRetriesVersionCheckUntilSuccess(t *testing.T) {
 		switch r.URL.EscapedPath() {
 		case "/containers/json":
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprint(w, `[]`)
+			_, _ = fmt.Fprint(w, `[]`)
 		case "/version":
 			idx := requestCounts["/version"] - 1
 			if idx >= len(versionStatuses) {
 				idx = len(versionStatuses) - 1
 			}
 			w.WriteHeader(versionStatuses[idx])
-			fmt.Fprint(w, versionBodies[idx])
+			_, _ = fmt.Fprint(w, versionBodies[idx])
 		default:
 			t.Fatalf("unexpected path: %s", r.URL.EscapedPath())
 		}

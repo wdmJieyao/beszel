@@ -166,7 +166,9 @@ func TestSendPOSTBuildsExpectedStatuses(t *testing.T) {
 
 			captured := make(chan requestCapture, 1)
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				defer r.Body.Close()
+				defer func() {
+					_ = r.Body.Close()
+				}()
 				body, err := io.ReadAll(r.Body)
 				require.NoError(t, err)
 

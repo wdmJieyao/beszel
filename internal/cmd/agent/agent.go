@@ -95,16 +95,22 @@ func (opts *cmdOptions) parse() bool {
 		pflag.Usage()
 		return true
 	case subcommand == "update":
-		agent.Update(*chinaMirrors)
+		if err := agent.Update(*chinaMirrors); err != nil {
+			log.Fatal(err)
+		}
 		return true
 	}
 
 	// Set environment variables from CLI flags (if provided)
 	if opts.hubURL != "" {
-		os.Setenv("HUB_URL", opts.hubURL)
+		if err := os.Setenv("HUB_URL", opts.hubURL); err != nil {
+			log.Fatal(err)
+		}
 	}
 	if opts.token != "" {
-		os.Setenv("TOKEN", opts.token)
+		if err := os.Setenv("TOKEN", opts.token); err != nil {
+			log.Fatal(err)
+		}
 	}
 	return false
 }

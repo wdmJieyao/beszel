@@ -136,8 +136,8 @@ func (sm *SystemManager) onTokenRotated(e *core.RecordEvent) error {
 	if system.WsConn == nil {
 		return e.Next()
 	}
-	system.setDown(nil)
-	sm.RemoveSystem(systemID)
+	_ = system.setDown(nil)
+	_ = sm.RemoveSystem(systemID)
 	return e.Next()
 }
 
@@ -195,7 +195,9 @@ func (sm *SystemManager) onRecordAfterUpdateSuccess(e *core.RecordEvent) error {
 	case pending:
 		// Resume monitoring, preferring existing WebSocket connection
 		if ok && system.WsConn != nil {
-			go system.update()
+			go func() {
+				_ = system.update()
+			}()
 			return e.Next()
 		}
 		// Start new monitoring session
@@ -230,7 +232,7 @@ func (sm *SystemManager) onRecordAfterUpdateSuccess(e *core.RecordEvent) error {
 // onRecordAfterDeleteSuccess is called after a system record is successfully deleted.
 // It removes the system from the manager and cleans up all associated resources.
 func (sm *SystemManager) onRecordAfterDeleteSuccess(e *core.RecordEvent) error {
-	sm.RemoveSystem(e.Record.Id)
+	_ = sm.RemoveSystem(e.Record.Id)
 	return e.Next()
 }
 

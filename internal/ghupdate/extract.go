@@ -27,13 +27,17 @@ func extractTarGz(srcPath, destDir string) error {
 	if err != nil {
 		return err
 	}
-	defer src.Close()
+	defer func() {
+		_ = src.Close()
+	}()
 
 	gz, err := gzip.NewReader(src)
 	if err != nil {
 		return err
 	}
-	defer gz.Close()
+	defer func() {
+		_ = gz.Close()
+	}()
 
 	tr := tar.NewReader(gz)
 
@@ -63,10 +67,12 @@ func extractTarGz(srcPath, destDir string) error {
 		}
 
 		if _, err := io.Copy(outFile, tr); err != nil {
-			outFile.Close()
+			_ = outFile.Close()
 			return err
 		}
-		outFile.Close()
+		if err := outFile.Close(); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -82,7 +88,9 @@ func extractZip(src, dest string) error {
 	if err != nil {
 		return err
 	}
-	defer zr.Close()
+	defer func() {
+		_ = zr.Close()
+	}()
 
 	// normalize dest path to check later for Zip Slip
 	dest = filepath.Clean(dest) + string(os.PathSeparator)
@@ -111,7 +119,9 @@ func extractFile(zipFile *zip.File, basePath string) error {
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+	defer func() {
+		_ = r.Close()
+	}()
 
 	// allow only dirs or regular files
 	if zipFile.FileInfo().IsDir() {
@@ -128,7 +138,9 @@ func extractFile(zipFile *zip.File, basePath string) error {
 		if err != nil {
 			return err
 		}
-		defer f.Close()
+		defer func() {
+			_ = f.Close()
+		}()
 
 		_, err = io.Copy(f, r)
 		if err != nil {

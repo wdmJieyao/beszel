@@ -37,7 +37,9 @@ func (t *WebSocketTransport) Request(ctx context.Context, action common.WebSocke
 	// Wait for response
 	select {
 	case message := <-pendingReq.ResponseCh:
-		defer message.Close()
+		defer func() {
+			_ = message.Close()
+		}()
 		defer pendingReq.Cancel()
 
 		// Legacy agents (< MinVersionAgentResponse) respond with a raw payload instead of an AgentResponse wrapper.

@@ -81,7 +81,9 @@ func (t *SSHTransport) Request(ctx context.Context, action common.WebSocketActio
 	if err != nil {
 		return err
 	}
-	defer session.Close()
+	defer func() {
+		_ = session.Close()
+	}()
 
 	stdout, err := session.StdoutPipe()
 	if err != nil {
@@ -100,7 +102,9 @@ func (t *SSHTransport) Request(ctx context.Context, action common.WebSocketActio
 	if err := cbor.NewEncoder(stdin).Encode(hubReq); err != nil {
 		return fmt.Errorf("failed to encode request: %w", err)
 	}
-	stdin.Close()
+	if err := stdin.Close(); err != nil {
+		return err
+	}
 
 	// Read response
 	var resp common.AgentResponse
@@ -127,7 +131,7 @@ func (t *SSHTransport) IsConnected() bool {
 // Close terminates the SSH connection.
 func (t *SSHTransport) Close() {
 	if t.client != nil {
-		t.client.Close()
+		_ = t.client.Close()
 		t.client = nil
 	}
 }
@@ -153,7 +157,7 @@ func (t *SSHTransport) connect() error {
 	t.client = client
 
 	// Extract agent version from server version string
-	t.agentVersion, _ = extractAgentVersion(string(client.Conn.ServerVersion()))
+	t.agentVersion, _ = extractAgentVersion(string(client.ServerVersion()))
 	return nil
 }
 

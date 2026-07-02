@@ -449,7 +449,9 @@ func (dm *dockerManager) getPodmanContainerHealth(containerID string) (container
 	if err != nil {
 		return container.DockerHealthNone, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return container.DockerHealthNone, fmt.Errorf("container inspect request failed: %s", resp.Status)
@@ -707,7 +709,7 @@ func (dm *dockerManager) checkDockerVersion() (bool, error) {
 	}
 	if resp.StatusCode != http.StatusOK {
 		status := resp.Status
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		return false, fmt.Errorf("docker version request failed: %s", status)
 	}
 
@@ -754,7 +756,9 @@ func (dm *dockerManager) decode(resp *http.Response, d any) error {
 		dm.buf = bytes.NewBuffer(make([]byte, 0, 1024*256))
 		dm.decoder = json.NewDecoder(dm.buf)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 	defer dm.buf.Reset()
 	_, err := dm.buf.ReadFrom(resp.Body)
 	if err != nil {
@@ -812,7 +816,9 @@ func (dm *dockerManager) getContainerInfo(ctx context.Context, containerID strin
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
@@ -851,7 +857,9 @@ func (dm *dockerManager) getLogs(ctx context.Context, containerID string) (strin
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
@@ -950,7 +958,9 @@ func (dm *dockerManager) GetHostInfo() (info container.HostInfo, err error) {
 	if err != nil {
 		return info, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if err := json.NewDecoder(resp.Body).Decode(&info); err != nil {
 		return info, err

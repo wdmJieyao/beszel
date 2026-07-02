@@ -30,7 +30,7 @@ func TestSystemManagerNew(t *testing.T) {
 	require.NoError(t, err)
 
 	synctest.Test(t, func(t *testing.T) {
-		sm.Initialize()
+		_ = sm.Initialize()
 
 		record, err := tests.CreateRecord(hub, "systems", map[string]any{
 			"name":  "it-was-coney-island",
@@ -94,8 +94,8 @@ func TestSystemManagerNew(t *testing.T) {
 		assert.Equal(t, "up", sm.GetSystemStatusFromStore(record.Id), "System status should be 'up'")
 
 		// make sure the system switches to down after 11 seconds
-		sm.RemoveSystem(record.Id)
-		sm.AddRecord(record, nil)
+		_ = sm.RemoveSystem(record.Id)
+		_ = sm.AddRecord(record, nil)
 		assert.Equal(t, "pending", sm.GetSystemStatusFromStore(record.Id), "System status should be 'pending'")
 		time.Sleep(12 * time.Second)
 		synctest.Wait()

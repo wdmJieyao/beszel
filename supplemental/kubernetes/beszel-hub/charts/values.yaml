@@ -6,9 +6,9 @@
 replicaCount: 1
 
 image:
-  repository: henrygd/beszel
+  repository: ghcr.io/wdmjieyao/beszel/beszel
   pullPolicy: IfNotPresent
-  tag: ""
+  tag: "edge"
 
 imagePullSecrets: []
 nameOverride: ""

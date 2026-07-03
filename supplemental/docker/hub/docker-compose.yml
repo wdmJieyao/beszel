@@ -3,7 +3,7 @@
 
 services:
   beszel:
-    image: "henrygd/beszel"
+    image: "ghcr.io/wdmjieyao/beszel/beszel:edge"
     container_name: "beszel"
     restart: unless-stopped
     ports:

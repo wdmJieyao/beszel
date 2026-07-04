@@ -5,7 +5,7 @@
 
 services:
   beszel-agent:
-    image: ghcr.io/wdmjieyao/beszel/beszel-agent:edge
+    image: ghcr.io/wdmjieyao/beszel-agent:edge
     container_name: beszel-agent
     restart: unless-stopped
     network_mode: host

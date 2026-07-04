@@ -33,6 +33,7 @@
 - [ ] CHKXXX Unit tests cover each behavior change or documented test gaps have follow-up tasks.
 - [ ] CHKXXX Required lint/static checks are listed and pass for touched areas.
 - [ ] CHKXXX HTTP API changes are RESTful or justify an existing non-REST contract.
+- [ ] CHKXXX GitHub pushes that trigger GHCR publication wait for the workflow and image tags before success is reported.
 
 ## [Category 2]
 

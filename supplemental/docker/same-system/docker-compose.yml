@@ -3,7 +3,7 @@
 
 services:
   beszel:
-    image: ghcr.io/wdmjieyao/beszel/beszel:edge
+    image: ghcr.io/wdmjieyao/beszel:edge
     container_name: beszel
     restart: unless-stopped
     environment:
@@ -20,7 +20,7 @@ services:
     #   timeout: 5s
 
   beszel-agent:
-    image: ghcr.io/wdmjieyao/beszel/beszel-agent:edge
+    image: ghcr.io/wdmjieyao/beszel-agent:edge
     container_name: beszel-agent
     restart: unless-stopped
     network_mode: host

@@ -159,6 +159,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX Run Go lint/static checks for backend/agent changes, including `golangci-lint run` when available
 - [ ] TXXX Run frontend lint/check commands for `internal/site` changes, including Biome
 - [ ] TXXX Review REST API contract compatibility if HTTP APIs changed
+- [ ] TXXX If pushed to GitHub or Docker image inputs changed, wait for the GHCR workflow to finish and verify expected image tags before reporting success
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
 

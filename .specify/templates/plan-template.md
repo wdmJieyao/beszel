@@ -45,6 +45,7 @@
 - **Quality Gates**: Required lint/static commands are named for touched areas, including Go linting and `internal/site` Biome checks.
 - **RESTful API Contracts**: New or changed HTTP APIs use resource-oriented REST semantics, standard methods/status codes, and documented schemas. Non-REST contracts are justified by existing PocketBase, websocket, or agent transport architecture.
 - **Incremental Delivery**: Work is sliced into independently testable stories or increments, with complexity and migration risks recorded.
+- **Release/GHCR Verification**: If the work will be pushed to GitHub, published from `main`/tags, or changes Docker image inputs, the plan names the GitHub Actions workflow and GHCR image tags that must complete successfully before the push/release is reported as successful.
 
 ## Project Structure
 

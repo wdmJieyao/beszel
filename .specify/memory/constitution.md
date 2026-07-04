@@ -1,22 +1,22 @@
 <!--
 Sync Impact Report
-Version change: 1.0.0 -> 1.0.1
+Version change: 1.0.1 -> 1.1.0
 Modified principles:
-- Template principle 1 -> I. Existing Architecture and Stack
-- Template principle 2 -> II. Unit Tests Required
-- Template principle 3 -> III. Lint and Static Quality Gates
-- Template principle 4 -> IV. RESTful API Contracts
-- Template principle 5 -> V. Incremental, Maintainable Changes
+- I. Existing Architecture and Stack (unchanged)
+- II. Unit Tests Required (unchanged)
+- III. Lint and Static Quality Gates (unchanged)
+- IV. RESTful API Contracts (unchanged)
+- V. Incremental, Maintainable Changes (unchanged)
 Added sections:
-- Technology Baseline
-- Development Workflow
+- VI. Release and Registry Verification
 Removed sections:
 - None
 Templates requiring updates:
 - ✅ .specify/templates/plan-template.md
-- ✅ .specify/templates/spec-template.md
 - ✅ .specify/templates/tasks-template.md
 - ✅ .specify/templates/checklist-template.md
+- ✅ .specify/templates/spec-template.md (reviewed; no change required)
+- ✅ .specify/templates/commands/ (not present in this repository)
 Follow-up TODOs:
 - None
 -->
@@ -89,6 +89,20 @@ and operational risks before implementation starts.
 Rationale: Beszel supports many environments. Small, traceable changes make
 review, release, and rollback safer.
 
+### VI. Release and Registry Verification
+Any push to GitHub that triggers GHCR image publishing, or is used to publish
+deployable code, MUST NOT be reported as successful until the relevant GitHub
+Actions workflow has completed and the GHCR image publication has succeeded.
+
+For main-branch pushes, release tags, or any change that affects Docker images,
+the operator MUST wait for the GHCR workflow result and verify the expected
+image tags are available. If a push does not trigger GHCR publication, the
+completion report MUST explicitly state that GHCR verification was not
+applicable and include the command or workflow evidence used to determine that.
+
+Rationale: Beszel deployments depend on container images. A Git push alone is
+not enough when users will deploy from GHCR.
+
 ## Technology Baseline
 
 Backend and agent code live primarily in Go under `agent/`, `internal/`, and
@@ -117,10 +131,13 @@ surfaces. Plans MUST include a Constitution Check that answers:
 - Which lint/static quality commands must pass?
 - Are HTTP APIs RESTful, or is a non-REST contract justified by existing
   architecture?
+- If the work will be pushed to GitHub or changes Docker images, which GHCR
+  workflow and image tags must be verified before reporting success?
 
 Task lists MUST include unit-test tasks before implementation tasks for each
 story or behavior change. Task lists MUST include final verification tasks for
-tests, lint/static checks, and API contract review when APIs are touched.
+tests, lint/static checks, GHCR publication when applicable, and API contract
+review when APIs are touched.
 
 ## Governance
 
@@ -136,7 +153,8 @@ redefinitions, MINOR for added principles or materially expanded requirements,
 and PATCH for clarifications that do not change obligations.
 
 All implementation reviews MUST verify constitution compliance before work is
-marked complete. Unresolved compliance gaps MUST remain visible in the plan or
-task list until closed.
+marked complete. Any GitHub push that triggers GHCR publication is incomplete
+until the workflow and image tags are verified. Unresolved compliance gaps MUST
+remain visible in the plan or task list until closed.
 
-**Version**: 1.0.1 | **Ratified**: 2026-06-28 | **Last Amended**: 2026-06-28
+**Version**: 1.1.0 | **Ratified**: 2026-06-28 | **Last Amended**: 2026-07-04

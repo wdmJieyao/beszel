@@ -5,7 +5,7 @@ import { DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu"
 
 // const isbeta = beszel.hub_version.includes("beta")
 // const imagetag = isbeta ? ":edge" : ""
-const agentImage = "ghcr.io/wdmjieyao/beszel/beszel-agent:edge"
+const agentImage = "ghcr.io/wdmjieyao/beszel-agent:edge"
 const repositoryRawUrl = "https://raw.githubusercontent.com/wdmJieyao/beszel/main"
 
 /**

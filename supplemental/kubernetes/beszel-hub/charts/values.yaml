@@ -6,7 +6,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/wdmjieyao/beszel/beszel
+  repository: ghcr.io/wdmjieyao/beszel
   pullPolicy: IfNotPresent
   tag: "edge"
 

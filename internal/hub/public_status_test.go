@@ -351,6 +351,7 @@ func TestPublicProbeSummariesFilterSeriesByRangeKeepLatestAndHideTarget(t *testi
 	probe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
 		"name":             "Public line",
 		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeFixed,
 		"target":           "secret.example.com:443",
 		"interval_seconds": 20,
 		"timeout_seconds":  5,
@@ -389,6 +390,64 @@ func TestPublicProbeSummariesFilterSeriesByRangeKeepLatestAndHideTarget(t *testi
 	assert.NotContains(t, string(payload), "443")
 }
 
+func TestPublicProbeSummariesIncludeGlobalPublicProbeWithoutAssignment(t *testing.T) {
+	hub := newPublicStatusTestHub(t)
+	user := createPublicStatusUser(t, hub)
+
+	systemRecord := createPublicStatusRecord(t, hub, "systems", map[string]any{
+		"name":   "node",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+	probe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Global line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "secret.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	createPublicProbeResult(t, hub, probe.Id, systemRecord.Id, time.Now().UTC().Add(-30*time.Second), true, 8, "")
+
+	summaries, err := hub.publicProbeSummaries(systemRecord.Id, publicChartRange{Name: "30m", Duration: 30 * time.Minute, StatsType: "1m"})
+	require.NoError(t, err)
+	require.Len(t, summaries, 1)
+	assert.Equal(t, "Global line", summaries[0].Name)
+	require.NotNil(t, summaries[0].Latest)
+	require.NotNil(t, summaries[0].Latest.LatencyMs)
+	assert.Equal(t, 8.0, *summaries[0].Latest.LatencyMs)
+}
+
+func TestPublicProbeSummariesExcludeHiddenGlobalProbe(t *testing.T) {
+	hub := newPublicStatusTestHub(t)
+	user := createPublicStatusUser(t, hub)
+
+	systemRecord := createPublicStatusRecord(t, hub, "systems", map[string]any{
+		"name":   "node",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+	probe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Hidden line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "secret.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   false,
+	})
+	createPublicProbeResult(t, hub, probe.Id, systemRecord.Id, time.Now().UTC().Add(-30*time.Second), true, 8, "")
+
+	summaries, err := hub.publicProbeSummaries(systemRecord.Id, publicChartRange{Name: "30m", Duration: 30 * time.Minute, StatsType: "1m"})
+	require.NoError(t, err)
+	assert.Empty(t, summaries)
+}
+
 func TestGetPublicStatusResponseHidesProbeTargetMetadata(t *testing.T) {
 	hub := newPublicStatusTestHub(t)
 	user := createPublicStatusUser(t, hub)
@@ -409,6 +468,7 @@ func TestGetPublicStatusResponseHidesProbeTargetMetadata(t *testing.T) {
 	probe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
 		"name":             "Public line",
 		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeFixed,
 		"target":           "secret.example.com:443",
 		"interval_seconds": 20,
 		"timeout_seconds":  5,

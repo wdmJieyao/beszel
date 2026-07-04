@@ -9,6 +9,7 @@ import { deleteNetworkProbe, getNetworkProbes, saveNetworkProbe } from "@/lib/ap
 import { $systems } from "@/lib/stores"
 import { useStore } from "@nanostores/react"
 import type { NetworkProbe, NetworkProbeType } from "@/types"
+import { buildNetworkProbePayload, probeScopeLabel } from "./network-probes-utils"
 
 const emptyProbe: Partial<NetworkProbe> = {
 	name: "",
@@ -18,6 +19,7 @@ const emptyProbe: Partial<NetworkProbe> = {
 	timeoutSeconds: 5,
 	enabled: true,
 	publicVisible: true,
+	scope: "global",
 	systems: [],
 }
 
@@ -32,8 +34,7 @@ export default function NetworkProbesSettings() {
 	}, [])
 
 	async function submit() {
-		const selectedSystems = draft.systems?.length ? draft.systems : systems.map((system) => system.id)
-		const saved = await saveNetworkProbe({ ...draft, systems: selectedSystems })
+		const saved = await saveNetworkProbe(buildNetworkProbePayload(draft))
 		setProbes((prev) => (draft.id ? prev.map((probe) => (probe.id === saved.id ? saved : probe)) : [...prev, saved]))
 		setDraft(emptyProbe)
 		setAdvancedOpen(false)
@@ -110,8 +111,14 @@ export default function NetworkProbesSettings() {
 							aria-label="超时时间"
 						/>
 						<Select
-							value={draft.systems?.[0] ?? "__all"}
-							onValueChange={(value) => setDraft((prev) => ({ ...prev, systems: value === "__all" ? [] : [value] }))}
+							value={draft.scope === "fixed" ? (draft.systems?.[0] ?? "__all") : "__all"}
+							onValueChange={(value) =>
+								setDraft((prev) => ({
+									...prev,
+									scope: value === "__all" ? "global" : "fixed",
+									systems: value === "__all" ? [] : [value],
+								}))
+							}
 						>
 							<SelectTrigger>
 								<SelectValue placeholder="执行节点" />
@@ -134,7 +141,7 @@ export default function NetworkProbesSettings() {
 						<button type="button" className="min-w-0 text-start" onClick={() => setDraft(probe)}>
 							<div className="truncate font-medium">{probe.name}</div>
 							<div className="truncate text-sm text-muted-foreground">
-								{probeTypeLabel(probe.type)} · {probe.target} · {probe.systems.length || systems.length} 个执行节点
+								{probeTypeLabel(probe.type)} · {probe.target} · {probeScopeLabel(probe, systems)}
 							</div>
 						</button>
 						<div className="flex items-center gap-3">

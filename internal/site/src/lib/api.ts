@@ -154,6 +154,7 @@ function toNetworkProbePayload(probe: Partial<NetworkProbeInput>) {
 		timeoutSeconds: probe.timeoutSeconds,
 		enabled: probe.enabled,
 		publicVisible: probe.publicVisible,
+		scope: probe.scope,
 		systems: probe.systems,
 	}
 }

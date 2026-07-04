@@ -403,13 +403,13 @@ func (h *Hub) upsertPublicVisibility(systemID string, visibility PublicSystemVis
 }
 
 func (h *Hub) publicProbeSummaries(systemID string, rangeSpec publicChartRange) ([]PublicProbeSummary, error) {
-	assignments, err := h.FindRecordsByFilter(CollectionNetworkProbeAssignments, "system = {:system} && enabled = true", "", -1, 0, dbx.Params{"system": systemID})
+	assignments, err := h.effectiveNetworkProbeAssignments(systemID)
 	if err != nil {
 		return nil, err
 	}
 	summaries := make([]PublicProbeSummary, 0, len(assignments))
 	for _, assignment := range assignments {
-		probe, err := h.FindRecordById(CollectionNetworkProbes, assignment.GetString("probe"))
+		probe, err := h.FindRecordById(CollectionNetworkProbes, assignment.ProbeID)
 		if err != nil || !probe.GetBool("enabled") || !probe.GetBool("public_visible") {
 			continue
 		}

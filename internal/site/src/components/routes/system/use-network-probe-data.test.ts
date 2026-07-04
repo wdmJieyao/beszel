@@ -1,7 +1,9 @@
 import { describe, it } from "node:test"
 import assert from "node:assert/strict"
 import { groupNetworkProbeData, type ProbeDefinition, type ProbeResultsByProbeId } from "./network-probe-groups.ts"
+import { filterAssignedProbes } from "./network-probe-filter.ts"
 import { applyLiveProbeResultEvent, initialLiveProbeResults } from "./network-probe-live-session.ts"
+import type { NetworkProbe } from "@/types"
 
 const systemId = "sys-1"
 
@@ -104,3 +106,38 @@ describe("useNetworkProbeData live result semantics", () => {
 		assert.equal(next["probe-ct"].series[0].latencyMs, 8)
 	})
 })
+
+describe("filterAssignedProbes", () => {
+	it("includes global probes for the active system without assignment rows", () => {
+		const activeSystem = "sys-new"
+		const assigned = filterAssignedProbes(
+			[
+				networkProbe({ id: "global", scope: "global", systems: [] }),
+				networkProbe({ id: "fixed-other", scope: "fixed", systems: ["sys-other"] }),
+				networkProbe({ id: "fixed-active", scope: "fixed", systems: [activeSystem] }),
+			],
+			activeSystem
+		)
+
+		assert.deepEqual(
+			assigned.map((probe) => probe.id),
+			["global", "fixed-active"]
+		)
+	})
+})
+
+function networkProbe(overrides: Partial<NetworkProbe>): NetworkProbe {
+	return {
+		id: "probe",
+		name: "线路",
+		type: "tcping",
+		target: "example.com:443",
+		intervalSeconds: 20,
+		timeoutSeconds: 5,
+		enabled: true,
+		publicVisible: true,
+		scope: "fixed",
+		systems: [],
+		...overrides,
+	}
+}

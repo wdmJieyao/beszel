@@ -45,6 +45,7 @@ func init() {
 					{"autogeneratePattern":"[a-z0-9]{15}","hidden":false,"id":"text3208210256","max":15,"min":15,"name":"id","pattern":"^[a-z0-9]+$","presentable":false,"primaryKey":true,"required":true,"system":true,"type":"text"},
 					{"autogeneratePattern":"","hidden":false,"id":"text_probe_name","max":120,"min":1,"name":"name","pattern":"","presentable":false,"primaryKey":false,"required":true,"system":false,"type":"text"},
 					{"hidden":false,"id":"select_probe_type","maxSelect":1,"name":"type","presentable":false,"required":true,"system":false,"type":"select","values":["tcping","icmp_ping","http_get"]},
+					{"hidden":false,"id":"select_probe_scope","maxSelect":1,"name":"scope","presentable":false,"required":false,"system":false,"type":"select","values":["global","fixed"]},
 					{"autogeneratePattern":"","hidden":false,"id":"text_probe_target","max":500,"min":1,"name":"target","pattern":"","presentable":false,"primaryKey":false,"required":true,"system":false,"type":"text"},
 					{"hidden":false,"id":"num_interval_seconds","max":86400,"min":10,"name":"interval_seconds","onlyInt":true,"presentable":false,"required":true,"system":false,"type":"number"},
 					{"hidden":false,"id":"num_timeout_seconds","max":300,"min":1,"name":"timeout_seconds","onlyInt":true,"presentable":false,"required":true,"system":false,"type":"number"},

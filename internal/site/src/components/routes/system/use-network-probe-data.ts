@@ -16,6 +16,7 @@ import {
 	shouldUseLiveProbeCadence,
 } from "./network-probe-live-cadence"
 import { applyLiveProbeResultEvent, initialLiveProbeResults } from "./network-probe-live-session"
+import { filterAssignedProbes } from "./network-probe-filter"
 
 type LoadedProbeData = {
 	probes: NetworkProbe[]
@@ -160,9 +161,9 @@ function subscribeToProbeResults(
 	)
 }
 
-async function loadAssignedProbes(systemId: string) {
+export async function loadAssignedProbes(systemId: string) {
 	const { probes } = await getNetworkProbes()
-	return probes.filter((probe) => probe.systems.includes(systemId))
+	return filterAssignedProbes(probes, systemId)
 }
 
 function mergeProbeResults(

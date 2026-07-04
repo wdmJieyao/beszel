@@ -97,6 +97,7 @@ export interface NetworkProbeSeriesPoint {
 }
 
 export type NetworkProbeType = "tcping" | "icmp_ping" | "http_get"
+export type NetworkProbeScope = "global" | "fixed"
 
 export interface NetworkProbe {
 	id: string
@@ -107,6 +108,7 @@ export interface NetworkProbe {
 	timeoutSeconds: number
 	enabled: boolean
 	publicVisible: boolean
+	scope: NetworkProbeScope
 	systems: string[]
 	created?: string
 	updated?: string

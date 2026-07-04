@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/henrygd/beszel/internal/common"
+	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tests"
 	"github.com/pocketbase/pocketbase/tools/router"
@@ -164,10 +165,23 @@ func TestNetworkProbeResponseDoesNotPanicWithEmptyAssignments(t *testing.T) {
 	record.Set("timeout_seconds", 5)
 	record.Set("enabled", true)
 	record.Set("public_visible", true)
+	record.Set("scope", NetworkProbeScopeGlobal)
 
 	resp := networkProbeResponse(record, nil)
 	require.Empty(t, resp.Systems)
+	encoded, err := json.Marshal(resp)
+	require.NoError(t, err)
+	assert.Contains(t, string(encoded), `"systems":[]`)
 	assert.Equal(t, "probe1", resp.ID)
+	assert.Equal(t, NetworkProbeScopeGlobal, resp.Scope)
+}
+
+func TestNormalizeNetworkProbeScopeDefaultsFromSystems(t *testing.T) {
+	assert.Equal(t, NetworkProbeScopeGlobal, normalizeNetworkProbeScope("", nil))
+	assert.Equal(t, NetworkProbeScopeGlobal, normalizeNetworkProbeScope("", []string{}))
+	assert.Equal(t, NetworkProbeScopeFixed, normalizeNetworkProbeScope("", []string{"system1"}))
+	assert.Equal(t, NetworkProbeScopeGlobal, normalizeNetworkProbeScope("GLOBAL", []string{"system1"}))
+	assert.Equal(t, NetworkProbeScopeFixed, normalizeNetworkProbeScope("fixed", nil))
 }
 
 func TestNetworkProbeAssignmentDueHonorsProbeInterval(t *testing.T) {
@@ -221,6 +235,7 @@ func TestLiveNetworkProbeAssignmentsFilterEnabledLatencyLines(t *testing.T) {
 	tcpProbe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
 		"name":             "tcp",
 		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeFixed,
 		"target":           "example.com:443",
 		"interval_seconds": 20,
 		"timeout_seconds":  5,
@@ -230,6 +245,7 @@ func TestLiveNetworkProbeAssignmentsFilterEnabledLatencyLines(t *testing.T) {
 	httpProbe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
 		"name":             "http",
 		"type":             NetworkProbeTypeHTTPGet,
+		"scope":            NetworkProbeScopeFixed,
 		"target":           "https://example.com",
 		"interval_seconds": 20,
 		"timeout_seconds":  5,
@@ -239,6 +255,7 @@ func TestLiveNetworkProbeAssignmentsFilterEnabledLatencyLines(t *testing.T) {
 	disabledProbe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
 		"name":             "icmp",
 		"type":             NetworkProbeTypeICMPPing,
+		"scope":            NetworkProbeScopeFixed,
 		"target":           "1.1.1.1",
 		"interval_seconds": 20,
 		"timeout_seconds":  5,
@@ -264,7 +281,130 @@ func TestLiveNetworkProbeAssignmentsFilterEnabledLatencyLines(t *testing.T) {
 	assignments, err := hub.liveNetworkProbeAssignments(systemRecord.Id)
 	require.NoError(t, err)
 	require.Len(t, assignments, 1)
-	assert.Equal(t, tcpProbe.Id, assignments[0].GetString("probe"))
+	assert.Equal(t, tcpProbe.Id, assignments[0].ProbeID)
+}
+
+func TestLiveNetworkProbeAssignmentsIncludeGlobalProbeWithoutAssignment(t *testing.T) {
+	hub := newNetworkProbeTestHub(t)
+	user := createNetworkProbeTestRecord(t, hub, "users", map[string]any{
+		"email":    "global-live@example.com",
+		"password": "password123",
+	})
+	systemRecord := createNetworkProbeTestRecord(t, hub, "systems", map[string]any{
+		"name":   "node",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+	globalProbe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "global tcp",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+
+	assignments, err := hub.liveNetworkProbeAssignments(systemRecord.Id)
+	require.NoError(t, err)
+	require.Len(t, assignments, 1)
+	assert.Equal(t, globalProbe.Id, assignments[0].ProbeID)
+	assert.Equal(t, systemRecord.Id, assignments[0].SystemID)
+}
+
+func TestEffectiveNetworkProbeAssignmentsKeepFixedProbeScoped(t *testing.T) {
+	hub := newNetworkProbeTestHub(t)
+	user := createNetworkProbeTestRecord(t, hub, "users", map[string]any{
+		"email":    "fixed-scope@example.com",
+		"password": "password123",
+	})
+	systemOne := createNetworkProbeTestRecord(t, hub, "systems", map[string]any{
+		"name":   "node-1",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+	systemTwo := createNetworkProbeTestRecord(t, hub, "systems", map[string]any{
+		"name":   "node-2",
+		"host":   "127.0.0.2",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+	fixedProbe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "fixed",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeFixed,
+		"target":           "example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	globalProbe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "global",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "example.org:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	createNetworkProbeTestRecord(t, hub, CollectionNetworkProbeAssignments, map[string]any{
+		"probe":   fixedProbe.Id,
+		"system":  systemOne.Id,
+		"enabled": true,
+	})
+
+	assignments, err := hub.effectiveNetworkProbeAssignments(systemTwo.Id)
+	require.NoError(t, err)
+	require.Len(t, assignments, 1)
+	assert.Equal(t, globalProbe.Id, assignments[0].ProbeID)
+	assert.Equal(t, systemTwo.Id, assignments[0].SystemID)
+}
+
+func TestReplaceProbeAssignmentsHonorsScopeTransitions(t *testing.T) {
+	hub := newNetworkProbeTestHub(t)
+	user := createNetworkProbeTestRecord(t, hub, "users", map[string]any{
+		"email":    "scope-transition@example.com",
+		"password": "password123",
+	})
+	systemOne := createNetworkProbeTestRecord(t, hub, "systems", map[string]any{
+		"name":   "node-1",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+	systemTwo := createNetworkProbeTestRecord(t, hub, "systems", map[string]any{
+		"name":   "node-2",
+		"host":   "127.0.0.2",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+	probe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeFixed,
+		"target":           "example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+
+	assignments, err := hub.replaceProbeAssignments(probe.Id, NetworkProbeScopeFixed, []string{systemOne.Id, systemTwo.Id})
+	require.NoError(t, err)
+	require.Len(t, assignments, 2)
+
+	assignments, err = hub.replaceProbeAssignments(probe.Id, NetworkProbeScopeGlobal, nil)
+	require.NoError(t, err)
+	assert.Empty(t, assignments)
+
+	remaining, err := hub.FindRecordsByFilter(CollectionNetworkProbeAssignments, "probe = {:probe}", "", -1, 0, dbx.Params{"probe": probe.Id})
+	require.NoError(t, err)
+	assert.Empty(t, remaining)
 }
 
 func TestRunLiveNetworkProbeAssignmentPersistsOfflineFailure(t *testing.T) {
@@ -282,6 +422,7 @@ func TestRunLiveNetworkProbeAssignmentPersistsOfflineFailure(t *testing.T) {
 	probe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
 		"name":             "tcp",
 		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeFixed,
 		"target":           "example.com:443",
 		"interval_seconds": 20,
 		"timeout_seconds":  5,
@@ -294,7 +435,12 @@ func TestRunLiveNetworkProbeAssignmentPersistsOfflineFailure(t *testing.T) {
 		"enabled": true,
 	})
 
-	require.NoError(t, hub.runLiveNetworkProbeAssignment(context.Background(), assignment))
+	require.NoError(t, hub.runLiveNetworkProbeAssignment(context.Background(), networkProbeAssignment{
+		ID:       assignment.Id,
+		ProbeID:  probe.Id,
+		SystemID: systemRecord.Id,
+		Enabled:  true,
+	}))
 
 	result, err := hub.latestNetworkProbeResult(probe.Id, systemRecord.Id)
 	require.NoError(t, err)
@@ -312,6 +458,7 @@ func TestGetNetworkProbeResultsUsesRangeAndReturnsNewestAscending(t *testing.T) 
 	probe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
 		"name":             "line",
 		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeFixed,
 		"target":           "example.com:443",
 		"interval_seconds": 20,
 		"timeout_seconds":  5,
@@ -344,6 +491,7 @@ func TestGetNetworkProbeResultsRejectsInvalidRange(t *testing.T) {
 	probe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
 		"name":             "line",
 		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeFixed,
 		"target":           "example.com:443",
 		"interval_seconds": 20,
 		"timeout_seconds":  5,

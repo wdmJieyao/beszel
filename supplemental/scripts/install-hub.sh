@@ -157,6 +157,7 @@ fi
 # Define default values
 PORT=8090
 GITHUB_URL="https://github.com"
+RELEASE_REPO="wdmJieyao/beszel"
 AUTO_UPDATE_FLAG="false"
 UNINSTALL=false
 
@@ -326,7 +327,7 @@ FILE_NAME="beszel_${OS}_${ARCH}.tar.gz"
 
 TEMP_DIR=$(mktemp -d)
 ARCHIVE_PATH="$TEMP_DIR/$FILE_NAME"
-DOWNLOAD_URL="$GITHUB_URL/henrygd/beszel/releases/latest/download/$FILE_NAME"
+DOWNLOAD_URL="$GITHUB_URL/${RELEASE_REPO}/releases/latest/download/$FILE_NAME"
 
 if ! curl -fL# --retry 3 --retry-delay 2 --connect-timeout 10 "$DOWNLOAD_URL" -o "$ARCHIVE_PATH"; then
   echo "Failed to download the Beszel Hub from:"

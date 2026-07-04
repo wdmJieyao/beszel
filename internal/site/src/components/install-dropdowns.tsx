@@ -6,6 +6,7 @@ import { DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu"
 // const isbeta = beszel.hub_version.includes("beta")
 // const imagetag = isbeta ? ":edge" : ""
 const agentImage = "ghcr.io/wdmjieyao/beszel/beszel-agent:edge"
+const repositoryRawUrl = "https://raw.githubusercontent.com/wdmJieyao/beszel/main"
 
 /**
  * Get the URL of the script to install the agent.
@@ -13,14 +14,13 @@ const agentImage = "ghcr.io/wdmjieyao/beszel/beszel-agent:edge"
  * @returns The URL for the script.
  */
 const getScriptUrl = (path: string = "") => {
-	return `https://get.beszel.dev${path}`
-	// no beta for now
-	// const url = new URL("https://get.beszel.dev")
-	// url.pathname = path
-	// if (isBeta) {
-	// 	url.searchParams.set("beta", "1")
-	// }
-	// return url.toString()
+	if (path === "/brew") {
+		return `${repositoryRawUrl}/supplemental/scripts/install-agent-brew.sh`
+	}
+	if (path === "/windows") {
+		return `${repositoryRawUrl}/supplemental/scripts/install-agent.ps1`
+	}
+	return `${repositoryRawUrl}/supplemental/scripts/install-agent.sh`
 }
 
 export function copyDockerCompose(port = "45876", publicKey: string, token: string) {
@@ -61,7 +61,7 @@ export function copyLinuxCommand(port = "45876", publicKey: string, token: strin
 
 export function copyWindowsCommand(port = "45876", publicKey: string, token: string) {
 	copyToClipboard(
-		`& iwr -useb ${getScriptUrl()} -OutFile "$env:TEMP\\install-agent.ps1"; & Powershell -ExecutionPolicy Bypass -File "$env:TEMP\\install-agent.ps1" -Key "${publicKey}" -Port ${port} -Token "${token}" -Url "${getHubURL()}"`
+		`& iwr -useb ${getScriptUrl("/windows")} -OutFile "$env:TEMP\\install-agent.ps1"; & Powershell -ExecutionPolicy Bypass -File "$env:TEMP\\install-agent.ps1" -Key "${publicKey}" -Port ${port} -Token "${token}" -Url "${getHubURL()}"`
 	)
 }
 

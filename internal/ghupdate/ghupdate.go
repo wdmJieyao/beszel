@@ -47,10 +47,10 @@ type HttpClient interface {
 //
 // NB! This plugin is considered experimental and its config options may change in the future.
 type Config struct {
-	// Owner specifies the account owner of the repository (default to "pocketbase").
+	// Owner specifies the account owner of the repository.
 	Owner string
 
-	// Repo specifies the name of the repository (default to "pocketbase").
+	// Repo specifies the name of the repository.
 	Repo string
 
 	// ArchiveExecutable specifies the name of the executable file in the release archive
@@ -94,7 +94,7 @@ func (p *updater) update() (updated bool, err error) {
 	}
 
 	if p.config.Owner == "" {
-		p.config.Owner = "henrygd"
+		p.config.Owner = "wdmJieyao"
 	}
 
 	if p.config.Repo == "" {
@@ -226,7 +226,7 @@ func (p *updater) update() (updated bool, err error) {
 
 func FetchLatestRelease(ctx context.Context, client HttpClient, url string) (*release, error) {
 	if url == "" {
-		url = getApiURL(false, "henrygd", "beszel")
+		url = getApiURL(false, "wdmJieyao", "beszel")
 	}
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)

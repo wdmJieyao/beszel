@@ -1972,11 +1972,15 @@ msgid "Your user settings have been updated."
 msgstr "Dine brukerinnstillinger har blitt oppdatert."
 
 #: src/components/routes/settings/network-probes.tsx
-msgid "仅后台"
-msgstr ""
+#~ msgid "仅后台"
+#~ msgstr ""
 
 #: src/components/routes/settings/network-probes.tsx
 msgid "保存线路"
+msgstr ""
+
+#: src/components/routes/settings/public-status.tsx
+msgid "全选"
 msgstr ""
 
 #: src/components/routes/public-status.tsx
@@ -1990,7 +1994,11 @@ msgid "公共看板加载失败。"
 msgstr ""
 
 #: src/components/routes/settings/network-probes.tsx
-msgid "公开展示"
+#~ msgid "公开展示"
+#~ msgstr ""
+
+#: src/components/routes/settings/public-status.tsx
+msgid "公开线路检测"
 msgstr ""
 
 #: src/components/routes/public-status.tsx
@@ -2016,6 +2024,10 @@ msgstr ""
 
 #: src/components/routes/public-status.tsx
 msgid "当前没有公开展示的节点。"
+msgstr ""
+
+#: src/components/routes/settings/public-status.tsx
+msgid "当前没有可公开到这个节点的线路检测配置。"
 msgstr ""
 
 #: src/components/routes/settings/public-status.tsx

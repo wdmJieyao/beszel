@@ -1,15 +1,20 @@
 import { Trans } from "@lingui/react/macro"
 import { useEffect, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
-import { getPublicSystems, updatePublicSystem } from "@/lib/api"
-import type { AdminPublicSystem } from "@/types"
+import { getNetworkProbes, getPublicSystems, updatePublicSystem } from "@/lib/api"
+import type { AdminPublicSystem, NetworkProbe } from "@/types"
+import { availablePublicProbeIds, togglePublicProbeSelection } from "./public-status-utils"
 
 export default function PublicStatusSettings() {
 	const [systems, setSystems] = useState<AdminPublicSystem[]>([])
+	const [probes, setProbes] = useState<NetworkProbe[]>([])
 
 	useEffect(() => {
 		getPublicSystems().then((data) => setSystems(data.systems))
+		getNetworkProbes().then((data) => setProbes(data.probes))
 	}, [])
 
 	async function save(system: AdminPublicSystem, patch: Partial<AdminPublicSystem>) {
@@ -77,6 +82,55 @@ export default function PublicStatusSettings() {
 										onChange={(showDisk) => save(system, { showDisk })}
 									/>
 								</div>
+							</div>
+							<div className="space-y-2 rounded-md bg-muted/30 p-3">
+								<div className="flex flex-wrap items-center justify-between gap-2">
+									<div className="text-sm font-medium">
+										<Trans>公开线路检测</Trans>
+									</div>
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										disabled={!system.publicEnabled}
+										onClick={() => save(system, { publicProbeIds: availablePublicProbeIds(system.id, probes) })}
+									>
+										<Trans>全选</Trans>
+									</Button>
+								</div>
+								<div className="flex flex-wrap gap-3">
+									{availablePublicProbeIds(system.id, probes).map((probeId) => {
+										const probe = probes.find((item) => item.id === probeId)
+										if (!probe) {
+											return null
+										}
+										const checked = system.publicProbeIds.includes(probe.id)
+										return (
+											<div key={probe.id} className="inline-flex items-center gap-2 text-sm">
+												<Checkbox
+													id={`${system.id}-${probe.id}`}
+													checked={checked}
+													disabled={!system.publicEnabled}
+													onCheckedChange={(nextChecked) =>
+														save(system, {
+															publicProbeIds: togglePublicProbeSelection(
+																system.publicProbeIds,
+																probe.id,
+																Boolean(nextChecked)
+															),
+														})
+													}
+												/>
+												<label htmlFor={`${system.id}-${probe.id}`}>{probe.name}</label>
+											</div>
+										)
+									})}
+								</div>
+								{availablePublicProbeIds(system.id, probes).length === 0 && (
+									<div className="text-sm text-muted-foreground">
+										<Trans>当前没有可公开到这个节点的线路检测配置。</Trans>
+									</div>
+								)}
 							</div>
 						</div>
 						<div className="flex items-center gap-2">

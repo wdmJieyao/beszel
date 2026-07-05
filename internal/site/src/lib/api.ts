@@ -14,6 +14,7 @@ import type {
 	UserSettings,
 } from "@/types"
 import { $alerts, $allSystemsById, $allSystemsByName, $userSettings } from "./stores"
+import { toPublicSystemPayload } from "@/components/routes/settings/public-status-utils"
 import { chartTimeData } from "./utils"
 
 /** PocketBase JS Client */
@@ -135,16 +136,6 @@ export function endNetworkProbeLiveSession(systemId: string, sessionId: string) 
 	})
 }
 
-function toPublicSystemPayload(data: Partial<AdminPublicSystem>) {
-	return {
-		publicEnabled: data.publicEnabled,
-		publicName: data.publicName,
-		showCpu: data.showCpu,
-		showMemory: data.showMemory,
-		showDisk: data.showDisk,
-	}
-}
-
 function toNetworkProbePayload(probe: Partial<NetworkProbeInput>) {
 	return {
 		name: probe.name,
@@ -153,7 +144,6 @@ function toNetworkProbePayload(probe: Partial<NetworkProbeInput>) {
 		intervalSeconds: probe.intervalSeconds,
 		timeoutSeconds: probe.timeoutSeconds,
 		enabled: probe.enabled,
-		publicVisible: probe.publicVisible,
 		scope: probe.scope,
 		systems: probe.systems,
 	}

@@ -3,6 +3,7 @@
 package hub
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +12,8 @@ import (
 	"time"
 
 	"github.com/henrygd/beszel/internal/entities/system"
+	"github.com/henrygd/beszel/internal/migrations"
+	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
 	pbTests "github.com/pocketbase/pocketbase/tests"
 	"github.com/pocketbase/pocketbase/tools/router"
@@ -67,6 +70,14 @@ func TestValidatePublicVisibilityDefaultsAndName(t *testing.T) {
 	assert.True(t, visibility.ShowCPU)
 	assert.True(t, visibility.ShowMemory)
 	assert.True(t, visibility.ShowDisk)
+	assert.Empty(t, visibility.PublicProbeIDs)
+
+	visibility, err = normalizePublicVisibilityInput(PublicVisibilityInput{
+		PublicEnabled:  true,
+		PublicProbeIDs: []string{" probe-a ", "probe-b", "probe-a", ""},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, []string{"probe-a", "probe-b"}, visibility.PublicProbeIDs)
 
 	_, err = normalizePublicVisibilityInput(PublicVisibilityInput{
 		PublicEnabled: true,
@@ -369,7 +380,9 @@ func TestPublicProbeSummariesFilterSeriesByRangeKeepLatestAndHideTarget(t *testi
 	createPublicProbeResult(t, hub, probe.Id, systemRecord.Id, now.Add(-20*time.Minute), true, 20, "")
 	createPublicProbeResult(t, hub, probe.Id, systemRecord.Id, now.Add(-5*time.Minute), false, 0, "dial tcp secret.example.com:443: i/o timeout")
 
-	summaries, err := hub.publicProbeSummaries(systemRecord.Id, publicChartRange{Name: "30m", Duration: 30 * time.Minute, StatsType: "1m"})
+	summaries, err := hub.publicProbeSummaries(systemRecord.Id, PublicSystemVisibility{
+		PublicProbeIDs: []string{probe.Id},
+	}, publicChartRange{Name: "30m", Duration: 30 * time.Minute, StatsType: "1m"})
 	require.NoError(t, err)
 	require.Len(t, summaries, 1)
 	summary := summaries[0]
@@ -412,7 +425,9 @@ func TestPublicProbeSummariesIncludeGlobalPublicProbeWithoutAssignment(t *testin
 	})
 	createPublicProbeResult(t, hub, probe.Id, systemRecord.Id, time.Now().UTC().Add(-30*time.Second), true, 8, "")
 
-	summaries, err := hub.publicProbeSummaries(systemRecord.Id, publicChartRange{Name: "30m", Duration: 30 * time.Minute, StatsType: "1m"})
+	summaries, err := hub.publicProbeSummaries(systemRecord.Id, PublicSystemVisibility{
+		PublicProbeIDs: []string{probe.Id},
+	}, publicChartRange{Name: "30m", Duration: 30 * time.Minute, StatsType: "1m"})
 	require.NoError(t, err)
 	require.Len(t, summaries, 1)
 	assert.Equal(t, "Global line", summaries[0].Name)
@@ -421,7 +436,7 @@ func TestPublicProbeSummariesIncludeGlobalPublicProbeWithoutAssignment(t *testin
 	assert.Equal(t, 8.0, *summaries[0].Latest.LatencyMs)
 }
 
-func TestPublicProbeSummariesExcludeHiddenGlobalProbe(t *testing.T) {
+func TestPublicProbeSummariesExcludeUnselectedGlobalProbe(t *testing.T) {
 	hub := newPublicStatusTestHub(t)
 	user := createPublicStatusUser(t, hub)
 
@@ -443,9 +458,345 @@ func TestPublicProbeSummariesExcludeHiddenGlobalProbe(t *testing.T) {
 	})
 	createPublicProbeResult(t, hub, probe.Id, systemRecord.Id, time.Now().UTC().Add(-30*time.Second), true, 8, "")
 
-	summaries, err := hub.publicProbeSummaries(systemRecord.Id, publicChartRange{Name: "30m", Duration: 30 * time.Minute, StatsType: "1m"})
+	summaries, err := hub.publicProbeSummaries(systemRecord.Id, PublicSystemVisibility{}, publicChartRange{Name: "30m", Duration: 30 * time.Minute, StatsType: "1m"})
 	require.NoError(t, err)
 	assert.Empty(t, summaries)
+}
+
+func TestPublicProbeSummariesRequirePerSystemSelection(t *testing.T) {
+	hub := newPublicStatusTestHub(t)
+	user := createPublicStatusUser(t, hub)
+
+	systemRecord := createPublicStatusRecord(t, hub, "systems", map[string]any{
+		"name":   "node",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+	selectedProbe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Selected line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "selected.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	hiddenProbe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Hidden line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "hidden.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+
+	createPublicProbeResult(t, hub, selectedProbe.Id, systemRecord.Id, time.Now().UTC().Add(-30*time.Second), true, 8, "")
+	createPublicProbeResult(t, hub, hiddenProbe.Id, systemRecord.Id, time.Now().UTC().Add(-20*time.Second), true, 12, "")
+
+	summaries, err := hub.publicProbeSummaries(systemRecord.Id, PublicSystemVisibility{
+		PublicProbeIDs: []string{selectedProbe.Id},
+	}, publicChartRange{Name: "30m", Duration: 30 * time.Minute, StatsType: "1m"})
+	require.NoError(t, err)
+	require.Len(t, summaries, 1)
+	assert.Equal(t, selectedProbe.Id, summaries[0].ID)
+}
+
+func TestPublicProbeSummariesHideUnselectedProbeMetadata(t *testing.T) {
+	hub := newPublicStatusTestHub(t)
+	user := createPublicStatusUser(t, hub)
+
+	systemRecord := createPublicStatusRecord(t, hub, "systems", map[string]any{
+		"name":   "node",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+	selectedProbe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Selected line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "selected.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	createPublicStatusRecord(t, hub, CollectionPublicSystemVisibility, map[string]any{
+		"system":           systemRecord.Id,
+		"public_enabled":   true,
+		"public_name":      "public-node",
+		"show_cpu":         true,
+		"show_memory":      true,
+		"show_disk":        true,
+		"public_probe_ids": []string{selectedProbe.Id},
+	})
+	unselectedProbe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Hidden line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "hidden.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	createPublicProbeResult(t, hub, selectedProbe.Id, systemRecord.Id, time.Now().UTC().Add(-30*time.Second), true, 8, "")
+	createPublicProbeResult(t, hub, unselectedProbe.Id, systemRecord.Id, time.Now().UTC().Add(-20*time.Second), true, 12, "")
+
+	response := requestPublicStatus(t, hub, "30m")
+	body, err := json.Marshal(response)
+	require.NoError(t, err)
+	assert.Contains(t, string(body), "Selected line")
+	assert.NotContains(t, string(body), "Hidden line")
+	assert.NotContains(t, string(body), "hidden.example.com")
+}
+
+func TestListPublicSystemsIncludesPublicProbeIDs(t *testing.T) {
+	hub := newPublicStatusTestHub(t)
+	user := createPublicStatusUser(t, hub)
+	systemRecord := createPublicStatusRecord(t, hub, "systems", map[string]any{
+		"name":   "node",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+	probeA := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Probe A",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "probe-a.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	probeB := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Probe B",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "probe-b.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	createPublicStatusRecord(t, hub, CollectionPublicSystemVisibility, map[string]any{
+		"system":           systemRecord.Id,
+		"public_enabled":   true,
+		"public_name":      "public-node",
+		"show_cpu":         true,
+		"show_memory":      true,
+		"show_disk":        true,
+		"public_probe_ids": []string{probeA.Id, probeB.Id},
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/beszel/public/systems", nil)
+	recorder := httptest.NewRecorder()
+	require.NoError(t, hub.listPublicSystems(&core.RequestEvent{
+		App: hub,
+		Event: router.Event{
+			Request:  req,
+			Response: recorder,
+		},
+	}))
+
+	var response AdminPublicSystemsResponse
+	require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &response))
+	require.Len(t, response.Systems, 1)
+	assert.Equal(t, []string{probeA.Id, probeB.Id}, response.Systems[0].PublicProbeIDs)
+}
+
+func TestUpdatePublicSystemPersistsPublicProbeIDs(t *testing.T) {
+	hub := newPublicStatusTestHub(t)
+	admin := createPublicStatusUser(t, hub)
+	admin.Set("role", "admin")
+	require.NoError(t, hub.Save(admin))
+
+	systemRecord := createPublicStatusRecord(t, hub, "systems", map[string]any{
+		"name":   "node",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{admin.Id},
+	})
+	globalProbe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Global line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "global.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+
+	body := bytes.NewBufferString(`{"publicEnabled":true,"publicName":"公开节点","showCpu":true,"showMemory":true,"showDisk":true,"publicProbeIds":["` + globalProbe.Id + `"]}`)
+	req := httptest.NewRequest(http.MethodPatch, "/api/beszel/public/systems/"+systemRecord.Id, body)
+	req.Header.Set("Content-Type", "application/json")
+	req.SetPathValue("systemId", systemRecord.Id)
+	recorder := httptest.NewRecorder()
+
+	require.NoError(t, hub.updatePublicSystem(&core.RequestEvent{
+		App:  hub,
+		Auth: admin,
+		Event: router.Event{
+			Request:  req,
+			Response: recorder,
+		},
+	}))
+
+	record, err := hub.FindFirstRecordByFilter(CollectionPublicSystemVisibility, "system = {:system}", dbx.Params{"system": systemRecord.Id})
+	require.NoError(t, err)
+	assert.Equal(t, []string{globalProbe.Id}, publicVisibilityFromRecord(record).PublicProbeIDs)
+}
+
+func TestUpdatePublicSystemRejectsProbeOutsideCoverage(t *testing.T) {
+	hub := newPublicStatusTestHub(t)
+	admin := createPublicStatusUser(t, hub)
+	admin.Set("role", "admin")
+	require.NoError(t, hub.Save(admin))
+
+	systemRecord := createPublicStatusRecord(t, hub, "systems", map[string]any{
+		"name":   "node",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{admin.Id},
+	})
+	otherSystem := createPublicStatusRecord(t, hub, "systems", map[string]any{
+		"name":   "other",
+		"host":   "127.0.0.2",
+		"status": "up",
+		"users":  []string{admin.Id},
+	})
+	fixedProbe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Fixed line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeFixed,
+		"target":           "fixed.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	createPublicStatusRecord(t, hub, CollectionNetworkProbeAssignments, map[string]any{
+		"probe":   fixedProbe.Id,
+		"system":  otherSystem.Id,
+		"enabled": true,
+	})
+
+	body := bytes.NewBufferString(`{"publicEnabled":true,"publicName":"公开节点","showCpu":true,"showMemory":true,"showDisk":true,"publicProbeIds":["` + fixedProbe.Id + `"]}`)
+	req := httptest.NewRequest(http.MethodPatch, "/api/beszel/public/systems/"+systemRecord.Id, body)
+	req.Header.Set("Content-Type", "application/json")
+	req.SetPathValue("systemId", systemRecord.Id)
+	recorder := httptest.NewRecorder()
+
+	err := hub.updatePublicSystem(&core.RequestEvent{
+		App:  hub,
+		Auth: admin,
+		Event: router.Event{
+			Request:  req,
+			Response: recorder,
+		},
+	})
+	require.Error(t, err)
+	apiErr := router.ToApiError(err)
+	assert.Equal(t, http.StatusBadRequest, apiErr.Status)
+}
+
+func TestSeedPublicProbeVisibilityPreservesExistingVisiblePairsOnly(t *testing.T) {
+	hub := newPublicStatusTestHub(t)
+	user := createPublicStatusUser(t, hub)
+	systemA := createPublicStatusRecord(t, hub, "systems", map[string]any{"name": "a", "host": "10.0.0.1", "status": "up", "users": []string{user.Id}})
+	systemB := createPublicStatusRecord(t, hub, "systems", map[string]any{"name": "b", "host": "10.0.0.2", "status": "up", "users": []string{user.Id}})
+	visibilityA := createPublicStatusRecord(t, hub, CollectionPublicSystemVisibility, map[string]any{
+		"system":         systemA.Id,
+		"public_enabled": true,
+		"public_name":    "A",
+		"show_cpu":       true,
+		"show_memory":    true,
+		"show_disk":      true,
+	})
+	visibilityB := createPublicStatusRecord(t, hub, CollectionPublicSystemVisibility, map[string]any{
+		"system":         systemB.Id,
+		"public_enabled": true,
+		"public_name":    "B",
+		"show_cpu":       true,
+		"show_memory":    true,
+		"show_disk":      true,
+	})
+	globalProbe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Global line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "global.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	fixedProbe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Fixed line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeFixed,
+		"target":           "fixed.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	createPublicStatusRecord(t, hub, CollectionNetworkProbeAssignments, map[string]any{
+		"probe":   fixedProbe.Id,
+		"system":  systemA.Id,
+		"enabled": true,
+	})
+
+	require.NoError(t, migrations.SeedPublicProbeVisibility(hub))
+	refreshedA, err := hub.FindRecordById(CollectionPublicSystemVisibility, visibilityA.Id)
+	require.NoError(t, err)
+	refreshedB, err := hub.FindRecordById(CollectionPublicSystemVisibility, visibilityB.Id)
+	require.NoError(t, err)
+	assert.ElementsMatch(t, []string{globalProbe.Id, fixedProbe.Id}, publicVisibilityFromRecord(refreshedA).PublicProbeIDs)
+	assert.ElementsMatch(t, []string{globalProbe.Id}, publicVisibilityFromRecord(refreshedB).PublicProbeIDs)
+}
+
+func TestSeedPublicProbeVisibilityIsIdempotentAndDoesNotOverrideExistingSelection(t *testing.T) {
+	hub := newPublicStatusTestHub(t)
+	user := createPublicStatusUser(t, hub)
+	systemRecord := createPublicStatusRecord(t, hub, "systems", map[string]any{"name": "a", "host": "10.0.0.1", "status": "up", "users": []string{user.Id}})
+	existingProbe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Existing line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "existing.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	visibility := createPublicStatusRecord(t, hub, CollectionPublicSystemVisibility, map[string]any{
+		"system":           systemRecord.Id,
+		"public_enabled":   true,
+		"public_name":      "A",
+		"show_cpu":         true,
+		"show_memory":      true,
+		"show_disk":        true,
+		"public_probe_ids": []string{existingProbe.Id},
+	})
+
+	require.NoError(t, migrations.SeedPublicProbeVisibility(hub))
+	require.NoError(t, migrations.SeedPublicProbeVisibility(hub))
+	refreshed, err := hub.FindRecordById(CollectionPublicSystemVisibility, visibility.Id)
+	require.NoError(t, err)
+	assert.Equal(t, []string{existingProbe.Id}, publicVisibilityFromRecord(refreshed).PublicProbeIDs)
+}
+
+func TestFindPublicVisibilityDefaultsNewPublicRowsToEmptyProbeSelection(t *testing.T) {
+	hub := newPublicStatusTestHub(t)
+	visibility, _ := hub.findPublicVisibility("system-new")
+	assert.Empty(t, visibility.PublicProbeIDs)
 }
 
 func TestGetPublicStatusResponseHidesProbeTargetMetadata(t *testing.T) {
@@ -502,6 +853,7 @@ func newPublicStatusTestHub(t testing.TB) *Hub {
 	t.Helper()
 	app, err := pbTests.NewTestApp(t.TempDir())
 	require.NoError(t, err)
+	require.NoError(t, migrations.EnsurePublicProbeVisibilityField(app))
 	t.Cleanup(app.Cleanup)
 	return NewHub(app)
 }

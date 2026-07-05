@@ -8,7 +8,13 @@ type SystemSummary = {
 export function buildNetworkProbePayload(draft: Partial<NetworkProbe>) {
 	const scope = draft.systems?.length ? "fixed" : "global"
 	return {
-		...draft,
+		id: draft.id,
+		name: draft.name,
+		type: draft.type,
+		target: draft.target,
+		intervalSeconds: draft.intervalSeconds,
+		timeoutSeconds: draft.timeoutSeconds,
+		enabled: draft.enabled,
 		scope,
 		systems: scope === "global" ? [] : draft.systems,
 	}

@@ -36,20 +36,22 @@ var publicChartRanges = map[string]publicChartRange{
 }
 
 type PublicSystemVisibility struct {
-	SystemID      string
-	PublicEnabled bool
-	PublicName    string
-	ShowCPU       bool
-	ShowMemory    bool
-	ShowDisk      bool
+	SystemID       string
+	PublicEnabled  bool
+	PublicName     string
+	ShowCPU        bool
+	ShowMemory     bool
+	ShowDisk       bool
+	PublicProbeIDs []string
 }
 
 type PublicVisibilityInput struct {
-	PublicEnabled bool   `json:"publicEnabled"`
-	PublicName    string `json:"publicName"`
-	ShowCPU       *bool  `json:"showCpu,omitempty"`
-	ShowMemory    *bool  `json:"showMemory,omitempty"`
-	ShowDisk      *bool  `json:"showDisk,omitempty"`
+	PublicEnabled  bool     `json:"publicEnabled"`
+	PublicName     string   `json:"publicName"`
+	ShowCPU        *bool    `json:"showCpu,omitempty"`
+	ShowMemory     *bool    `json:"showMemory,omitempty"`
+	ShowDisk       *bool    `json:"showDisk,omitempty"`
+	PublicProbeIDs []string `json:"publicProbeIds,omitempty"`
 }
 
 type PublicMetrics struct {
@@ -107,14 +109,15 @@ type PublicStatusResponse struct {
 }
 
 type AdminPublicSystemResponse struct {
-	ID            string `json:"id"`
-	Name          string `json:"name"`
-	Status        string `json:"status"`
-	PublicEnabled bool   `json:"publicEnabled"`
-	PublicName    string `json:"publicName"`
-	ShowCPU       bool   `json:"showCpu"`
-	ShowMemory    bool   `json:"showMemory"`
-	ShowDisk      bool   `json:"showDisk"`
+	ID             string   `json:"id"`
+	Name           string   `json:"name"`
+	Status         string   `json:"status"`
+	PublicEnabled  bool     `json:"publicEnabled"`
+	PublicName     string   `json:"publicName"`
+	ShowCPU        bool     `json:"showCpu"`
+	ShowMemory     bool     `json:"showMemory"`
+	ShowDisk       bool     `json:"showDisk"`
+	PublicProbeIDs []string `json:"publicProbeIds"`
 }
 
 type AdminPublicSystemsResponse struct {
@@ -122,12 +125,13 @@ type AdminPublicSystemsResponse struct {
 }
 
 type PublicVisibilityResponse struct {
-	ID            string `json:"id"`
-	PublicEnabled bool   `json:"publicEnabled"`
-	PublicName    string `json:"publicName"`
-	ShowCPU       bool   `json:"showCpu"`
-	ShowMemory    bool   `json:"showMemory"`
-	ShowDisk      bool   `json:"showDisk"`
+	ID             string   `json:"id"`
+	PublicEnabled  bool     `json:"publicEnabled"`
+	PublicName     string   `json:"publicName"`
+	ShowCPU        bool     `json:"showCpu"`
+	ShowMemory     bool     `json:"showMemory"`
+	ShowDisk       bool     `json:"showDisk"`
+	PublicProbeIDs []string `json:"publicProbeIds"`
 }
 
 func normalizePublicVisibilityInput(input PublicVisibilityInput) (PublicSystemVisibility, error) {
@@ -136,12 +140,57 @@ func normalizePublicVisibilityInput(input PublicVisibilityInput) (PublicSystemVi
 		return PublicSystemVisibility{}, errors.New("publicName is too long")
 	}
 	return PublicSystemVisibility{
-		PublicEnabled: input.PublicEnabled,
-		PublicName:    publicName,
-		ShowCPU:       boolValue(input.ShowCPU, true),
-		ShowMemory:    boolValue(input.ShowMemory, true),
-		ShowDisk:      boolValue(input.ShowDisk, true),
+		PublicEnabled:  input.PublicEnabled,
+		PublicName:     publicName,
+		ShowCPU:        boolValue(input.ShowCPU, true),
+		ShowMemory:     boolValue(input.ShowMemory, true),
+		ShowDisk:       boolValue(input.ShowDisk, true),
+		PublicProbeIDs: normalizePublicProbeIDs(input.PublicProbeIDs),
 	}, nil
+}
+
+func normalizePublicProbeIDs(probeIDs []string) []string {
+	if len(probeIDs) == 0 {
+		return []string{}
+	}
+	normalized := make([]string, 0, len(probeIDs))
+	seen := make(map[string]struct{}, len(probeIDs))
+	for _, probeID := range probeIDs {
+		probeID = strings.TrimSpace(probeID)
+		if probeID == "" {
+			continue
+		}
+		if _, ok := seen[probeID]; ok {
+			continue
+		}
+		seen[probeID] = struct{}{}
+		normalized = append(normalized, probeID)
+	}
+	return normalized
+}
+
+func publicProbeIDsFromRecord(record *core.Record) []string {
+	if record == nil {
+		return []string{}
+	}
+	raw := record.Get("public_probe_ids")
+	switch value := raw.(type) {
+	case []string:
+		return normalizePublicProbeIDs(value)
+	case []any:
+		probeIDs := make([]string, 0, len(value))
+		for _, item := range value {
+			if text, ok := item.(string); ok {
+				probeIDs = append(probeIDs, text)
+			}
+		}
+		return normalizePublicProbeIDs(probeIDs)
+	case string:
+		if strings.TrimSpace(value) == "" {
+			return []string{}
+		}
+	}
+	return normalizePublicProbeIDs(record.GetStringSlice("public_probe_ids"))
 }
 
 func sanitizePublicSystem(record *core.Record, visibility PublicSystemVisibility, probes []PublicProbeSummary, history []PublicMetricPoint) PublicSystemSummary {
@@ -292,7 +341,7 @@ func (h *Hub) getPublicStatus(e *core.RequestEvent) error {
 		if err != nil {
 			continue
 		}
-		probes, err := h.publicProbeSummaries(systemRecord.Id, rangeSpec)
+		probes, err := h.publicProbeSummaries(systemRecord.Id, visibility, rangeSpec)
 		if err != nil {
 			return err
 		}
@@ -317,14 +366,15 @@ func (h *Hub) listPublicSystems(e *core.RequestEvent) error {
 	for _, systemRecord := range systemRecords {
 		visibility, _ := h.findPublicVisibility(systemRecord.Id)
 		systems = append(systems, AdminPublicSystemResponse{
-			ID:            systemRecord.Id,
-			Name:          systemRecord.GetString("name"),
-			Status:        systemRecord.GetString("status"),
-			PublicEnabled: visibility.PublicEnabled,
-			PublicName:    visibility.PublicName,
-			ShowCPU:       visibility.ShowCPU,
-			ShowMemory:    visibility.ShowMemory,
-			ShowDisk:      visibility.ShowDisk,
+			ID:             systemRecord.Id,
+			Name:           systemRecord.GetString("name"),
+			Status:         systemRecord.GetString("status"),
+			PublicEnabled:  visibility.PublicEnabled,
+			PublicName:     visibility.PublicName,
+			ShowCPU:        visibility.ShowCPU,
+			ShowMemory:     visibility.ShowMemory,
+			ShowDisk:       visibility.ShowDisk,
+			PublicProbeIDs: visibility.PublicProbeIDs,
 		})
 	}
 	return e.JSON(http.StatusOK, AdminPublicSystemsResponse{Systems: systems})
@@ -347,37 +397,46 @@ func (h *Hub) updatePublicSystem(e *core.RequestEvent) error {
 	if err != nil {
 		return e.BadRequestError(err.Error(), err)
 	}
+	if input.PublicProbeIDs == nil {
+		existing, _ := h.findPublicVisibility(systemID)
+		visibility.PublicProbeIDs = existing.PublicProbeIDs
+	}
+	if _, err := h.validatePublicProbeSelection(systemID, visibility.PublicProbeIDs); err != nil {
+		return e.BadRequestError(err.Error(), err)
+	}
 	record, err := h.upsertPublicVisibility(systemID, visibility)
 	if err != nil {
 		return err
 	}
 	visibility = publicVisibilityFromRecord(record)
 	return e.JSON(http.StatusOK, PublicVisibilityResponse{
-		ID:            systemID,
-		PublicEnabled: visibility.PublicEnabled,
-		PublicName:    visibility.PublicName,
-		ShowCPU:       visibility.ShowCPU,
-		ShowMemory:    visibility.ShowMemory,
-		ShowDisk:      visibility.ShowDisk,
+		ID:             systemID,
+		PublicEnabled:  visibility.PublicEnabled,
+		PublicName:     visibility.PublicName,
+		ShowCPU:        visibility.ShowCPU,
+		ShowMemory:     visibility.ShowMemory,
+		ShowDisk:       visibility.ShowDisk,
+		PublicProbeIDs: visibility.PublicProbeIDs,
 	})
 }
 
 func (h *Hub) findPublicVisibility(systemID string) (PublicSystemVisibility, *core.Record) {
 	record, err := h.FindFirstRecordByFilter(CollectionPublicSystemVisibility, "system = {:system}", dbx.Params{"system": systemID})
 	if err != nil {
-		return PublicSystemVisibility{SystemID: systemID, ShowCPU: true, ShowMemory: true, ShowDisk: true}, nil
+		return PublicSystemVisibility{SystemID: systemID, ShowCPU: true, ShowMemory: true, ShowDisk: true, PublicProbeIDs: []string{}}, nil
 	}
 	return publicVisibilityFromRecord(record), record
 }
 
 func publicVisibilityFromRecord(record *core.Record) PublicSystemVisibility {
 	return PublicSystemVisibility{
-		SystemID:      record.GetString("system"),
-		PublicEnabled: record.GetBool("public_enabled"),
-		PublicName:    record.GetString("public_name"),
-		ShowCPU:       record.GetBool("show_cpu"),
-		ShowMemory:    record.GetBool("show_memory"),
-		ShowDisk:      record.GetBool("show_disk"),
+		SystemID:       record.GetString("system"),
+		PublicEnabled:  record.GetBool("public_enabled"),
+		PublicName:     record.GetString("public_name"),
+		ShowCPU:        record.GetBool("show_cpu"),
+		ShowMemory:     record.GetBool("show_memory"),
+		ShowDisk:       record.GetBool("show_disk"),
+		PublicProbeIDs: publicProbeIDsFromRecord(record),
 	}
 }
 
@@ -396,21 +455,62 @@ func (h *Hub) upsertPublicVisibility(systemID string, visibility PublicSystemVis
 	record.Set("show_cpu", visibility.ShowCPU)
 	record.Set("show_memory", visibility.ShowMemory)
 	record.Set("show_disk", visibility.ShowDisk)
+	record.Set("public_probe_ids", normalizePublicProbeIDs(visibility.PublicProbeIDs))
 	if err := h.Save(record); err != nil {
 		return nil, err
 	}
 	return record, nil
 }
 
-func (h *Hub) publicProbeSummaries(systemID string, rangeSpec publicChartRange) ([]PublicProbeSummary, error) {
+func (h *Hub) validatePublicProbeSelection(systemID string, probeIDs []string) ([]string, error) {
+	if len(probeIDs) == 0 {
+		return []string{}, nil
+	}
 	assignments, err := h.effectiveNetworkProbeAssignments(systemID)
 	if err != nil {
 		return nil, err
 	}
-	summaries := make([]PublicProbeSummary, 0, len(assignments))
+	available := make(map[string]struct{}, len(assignments))
 	for _, assignment := range assignments {
-		probe, err := h.FindRecordById(CollectionNetworkProbes, assignment.ProbeID)
-		if err != nil || !probe.GetBool("enabled") || !probe.GetBool("public_visible") {
+		available[assignment.ProbeID] = struct{}{}
+	}
+	normalized := normalizePublicProbeIDs(probeIDs)
+	for _, probeID := range normalized {
+		if _, ok := available[probeID]; !ok {
+			return nil, fmt.Errorf("probe %s does not cover system %s", probeID, systemID)
+		}
+		if _, err := h.FindRecordById(CollectionNetworkProbes, probeID); err != nil {
+			return nil, fmt.Errorf("probe %s not found", probeID)
+		}
+	}
+	return normalized, nil
+}
+
+func (h *Hub) publicProbeSummaries(systemID string, visibility PublicSystemVisibility, rangeSpec publicChartRange) ([]PublicProbeSummary, error) {
+	if len(visibility.PublicProbeIDs) == 0 {
+		return []PublicProbeSummary{}, nil
+	}
+	assignments, err := h.effectiveNetworkProbeAssignments(systemID)
+	if err != nil {
+		return nil, err
+	}
+	selected := make(map[string]struct{}, len(visibility.PublicProbeIDs))
+	for _, probeID := range visibility.PublicProbeIDs {
+		selected[probeID] = struct{}{}
+	}
+	covered := make(map[string]struct{}, len(assignments))
+	for _, assignment := range assignments {
+		if _, ok := selected[assignment.ProbeID]; ok {
+			covered[assignment.ProbeID] = struct{}{}
+		}
+	}
+	summaries := make([]PublicProbeSummary, 0, len(visibility.PublicProbeIDs))
+	for _, probeID := range visibility.PublicProbeIDs {
+		if _, ok := covered[probeID]; !ok {
+			continue
+		}
+		probe, err := h.FindRecordById(CollectionNetworkProbes, probeID)
+		if err != nil || !probe.GetBool("enabled") {
 			continue
 		}
 		latestResults, err := h.FindRecordsByFilter(CollectionNetworkProbeResults, "probe = {:probe} && system = {:system}", "-created", 1, 0, dbx.Params{

@@ -17,6 +17,12 @@ describe("buildNetworkProbePayload", () => {
 		assert.equal(payload.scope, "fixed")
 		assert.deepEqual(payload.systems, ["sys-1"])
 	})
+
+	it("does not expose a probe-level public visibility toggle in saved payloads", () => {
+		const payload = buildNetworkProbePayload(networkProbe({ publicVisible: false }))
+
+		assert.equal("publicVisible" in payload, false)
+	})
 })
 
 describe("probeScopeLabel", () => {

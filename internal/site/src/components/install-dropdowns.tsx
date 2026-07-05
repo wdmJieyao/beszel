@@ -1,11 +1,11 @@
 import { i18n } from "@lingui/core"
 import { memo } from "react"
 import { copyToClipboard, getHubURL } from "@/lib/utils"
+import { agentImage, buildRefreshDockerRunCommand, buildRefreshDockerRunSpec } from "./install-dropdowns-utils"
 import { DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu"
 
 // const isbeta = beszel.hub_version.includes("beta")
 // const imagetag = isbeta ? ":edge" : ""
-const agentImage = "ghcr.io/wdmjieyao/beszel-agent:edge"
 const repositoryRawUrl = "https://raw.githubusercontent.com/wdmJieyao/beszel/main"
 
 /**
@@ -44,7 +44,23 @@ export function copyDockerCompose(port = "45876", publicKey: string, token: stri
 
 export function copyDockerRun(port = "45876", publicKey: string, token: string) {
 	copyToClipboard(
-		`docker run -d --name beszel-agent --network host --restart unless-stopped -v /var/run/docker.sock:/var/run/docker.sock:ro -v beszel_agent_data:/var/lib/beszel-agent -e KEY="${publicKey}" -e LISTEN=${port} -e TOKEN="${token}" -e HUB_URL="${getHubURL()}" ${agentImage}`
+		buildRefreshDockerRunCommand(
+			buildRefreshDockerRunSpec({
+				containerName: "beszel-agent",
+				image: agentImage,
+				runArgs: [
+					"-d",
+					"--network host",
+					"--restart unless-stopped",
+					"-v /var/run/docker.sock:/var/run/docker.sock:ro",
+					"-v beszel_agent_data:/var/lib/beszel-agent",
+					`-e KEY="${publicKey}"`,
+					`-e LISTEN=${port}`,
+					`-e TOKEN="${token}"`,
+					`-e HUB_URL="${getHubURL()}"`,
+				],
+			})
+		)
 	)
 }
 

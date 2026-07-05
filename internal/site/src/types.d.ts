@@ -166,6 +166,7 @@ export interface AdminPublicSystem {
 	showCpu: boolean
 	showMemory: boolean
 	showDisk: boolean
+	publicProbeIds: string[]
 }
 
 export interface SystemInfo {

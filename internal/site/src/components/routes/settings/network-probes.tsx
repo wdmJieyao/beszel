@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { deleteNetworkProbe, getNetworkProbes, saveNetworkProbe } from "@/lib/api"
 import { $systems } from "@/lib/stores"
 import { useStore } from "@nanostores/react"
@@ -18,7 +17,6 @@ const emptyProbe: Partial<NetworkProbe> = {
 	intervalSeconds: 10,
 	timeoutSeconds: 5,
 	enabled: true,
-	publicVisible: true,
 	scope: "global",
 	systems: [],
 }
@@ -145,16 +143,6 @@ export default function NetworkProbesSettings() {
 							</div>
 						</button>
 						<div className="flex items-center gap-3">
-							<span className="text-sm text-muted-foreground">
-								{probe.publicVisible ? <Trans>公开展示</Trans> : <Trans>仅后台</Trans>}
-							</span>
-							<Switch
-								checked={probe.publicVisible}
-								onCheckedChange={async (checked) => {
-									const saved = await saveNetworkProbe({ ...probe, publicVisible: checked })
-									setProbes((prev) => prev.map((item) => (item.id === saved.id ? saved : item)))
-								}}
-							/>
 							<Button variant="ghost" size="icon" onClick={() => remove(probe)}>
 								<TrashIcon className="size-4" />
 							</Button>

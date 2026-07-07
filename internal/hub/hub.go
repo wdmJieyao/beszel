@@ -36,6 +36,9 @@ type Hub struct {
 	sm                        *systems.SystemManager
 	hb                        *heartbeat.Heartbeat
 	hbStop                    chan struct{}
+	telegramTransport         TelegramTransport
+	telegramPollingOnce       sync.Once
+	telegramPollingCancel     context.CancelFunc
 	networkProbeSchedulerOnce sync.Once
 	networkProbeLiveOnce      sync.Once
 	networkProbeLive          *networkProbeLiveManager
@@ -48,10 +51,12 @@ type Hub struct {
 func NewHub(app core.App) *Hub {
 	hub := &Hub{App: app}
 	hub.AlertManager = alerts.NewAlertManager(hub)
+	hub.SetTelegramSender(hub)
 	hub.um = users.NewUserManager(hub)
 	hub.rm = records.NewRecordManager(hub)
 	hub.sm = systems.NewSystemManager(hub)
 	hub.hb = heartbeat.New(app, utils.GetEnv)
+	hub.telegramTransport = newTelegramHTTPTransport(nil)
 	hub.networkProbeLive = newNetworkProbeLiveManager()
 	if hub.hb != nil {
 		hub.hbStop = make(chan struct{})
@@ -154,6 +159,11 @@ func (h *Hub) registerCronJobs(_ *core.ServeEvent) error {
 	h.networkProbeLiveOnce.Do(func() {
 		go h.startNetworkProbeLiveScheduler()
 	})
+	h.telegramPollingOnce.Do(func() {
+		ctx, cancel := context.WithCancel(context.Background())
+		h.telegramPollingCancel = cancel
+		go h.startTelegramPolling(ctx)
+	})
 	return nil
 }
 
@@ -245,4 +255,11 @@ func (h *Hub) MakeLink(parts ...string) string {
 		base = fmt.Sprintf("%s/%s", base, url.PathEscape(part))
 	}
 	return base
+}
+
+func (h *Hub) SetTelegramTransport(transport TelegramTransport) {
+	if transport == nil {
+		return
+	}
+	h.telegramTransport = transport
 }

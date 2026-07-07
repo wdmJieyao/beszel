@@ -111,6 +111,15 @@ func (h *Hub) registerApiRoutes(se *core.ServeEvent) error {
 	}
 	// send test notification
 	apiAuth.POST("/test-notification", h.SendTestNotification)
+	// telegram notifications
+	apiAuth.GET("/telegram/settings", h.getTelegramSettings).BindFunc(requireAdminRole)
+	apiAuth.PUT("/telegram/settings", h.updateTelegramSettings).BindFunc(requireAdminRole)
+	apiAuth.POST("/telegram/settings/test", h.testTelegramSettings).BindFunc(requireAdminRole)
+	apiAuth.GET("/telegram/destinations", h.listTelegramDestinationsHandler).BindFunc(requireAdminRole)
+	apiAuth.POST("/telegram/destinations", h.createTelegramDestination).BindFunc(requireAdminRole)
+	apiAuth.PATCH("/telegram/destinations/{destinationId}", h.updateTelegramDestination).BindFunc(requireAdminRole)
+	apiAuth.DELETE("/telegram/destinations/{destinationId}", h.deleteTelegramDestination).BindFunc(requireAdminRole)
+	apiAuth.POST("/telegram/destinations/{destinationId}/test", h.testTelegramDestination).BindFunc(requireAdminRole)
 	// heartbeat status and test
 	apiAuth.GET("/heartbeat-status", h.getHeartbeatStatus).BindFunc(requireAdminRole)
 	apiAuth.POST("/test-heartbeat", h.testHeartbeat).BindFunc(requireAdminRole)
@@ -119,6 +128,9 @@ func (h *Hub) registerApiRoutes(se *core.ServeEvent) error {
 	apiAuth.PATCH("/public/systems/{systemId}", h.updatePublicSystem).BindFunc(excludeReadOnlyRole)
 	// get config.yml content
 	apiAuth.GET("/config-yaml", config.GetYamlConfig).BindFunc(requireAdminRole)
+	apiAuth.POST("/config-backups/exports", h.exportConfigBackup).BindFunc(requireAdminRole)
+	apiAuth.POST("/config-backups/validations", h.validateConfigBackup).BindFunc(requireAdminRole)
+	apiAuth.POST("/config-backups/restores", h.restoreConfigBackup).BindFunc(requireAdminRole)
 	// handle agent websocket connection
 	apiNoAuth.GET("/agent-connect", h.handleAgentConnect)
 	// anonymous public status page

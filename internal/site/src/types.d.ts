@@ -157,6 +157,121 @@ export interface NetworkProbeChartGroup {
 	series: NetworkProbeChartSeries[]
 }
 
+export type TelegramRole = "admin" | "read_only"
+export type TelegramChatType = "private" | "group" | "supergroup" | "channel" | "unknown"
+
+export interface TelegramSettings {
+	enabled: boolean
+	pollingEnabled: boolean
+	botUsername: string
+	hasToken: boolean
+	lastError: string
+	updated?: string
+}
+
+export interface TelegramSettingsInput {
+	enabled: boolean
+	pollingEnabled: boolean
+	botToken?: string
+}
+
+export interface TelegramTestResponse {
+	ok: boolean
+	botUsername?: string
+	error?: string
+}
+
+export interface TelegramDestination {
+	id: string
+	userId?: string
+	name: string
+	chatId: string
+	chatType: TelegramChatType
+	role: TelegramRole
+	enabled: boolean
+	nodeScope: string[]
+	alertLevelScope: string[]
+	muteUntil?: string
+	lastTestAt?: string
+	lastDeliveryAt?: string
+	lastError: string
+}
+
+export type TelegramDestinationInput = Omit<
+	TelegramDestination,
+	"id" | "lastTestAt" | "lastDeliveryAt" | "lastError"
+> & {
+	id?: string
+}
+
+export type ConfigBackupSection = "systems" | "alerts" | "notifications" | "publicStatus" | "networkProbes"
+
+export interface ConfigBackupExportRequest {
+	includeSecrets: boolean
+	encryptionCredential: string
+	sections: ConfigBackupSection[]
+}
+
+export interface ConfigBackupExportResponse {
+	filename: string
+	contentType: string
+	backupVersion: string
+	warnings: string[]
+	content: string
+}
+
+export interface ConfigBackupValidationRequest {
+	content: string
+	decryptionCredential: string
+}
+
+export interface ConfigBackupRestoreRequest extends ConfigBackupValidationRequest {
+	previewId: string
+	mode: "merge"
+}
+
+export interface ConfigBackupPreviewResponse {
+	previewId: string
+	mode: "merge"
+	backupMeta: {
+		backupVersion: string
+		sourceVersion: string
+		createdAt: string
+		mode: "merge"
+		sections: ConfigBackupSection[]
+	}
+	summary: {
+		create: number
+		update: number
+		preserve: number
+		skip: number
+		conflict: number
+		error: number
+	}
+	items: ConfigBackupPreviewItem[]
+	warnings: string[]
+	requiresCredential: boolean
+}
+
+export interface ConfigBackupPreviewItem {
+	section: string
+	stableId?: string
+	displayName?: string
+	action: "create" | "update" | "preserve" | "skip" | "conflict" | "error"
+	reason: string
+}
+
+export interface ConfigBackupRestoreResponse {
+	mode: "merge"
+	applied: {
+		created: number
+		updated: number
+		preserved: number
+		skipped: number
+	}
+	warnings: string[]
+}
+
 export interface AdminPublicSystem {
 	id: string
 	name: string

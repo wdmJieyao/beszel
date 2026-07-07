@@ -11,10 +11,12 @@ import { InputTags } from "@/components/ui/input-tags"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "@/components/ui/use-toast"
-import { isAdmin, pb } from "@/lib/api"
-import type { UserSettings } from "@/types"
+import { getTelegramSettings, isAdmin, pb, saveTelegramSettings } from "@/lib/api"
+import type { TelegramSettingsInput, UserSettings } from "@/types"
 import { saveSettings } from "./layout"
 import { QuietHours } from "./quiet-hours"
+import { TelegramDestinations } from "./telegram-destinations"
+import { defaultTelegramSettings } from "./telegram-utils"
 import type { ClientResponseError } from "pocketbase"
 
 interface ShoutrrrUrlCardProps {
@@ -32,12 +34,33 @@ const SettingsNotificationsPage = ({ userSettings }: { userSettings: UserSetting
 	const [webhooks, setWebhooks] = useState(userSettings.webhooks ?? [])
 	const [emails, setEmails] = useState<string[]>(userSettings.emails ?? [])
 	const [isLoading, setIsLoading] = useState(false)
+	const [telegramSettings, setTelegramSettings] = useState<
+		TelegramSettingsInput & { botUsername?: string; hasToken?: boolean; lastError?: string }
+	>(defaultTelegramSettings())
 
 	// update values when userSettings changes
 	useEffect(() => {
 		setWebhooks(userSettings.webhooks ?? [])
 		setEmails(userSettings.emails ?? [])
 	}, [userSettings])
+
+	useEffect(() => {
+		if (!isAdmin()) {
+			return
+		}
+		getTelegramSettings()
+			.then((response) =>
+				setTelegramSettings({
+					enabled: response.enabled,
+					pollingEnabled: response.pollingEnabled,
+					botToken: "",
+					botUsername: response.botUsername,
+					hasToken: response.hasToken,
+					lastError: response.lastError,
+				})
+			)
+			.catch(() => {})
+	}, [])
 
 	function addWebhook() {
 		setWebhooks([...webhooks, ""])
@@ -158,6 +181,28 @@ const SettingsNotificationsPage = ({ userSettings }: { userSettings: UserSetting
 					)}
 				</div>
 				<Separator />
+				{isAdmin() && (
+					<>
+						<TelegramDestinations
+							settings={telegramSettings}
+							onSettingsChange={(settings) => {
+								setTelegramSettings((previous) => ({ ...previous, ...settings }))
+							}}
+							onSettingsSave={async (settings) => {
+								const saved = await saveTelegramSettings(settings)
+								setTelegramSettings({
+									enabled: saved.enabled,
+									pollingEnabled: saved.pollingEnabled,
+									botToken: "",
+									botUsername: saved.botUsername,
+									hasToken: saved.hasToken,
+									lastError: saved.lastError,
+								})
+							}}
+						/>
+						<Separator />
+					</>
+				)}
 				<div className="space-y-3">
 					<QuietHours />
 				</div>

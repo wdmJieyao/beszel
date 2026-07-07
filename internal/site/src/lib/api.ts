@@ -5,12 +5,23 @@ import { toast } from "@/components/ui/use-toast"
 import type {
 	AdminPublicSystem,
 	ChartTimes,
+	ConfigBackupExportRequest,
+	ConfigBackupExportResponse,
+	ConfigBackupPreviewResponse,
+	ConfigBackupRestoreRequest,
+	ConfigBackupRestoreResponse,
+	ConfigBackupValidationRequest,
 	NetworkProbe,
 	NetworkProbeLiveSession,
 	NetworkProbeInput,
 	NetworkProbeResultsResponse,
 	PublicChartRange,
 	PublicStatusResponse,
+	TelegramDestination,
+	TelegramDestinationInput,
+	TelegramSettings,
+	TelegramSettingsInput,
+	TelegramTestResponse,
 	UserSettings,
 } from "@/types"
 import { $alerts, $allSystemsById, $allSystemsByName, $userSettings } from "./stores"
@@ -133,6 +144,75 @@ export function renewNetworkProbeLiveSession(systemId: string, sessionId: string
 export function endNetworkProbeLiveSession(systemId: string, sessionId: string) {
 	return pb.send(`/api/beszel/systems/${systemId}/network-probe-live-sessions/${sessionId}`, {
 		method: "DELETE",
+	})
+}
+
+export function getTelegramSettings() {
+	return pb.send<TelegramSettings>("/api/beszel/telegram/settings", {})
+}
+
+export function saveTelegramSettings(settings: TelegramSettingsInput) {
+	return pb.send<TelegramSettings>("/api/beszel/telegram/settings", {
+		method: "PUT",
+		body: settings,
+	})
+}
+
+export function testTelegramSettings(settings?: Partial<TelegramSettingsInput>) {
+	return pb.send<TelegramTestResponse>("/api/beszel/telegram/settings/test", {
+		method: "POST",
+		body: settings ?? {},
+	})
+}
+
+export function getTelegramDestinations() {
+	return pb.send<{ destinations: TelegramDestination[] }>("/api/beszel/telegram/destinations", {})
+}
+
+export function saveTelegramDestination(destination: Partial<TelegramDestinationInput>) {
+	const method = destination.id ? "PATCH" : "POST"
+	const path = destination.id
+		? `/api/beszel/telegram/destinations/${destination.id}`
+		: "/api/beszel/telegram/destinations"
+	return pb.send<TelegramDestination>(path, {
+		method,
+		body: destination,
+	})
+}
+
+export function deleteTelegramDestination(destinationId: string) {
+	return pb.send(`/api/beszel/telegram/destinations/${destinationId}`, {
+		method: "DELETE",
+	})
+}
+
+export function testTelegramDestination(destinationId: string) {
+	return pb.send<TelegramTestResponse & { sentAt?: string }>(
+		`/api/beszel/telegram/destinations/${destinationId}/test`,
+		{
+			method: "POST",
+		}
+	)
+}
+
+export function exportConfigBackup(request: ConfigBackupExportRequest) {
+	return pb.send<ConfigBackupExportResponse>("/api/beszel/config-backups/exports", {
+		method: "POST",
+		body: request,
+	})
+}
+
+export function validateConfigBackup(request: ConfigBackupValidationRequest) {
+	return pb.send<ConfigBackupPreviewResponse>("/api/beszel/config-backups/validations", {
+		method: "POST",
+		body: request,
+	})
+}
+
+export function restoreConfigBackup(request: ConfigBackupRestoreRequest) {
+	return pb.send<ConfigBackupRestoreResponse>("/api/beszel/config-backups/restores", {
+		method: "POST",
+		body: request,
 	})
 }
 

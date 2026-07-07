@@ -19,6 +19,12 @@ msgctxt "New version available"
 msgid "{0} available"
 msgstr "{0} available"
 
+#. placeholder {0}: response.applied.created
+#. placeholder {1}: response.applied.updated
+#: src/components/routes/settings/config-yaml.tsx
+msgid "{0} created, {1} updated."
+msgstr "{0} created, {1} updated."
+
 #. placeholder {0}: table.getFilteredSelectedRowModel().rows.length
 #. placeholder {1}: table.getFilteredRowModel().rows.length
 #: src/components/routes/settings/alerts-history-data-table.tsx
@@ -156,6 +162,10 @@ msgstr "Agent"
 msgid "Alert History"
 msgstr "Alert History"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Alert Scope Tags"
+msgstr "Alert Scope Tags"
+
 #: src/components/alerts/alert-button.tsx
 #: src/components/alerts/alerts-sheet.tsx
 msgid "Alerts"
@@ -234,6 +244,10 @@ msgstr "Average utilization of {0}"
 msgid "Average utilization of GPU engines"
 msgstr "Average utilization of GPU engines"
 
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Backup preview ready"
+msgstr "Backup preview ready"
+
 #: src/components/command-palette.tsx
 #: src/components/navbar.tsx
 msgid "Backups"
@@ -293,6 +307,18 @@ msgstr "Bits (Kbps, Mbps, Gbps)"
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Boot state"
 msgstr "Boot state"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Bot menu"
+msgstr "Bot menu"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Bot polling"
+msgstr "Bot polling"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Bot Token"
+msgstr "Bot Token"
 
 #: src/components/routes/settings/general.tsx
 #: src/components/routes/settings/general.tsx
@@ -362,6 +388,14 @@ msgstr "Chart options"
 msgid "Chart width"
 msgstr "Chart width"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Chat ID"
+msgstr "Chat ID"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Chat Type"
+msgstr "Chat Type"
+
 #: src/components/login/forgot-pass-form.tsx
 msgid "Check {email} for a reset link."
 msgstr "Check {email} for a reset link."
@@ -404,6 +438,18 @@ msgstr "Click to copy"
 #: src/components/login/forgot-pass-form.tsx
 msgid "Command line instructions"
 msgstr "Command line instructions"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Configuration Backup"
+msgstr "Configuration Backup"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Configuration backup exported"
+msgstr "Configuration backup exported"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Configuration backup restored"
+msgstr "Configuration backup restored"
 
 #: src/components/routes/settings/notifications.tsx
 msgid "Configure how you receive alert notifications."
@@ -691,6 +737,22 @@ msgstr "Email notifications"
 msgid "Empty"
 msgstr "Empty"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Enable Telegram"
+msgstr "Enable Telegram"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Enabled"
+msgstr "Enabled"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Encrypt sensitive values"
+msgstr "Encrypt sensitive values"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Encryption credential"
+msgstr "Encryption credential"
+
 #: src/components/routes/settings/quiet-hours.tsx
 #: src/components/routes/settings/quiet-hours.tsx
 msgid "End Time"
@@ -765,12 +827,20 @@ msgid "Export"
 msgstr "Export"
 
 #: src/components/routes/settings/config-yaml.tsx
-msgid "Export configuration"
-msgstr "Export configuration"
+msgid "Export Backup"
+msgstr "Export Backup"
 
 #: src/components/routes/settings/config-yaml.tsx
-msgid "Export your current systems configuration."
-msgstr "Export your current systems configuration."
+#~ msgid "Export configuration"
+#~ msgstr "Export configuration"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Export legacy config.yml"
+msgstr "Export legacy config.yml"
+
+#: src/components/routes/settings/config-yaml.tsx
+#~ msgid "Export your current systems configuration."
+#~ msgstr "Export your current systems configuration."
 
 #: src/components/routes/settings/general.tsx
 msgid "Fahrenheit (°F)"
@@ -788,15 +858,43 @@ msgstr "Failed Attributes:"
 msgid "Failed to authenticate"
 msgstr "Failed to authenticate"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to delete Telegram destination"
+msgstr "Failed to delete Telegram destination"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Failed to export configuration backup"
+msgstr "Failed to export configuration backup"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to load Telegram destinations"
+msgstr "Failed to load Telegram destinations"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Failed to restore configuration backup"
+msgstr "Failed to restore configuration backup"
+
 #: src/components/routes/settings/layout.tsx
 #: src/components/routes/settings/notifications.tsx
 #: src/components/routes/settings/quiet-hours.tsx
 msgid "Failed to save settings"
 msgstr "Failed to save settings"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to save Telegram destination"
+msgstr "Failed to save Telegram destination"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to save Telegram settings"
+msgstr "Failed to save Telegram settings"
+
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Failed to send heartbeat"
 msgstr "Failed to send heartbeat"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to send Telegram test message"
+msgstr "Failed to send Telegram test message"
 
 #: src/components/routes/settings/notifications.tsx
 msgid "Failed to send test notification"
@@ -805,6 +903,14 @@ msgstr "Failed to send test notification"
 #: src/components/alerts/alerts-sheet.tsx
 msgid "Failed to update alert"
 msgstr "Failed to update alert"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Failed to validate configuration backup"
+msgstr "Failed to validate configuration backup"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to verify Telegram bot"
+msgstr "Failed to verify Telegram bot"
 
 #. placeholder {0}: statusTotals[ServiceStatus.Failed]
 #: src/components/systemd-table/systemd-table.tsx
@@ -971,6 +1077,10 @@ msgstr "Layout"
 msgid "Layout width"
 msgstr "Layout width"
 
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Legacy config.yml"
+msgstr "Legacy config.yml"
+
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Lifecycle"
 msgstr "Lifecycle"
@@ -1085,6 +1195,7 @@ msgstr "Model"
 #: src/components/add-system.tsx
 #: src/components/alerts-history-columns.tsx
 #: src/components/containers-table/containers-table-columns.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/systemd-table/systemd-table-columns.tsx
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Name"
@@ -1116,6 +1227,10 @@ msgstr "Network traffic of public interfaces"
 msgid "Network unit"
 msgstr "Network unit"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "New Destination"
+msgstr "New Destination"
+
 #: src/components/systemd-table/systemd-table.tsx
 #: src/components/systemd-table/systemd-table.tsx
 #: src/components/systemd-table/systemd-table.tsx
@@ -1144,10 +1259,22 @@ msgstr "No results."
 msgid "No S.M.A.R.T. attributes available for this device."
 msgstr "No S.M.A.R.T. attributes available for this device."
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "No systems available."
+msgstr "No systems available."
+
 #: src/components/systems-table/systems-table.tsx
 #: src/components/systems-table/systems-table.tsx
 msgid "No systems found."
 msgstr "No systems found."
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "No Telegram destinations yet."
+msgstr "No Telegram destinations yet."
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Node Scope"
+msgstr "Node Scope"
 
 #: src/components/command-palette.tsx
 #: src/components/routes/settings/layout.tsx
@@ -1160,8 +1287,8 @@ msgid "OAuth 2 / OIDC support"
 msgstr "OAuth 2 / OIDC support"
 
 #: src/components/routes/settings/config-yaml.tsx
-msgid "On each restart, systems in the database will be updated to match the systems defined in the file."
-msgstr "On each restart, systems in the database will be updated to match the systems defined in the file."
+#~ msgid "On each restart, systems in the database will be updated to match the systems defined in the file."
+#~ msgstr "On each restart, systems in the database will be updated to match the systems defined in the file."
 
 #: src/components/routes/settings/quiet-hours.tsx
 #: src/components/routes/settings/quiet-hours.tsx
@@ -1398,9 +1525,21 @@ msgstr "Resolved"
 msgid "Restarts"
 msgstr "Restarts"
 
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Restore Merge"
+msgstr "Restore Merge"
+
 #: src/components/systems-table/systems-table-columns.tsx
 msgid "Resume"
 msgstr "Resume"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Review the merge result before restoring."
+msgstr "Review the merge result before restoring."
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Role"
+msgstr "Role"
 
 #: src/components/systems-table/systems-table-columns.tsx
 msgctxt "Root disk label"
@@ -1439,10 +1578,18 @@ msgstr "Save {foo}"
 msgid "Save address using enter key or comma. Leave blank to disable email notifications."
 msgstr "Save address using enter key or comma. Leave blank to disable email notifications."
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Save Destination"
+msgstr "Save Destination"
+
 #: src/components/routes/settings/general.tsx
 #: src/components/routes/settings/notifications.tsx
 msgid "Save Settings"
 msgstr "Save Settings"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Save Telegram"
+msgstr "Save Telegram"
 
 #: src/components/routes/settings/tokens-fingerprints.tsx
 msgid "Saved in the database and does not expire until you disable it."
@@ -1471,6 +1618,10 @@ msgstr "Search for systems or settings..."
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Seconds between pings (default: 60)"
 msgstr "Seconds between pings (default: 60)"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Sections"
+msgstr "Sections"
 
 #: src/components/alerts/alerts-sheet.tsx
 msgid "See <0>notification settings</0> to configure how you receive alerts."
@@ -1567,6 +1718,10 @@ msgstr "State"
 msgid "Status"
 msgstr "Status"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "status, cpu, memory ..."
+msgstr "status, cpu, memory ..."
+
 #: src/components/systemd-table/systemd-table-columns.tsx
 msgid "Sub State"
 msgstr "Sub State"
@@ -1612,8 +1767,8 @@ msgid "Systems"
 msgstr "Systems"
 
 #: src/components/routes/settings/config-yaml.tsx
-msgid "Systems may be managed in a <0>config.yml</0> file inside your data directory."
-msgstr "Systems may be managed in a <0>config.yml</0> file inside your data directory."
+#~ msgid "Systems may be managed in a <0>config.yml</0> file inside your data directory."
+#~ msgstr "Systems may be managed in a <0>config.yml</0> file inside your data directory."
 
 #: src/components/systems-table/systems-table.tsx
 msgid "Table"
@@ -1627,6 +1782,35 @@ msgstr "Tabs"
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Tasks"
 msgstr "Tasks"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram bot"
+msgstr "Telegram bot"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram bot verified"
+msgstr "Telegram bot verified"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram connectivity is working."
+msgstr "Telegram connectivity is working."
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram destination saved"
+msgstr "Telegram destination saved"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram destinations"
+msgstr "Telegram destinations"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram test failed"
+msgstr "Telegram test failed"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram test message sent"
+msgstr "Telegram test message sent"
 
 #. Temperature label in systems table
 #: src/components/routes/system/smart-table.tsx
@@ -1647,9 +1831,17 @@ msgstr "Temperature unit"
 msgid "Temperatures of system sensors"
 msgstr "Temperatures of system sensors"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Test"
+msgstr "Test"
+
 #: src/components/routes/settings/notifications.tsx
 msgid "Test <0>URL</0>"
 msgstr "Test <0>URL</0>"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Test Bot"
+msgstr "Test Bot"
 
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Test heartbeat"
@@ -1880,6 +2072,10 @@ msgctxt "Disk I/O utilization"
 msgid "Utilization"
 msgstr "Utilization"
 
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Validate Preview"
+msgstr "Validate Preview"
+
 #: src/components/alerts-history-columns.tsx
 msgid "Value"
 msgstr "Value"
@@ -1953,8 +2149,8 @@ msgid "YAML Config"
 msgstr "YAML Config"
 
 #: src/components/routes/settings/config-yaml.tsx
-msgid "YAML Configuration"
-msgstr "YAML Configuration"
+#~ msgid "YAML Configuration"
+#~ msgstr "YAML Configuration"
 
 #: src/components/systemd-table/systemd-table.tsx
 #: src/components/systemd-table/systemd-table.tsx
@@ -2009,6 +2205,34 @@ msgstr "公开节点状态与线路检测走势。"
 msgid "最新刷新失败，正在保留当前数据。"
 msgstr "最新刷新失败，正在保留当前数据。"
 
+#: src/components/routes/settings/config-yaml.tsx
+msgid "包含 token、Webhook URL、Telegram Bot Token 等敏感值时必须加密。"
+msgstr "包含 token、Webhook URL、Telegram Bot Token 等敏感值时必须加密。"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "只读渠道可按告警类别限制投递；留空表示不过滤。"
+msgstr "只读渠道可按告警类别限制投递；留空表示不过滤。"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "后续可用于管理 Telegram 菜单命令。"
+msgstr "后续可用于管理 Telegram 菜单命令。"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "启用 Telegram 告警投递。"
+msgstr "启用 Telegram 告警投递。"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "启用轮询后，管理员目的地可使用 /status、/alerts、/systems、/system、/mute、/unmute；只读目的地只能接收授权范围内的通知。"
+msgstr "启用轮询后，管理员目的地可使用 /status、/alerts、/systems、/system、/mute、/unmute；只读目的地只能接收授权范围内的通知。"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "导出完整面板配置，或通过预览后的合并恢复导入配置。"
+msgstr "导出完整面板配置，或通过预览后的合并恢复导入配置。"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "已保存旧 token；留空即可保留。"
+msgstr "已保存旧 token；留空即可保留。"
+
 #: src/components/routes/settings/public-status.tsx
 msgid "已展示"
 msgstr "已展示"
@@ -2024,6 +2248,10 @@ msgstr "当前没有公开展示的节点。"
 #: src/components/routes/settings/public-status.tsx
 msgid "当前没有可公开到这个节点的线路检测配置。"
 msgstr "当前没有可公开到这个节点的线路检测配置。"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "旧版 config.yml 只包含系统配置，并保留重启同步时删除缺失系统的原有行为。"
+msgstr "旧版 config.yml 只包含系统配置，并保留重启同步时删除缺失系统的原有行为。"
 
 #: src/components/routes/settings/public-status.tsx
 msgid "暂无可配置节点。"
@@ -2041,6 +2269,14 @@ msgstr "暂无线路检测配置。"
 msgid "正在加载..."
 msgstr "正在加载..."
 
+#: src/components/routes/settings/config-backup-preview.tsx
+msgid "没有需要应用的配置项。"
+msgstr "没有需要应用的配置项。"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "管理员可以在这里配置 Bot 凭据、验证连通性，并维护允许接收消息的会话。"
+msgstr "管理员可以在这里配置 Bot 凭据、验证连通性，并维护允许接收消息的会话。"
+
 #: src/components/routes/public-status.tsx
 msgid "管理登录"
 msgstr "管理登录"
@@ -2049,6 +2285,10 @@ msgstr "管理登录"
 #: src/components/routes/settings/network-probes.tsx
 msgid "线路检测"
 msgstr "线路检测"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "维护允许接收告警的私聊、群组、频道或超群，并为只读渠道限制节点和告警范围。"
+msgstr "维护允许接收告警的私聊、群组、频道或超群，并为只读渠道限制节点和告警范围。"
 
 #: src/components/routes/public-status.tsx
 #: src/components/routes/public-status.tsx
@@ -2066,6 +2306,10 @@ msgstr "配置线路、观测点和检测目标，系统会定期记录延迟走
 #: src/components/routes/settings/public-status.tsx
 msgid "隐藏"
 msgstr "隐藏"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "首次启用时需要填写有效 token。"
+msgstr "首次启用时需要填写有效 token。"
 
 #: src/components/routes/settings/network-probes.tsx
 msgid "高级设置"

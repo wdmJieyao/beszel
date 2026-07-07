@@ -24,6 +24,12 @@ msgctxt "New version available"
 msgid "{0} available"
 msgstr "{0} доступно"
 
+#. placeholder {0}: response.applied.created
+#. placeholder {1}: response.applied.updated
+#: src/components/routes/settings/config-yaml.tsx
+msgid "{0} created, {1} updated."
+msgstr ""
+
 #. placeholder {0}: table.getFilteredSelectedRowModel().rows.length
 #. placeholder {1}: table.getFilteredRowModel().rows.length
 #: src/components/routes/settings/alerts-history-data-table.tsx
@@ -161,6 +167,10 @@ msgstr "Агент"
 msgid "Alert History"
 msgstr "Історія сповіщень"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Alert Scope Tags"
+msgstr ""
+
 #: src/components/alerts/alert-button.tsx
 #: src/components/alerts/alerts-sheet.tsx
 msgid "Alerts"
@@ -239,6 +249,10 @@ msgstr "Середнє використання {0}"
 msgid "Average utilization of GPU engines"
 msgstr "Середнє використання рушіїв GPU"
 
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Backup preview ready"
+msgstr ""
+
 #: src/components/command-palette.tsx
 #: src/components/navbar.tsx
 msgid "Backups"
@@ -298,6 +312,18 @@ msgstr "Біти (Кбіт/с, Мбіт/с, Гбіт/с)"
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Boot state"
 msgstr "Стан завантаження"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Bot menu"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Bot polling"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Bot Token"
+msgstr ""
 
 #: src/components/routes/settings/general.tsx
 #: src/components/routes/settings/general.tsx
@@ -367,6 +393,14 @@ msgstr "Параметри графіків"
 msgid "Chart width"
 msgstr "Ширина графіка"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Chat ID"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Chat Type"
+msgstr ""
+
 #: src/components/login/forgot-pass-form.tsx
 msgid "Check {email} for a reset link."
 msgstr "Перевірте {email} для отримання посилання на скидання."
@@ -409,6 +443,18 @@ msgstr "Натисніть, щоб скопіювати"
 #: src/components/login/forgot-pass-form.tsx
 msgid "Command line instructions"
 msgstr "Інструкції командного рядка"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Configuration Backup"
+msgstr ""
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Configuration backup exported"
+msgstr ""
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Configuration backup restored"
+msgstr ""
 
 #: src/components/routes/settings/notifications.tsx
 msgid "Configure how you receive alert notifications."
@@ -696,6 +742,22 @@ msgstr "Сповіщення електронною поштою"
 msgid "Empty"
 msgstr "Порожня"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Enable Telegram"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Enabled"
+msgstr ""
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Encrypt sensitive values"
+msgstr ""
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Encryption credential"
+msgstr ""
+
 #: src/components/routes/settings/quiet-hours.tsx
 #: src/components/routes/settings/quiet-hours.tsx
 msgid "End Time"
@@ -770,12 +832,20 @@ msgid "Export"
 msgstr "Експорт"
 
 #: src/components/routes/settings/config-yaml.tsx
-msgid "Export configuration"
-msgstr "Експорт конфігурації"
+msgid "Export Backup"
+msgstr ""
 
 #: src/components/routes/settings/config-yaml.tsx
-msgid "Export your current systems configuration."
-msgstr "Експортуйте поточну конфігурацію систем."
+#~ msgid "Export configuration"
+#~ msgstr "Експорт конфігурації"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Export legacy config.yml"
+msgstr ""
+
+#: src/components/routes/settings/config-yaml.tsx
+#~ msgid "Export your current systems configuration."
+#~ msgstr "Експортуйте поточну конфігурацію систем."
 
 #: src/components/routes/settings/general.tsx
 msgid "Fahrenheit (°F)"
@@ -793,15 +863,43 @@ msgstr "Невдалі атрибути:"
 msgid "Failed to authenticate"
 msgstr "Не вдалося автентифікувати"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to delete Telegram destination"
+msgstr ""
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Failed to export configuration backup"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to load Telegram destinations"
+msgstr ""
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Failed to restore configuration backup"
+msgstr ""
+
 #: src/components/routes/settings/layout.tsx
 #: src/components/routes/settings/notifications.tsx
 #: src/components/routes/settings/quiet-hours.tsx
 msgid "Failed to save settings"
 msgstr "Не вдалося зберегти налаштування"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to save Telegram destination"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to save Telegram settings"
+msgstr ""
+
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Failed to send heartbeat"
 msgstr "Не вдалося надіслати heartbeat"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to send Telegram test message"
+msgstr ""
 
 #: src/components/routes/settings/notifications.tsx
 msgid "Failed to send test notification"
@@ -810,6 +908,14 @@ msgstr "Не вдалося надіслати тестове сповіщенн
 #: src/components/alerts/alerts-sheet.tsx
 msgid "Failed to update alert"
 msgstr "Не вдалося оновити сповіщення"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Failed to validate configuration backup"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to verify Telegram bot"
+msgstr ""
 
 #. placeholder {0}: statusTotals[ServiceStatus.Failed]
 #: src/components/systemd-table/systemd-table.tsx
@@ -976,6 +1082,10 @@ msgstr "Макет"
 msgid "Layout width"
 msgstr "Ширина макету"
 
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Legacy config.yml"
+msgstr ""
+
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Lifecycle"
 msgstr "Життєвий цикл"
@@ -1090,6 +1200,7 @@ msgstr "Модель"
 #: src/components/add-system.tsx
 #: src/components/alerts-history-columns.tsx
 #: src/components/containers-table/containers-table-columns.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/systemd-table/systemd-table-columns.tsx
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Name"
@@ -1121,6 +1232,10 @@ msgstr "Мережевий трафік публічних інтерфейсі�
 msgid "Network unit"
 msgstr "Одиниця виміру мережі"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "New Destination"
+msgstr ""
+
 #: src/components/systemd-table/systemd-table.tsx
 #: src/components/systemd-table/systemd-table.tsx
 #: src/components/systemd-table/systemd-table.tsx
@@ -1149,10 +1264,22 @@ msgstr "Немає результатів."
 msgid "No S.M.A.R.T. attributes available for this device."
 msgstr "Для цього пристрою немає доступних атрибутів S.M.A.R.T."
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "No systems available."
+msgstr ""
+
 #: src/components/systems-table/systems-table.tsx
 #: src/components/systems-table/systems-table.tsx
 msgid "No systems found."
 msgstr "Систем не знайдено."
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "No Telegram destinations yet."
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Node Scope"
+msgstr ""
 
 #: src/components/command-palette.tsx
 #: src/components/routes/settings/layout.tsx
@@ -1165,8 +1292,8 @@ msgid "OAuth 2 / OIDC support"
 msgstr "Підтримка OAuth 2 / OIDC"
 
 #: src/components/routes/settings/config-yaml.tsx
-msgid "On each restart, systems in the database will be updated to match the systems defined in the file."
-msgstr "При кожному перезапуску системи в базі даних будуть оновлені, щоб відповідати системам, визначеним у файлі."
+#~ msgid "On each restart, systems in the database will be updated to match the systems defined in the file."
+#~ msgstr "При кожному перезапуску системи в базі даних будуть оновлені, щоб відповідати системам, визначеним у файлі."
 
 #: src/components/routes/settings/quiet-hours.tsx
 #: src/components/routes/settings/quiet-hours.tsx
@@ -1403,9 +1530,21 @@ msgstr "Вирішено"
 msgid "Restarts"
 msgstr "Перезапуски"
 
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Restore Merge"
+msgstr ""
+
 #: src/components/systems-table/systems-table-columns.tsx
 msgid "Resume"
 msgstr "Відновити"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Review the merge result before restoring."
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Role"
+msgstr ""
 
 #: src/components/systems-table/systems-table-columns.tsx
 msgctxt "Root disk label"
@@ -1444,10 +1583,18 @@ msgstr "Зберегти {foo}"
 msgid "Save address using enter key or comma. Leave blank to disable email notifications."
 msgstr "Збережіть адресу, використовуючи клавішу Enter або кому. Залиште порожнім, щоб вимкнути сповіщення електронною поштою."
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Save Destination"
+msgstr ""
+
 #: src/components/routes/settings/general.tsx
 #: src/components/routes/settings/notifications.tsx
 msgid "Save Settings"
 msgstr "Зберегти налаштування"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Save Telegram"
+msgstr ""
 
 #: src/components/routes/settings/tokens-fingerprints.tsx
 msgid "Saved in the database and does not expire until you disable it."
@@ -1476,6 +1623,10 @@ msgstr "Шукати системи або налаштування..."
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Seconds between pings (default: 60)"
 msgstr "Секунди між пінгами (за замовчуванням: 60)"
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Sections"
+msgstr ""
 
 #: src/components/alerts/alerts-sheet.tsx
 msgid "See <0>notification settings</0> to configure how you receive alerts."
@@ -1572,6 +1723,10 @@ msgstr "Стан"
 msgid "Status"
 msgstr "Статус"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "status, cpu, memory ..."
+msgstr ""
+
 #: src/components/systemd-table/systemd-table-columns.tsx
 msgid "Sub State"
 msgstr "Підстан"
@@ -1617,8 +1772,8 @@ msgid "Systems"
 msgstr "Системи"
 
 #: src/components/routes/settings/config-yaml.tsx
-msgid "Systems may be managed in a <0>config.yml</0> file inside your data directory."
-msgstr "Системи можуть керуватися у файлі <0>config.yml</0> у вашій директорії даних."
+#~ msgid "Systems may be managed in a <0>config.yml</0> file inside your data directory."
+#~ msgstr "Системи можуть керуватися у файлі <0>config.yml</0> у вашій директорії даних."
 
 #: src/components/systems-table/systems-table.tsx
 msgid "Table"
@@ -1632,6 +1787,35 @@ msgstr "Вкладки"
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Tasks"
 msgstr "Завдання"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram bot"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram bot verified"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram connectivity is working."
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram destination saved"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram destinations"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram test failed"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram test message sent"
+msgstr ""
 
 #. Temperature label in systems table
 #: src/components/routes/system/smart-table.tsx
@@ -1652,9 +1836,17 @@ msgstr "Одиниця вимірювання температури"
 msgid "Temperatures of system sensors"
 msgstr "Температури датчиків системи"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Test"
+msgstr ""
+
 #: src/components/routes/settings/notifications.tsx
 msgid "Test <0>URL</0>"
 msgstr "Тест <0>URL</0>"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Test Bot"
+msgstr ""
 
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Test heartbeat"
@@ -1885,6 +2077,10 @@ msgctxt "Disk I/O utilization"
 msgid "Utilization"
 msgstr "Використання"
 
+#: src/components/routes/settings/config-yaml.tsx
+msgid "Validate Preview"
+msgstr ""
+
 #: src/components/alerts-history-columns.tsx
 msgid "Value"
 msgstr "Значення"
@@ -1958,8 +2154,8 @@ msgid "YAML Config"
 msgstr "Конфігурація YAML"
 
 #: src/components/routes/settings/config-yaml.tsx
-msgid "YAML Configuration"
-msgstr "Конфігурація YAML"
+#~ msgid "YAML Configuration"
+#~ msgstr "Конфігурація YAML"
 
 #: src/components/systemd-table/systemd-table.tsx
 #: src/components/systemd-table/systemd-table.tsx
@@ -2014,6 +2210,34 @@ msgstr ""
 msgid "最新刷新失败，正在保留当前数据。"
 msgstr ""
 
+#: src/components/routes/settings/config-yaml.tsx
+msgid "包含 token、Webhook URL、Telegram Bot Token 等敏感值时必须加密。"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "只读渠道可按告警类别限制投递；留空表示不过滤。"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "后续可用于管理 Telegram 菜单命令。"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "启用 Telegram 告警投递。"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "启用轮询后，管理员目的地可使用 /status、/alerts、/systems、/system、/mute、/unmute；只读目的地只能接收授权范围内的通知。"
+msgstr ""
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "导出完整面板配置，或通过预览后的合并恢复导入配置。"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "已保存旧 token；留空即可保留。"
+msgstr ""
+
 #: src/components/routes/settings/public-status.tsx
 msgid "已展示"
 msgstr ""
@@ -2028,6 +2252,10 @@ msgstr ""
 
 #: src/components/routes/settings/public-status.tsx
 msgid "当前没有可公开到这个节点的线路检测配置。"
+msgstr ""
+
+#: src/components/routes/settings/config-yaml.tsx
+msgid "旧版 config.yml 只包含系统配置，并保留重启同步时删除缺失系统的原有行为。"
 msgstr ""
 
 #: src/components/routes/settings/public-status.tsx
@@ -2046,6 +2274,14 @@ msgstr ""
 msgid "正在加载..."
 msgstr ""
 
+#: src/components/routes/settings/config-backup-preview.tsx
+msgid "没有需要应用的配置项。"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "管理员可以在这里配置 Bot 凭据、验证连通性，并维护允许接收消息的会话。"
+msgstr ""
+
 #: src/components/routes/public-status.tsx
 msgid "管理登录"
 msgstr ""
@@ -2053,6 +2289,10 @@ msgstr ""
 #: src/components/routes/settings/layout.tsx
 #: src/components/routes/settings/network-probes.tsx
 msgid "线路检测"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "维护允许接收告警的私聊、群组、频道或超群，并为只读渠道限制节点和告警范围。"
 msgstr ""
 
 #: src/components/routes/public-status.tsx
@@ -2070,6 +2310,10 @@ msgstr ""
 
 #: src/components/routes/settings/public-status.tsx
 msgid "隐藏"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "首次启用时需要填写有效 token。"
 msgstr ""
 
 #: src/components/routes/settings/network-probes.tsx

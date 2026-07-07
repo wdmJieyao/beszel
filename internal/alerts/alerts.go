@@ -20,10 +20,11 @@ type hubLike interface {
 }
 
 type AlertManager struct {
-	hub           hubLike
-	stopOnce      sync.Once
-	pendingAlerts sync.Map
-	alertsCache   *AlertsCache
+	hub            hubLike
+	stopOnce       sync.Once
+	pendingAlerts  sync.Map
+	alertsCache    *AlertsCache
+	telegramSender TelegramAlertSender
 }
 
 type AlertMessageData struct {
@@ -220,6 +221,11 @@ func (am *AlertManager) SendAlert(data AlertMessageData) error {
 	for _, webhook := range userAlertSettings.Webhooks {
 		if err := am.SendShoutrrrAlert(webhook, data.Title, data.Message, data.Link, data.LinkText); err != nil {
 			am.hub.Logger().Error("Failed to send shoutrrr alert", "err", err)
+		}
+	}
+	if am.telegramSender != nil {
+		if err := am.telegramSender.SendTelegramAlert(data); err != nil {
+			am.hub.Logger().Error("Failed to send telegram alert", "err", err)
 		}
 	}
 	// send alerts via email

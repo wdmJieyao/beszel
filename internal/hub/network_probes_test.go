@@ -486,6 +486,135 @@ func TestGetNetworkProbeResultsUsesRangeAndReturnsNewestAscending(t *testing.T) 
 	assert.Less(t, response.Series[0].Created, response.Series[1].Created)
 }
 
+func TestGetNetworkProbeResultsUseCompatibleBucketsForLongRanges(t *testing.T) {
+	hub := newNetworkProbeTestHub(t)
+	user := createNetworkProbeTestRecord(t, hub, "users", map[string]any{
+		"email":    "network-probe-bucket@example.com",
+		"password": "password123",
+	})
+	probe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeFixed,
+		"target":           "example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	systemRecord := createNetworkProbeTestRecord(t, hub, "systems", map[string]any{
+		"name":   "node",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+
+	now := time.Now().UTC().Truncate(120 * time.Minute)
+	createNetworkProbeResultWithBucket(t, hub, probe.Id, systemRecord.Id, now.Add(-6*time.Hour+30*time.Minute), "120m", 120)
+	createNetworkProbeResultWithBucket(t, hub, probe.Id, systemRecord.Id, now.Add(-6*time.Hour+50*time.Minute), "20m", 25)
+	createNetworkProbeResultWithBucket(t, hub, probe.Id, systemRecord.Id, now.Add(-4*time.Hour+20*time.Minute), "20m", 40)
+	createNetworkProbeLegacyResult(t, hub, probe.Id, systemRecord.Id, now.Add(-2*time.Hour+20*time.Minute), 60)
+
+	response := requestNetworkProbeResults(t, hub, probe.Id, systemRecord.Id, "1w")
+	require.Len(t, response.Series, 3)
+	require.NotNil(t, response.Series[0].LatencyMs)
+	require.NotNil(t, response.Series[1].LatencyMs)
+	require.NotNil(t, response.Series[2].LatencyMs)
+	assert.Equal(t, 120.0, *response.Series[0].LatencyMs)
+	assert.Equal(t, 40.0, *response.Series[1].LatencyMs)
+	assert.Equal(t, 60.0, *response.Series[2].LatencyMs)
+	assert.Equal(t, "120m", response.Series[0].RetentionBucket)
+	assert.Equal(t, "20m", response.Series[1].RetentionBucket)
+	assert.Empty(t, response.Series[2].RetentionBucket)
+}
+
+func TestGetNetworkProbeResultsWithoutSystemKeepsCompatibleRecordsPerSystem(t *testing.T) {
+	hub := newNetworkProbeTestHub(t)
+	user := createNetworkProbeTestRecord(t, hub, "users", map[string]any{
+		"email":    "network-probe-multi-system@example.com",
+		"password": "password123",
+	})
+	probe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeGlobal,
+		"target":           "example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	systemA := createNetworkProbeTestRecord(t, hub, "systems", map[string]any{
+		"name":   "node-a",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+	systemB := createNetworkProbeTestRecord(t, hub, "systems", map[string]any{
+		"name":   "node-b",
+		"host":   "127.0.0.2",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+
+	now := time.Now().UTC().Truncate(120 * time.Minute)
+	createNetworkProbeResultWithBucket(t, hub, probe.Id, systemA.Id, now.Add(-4*time.Hour+30*time.Minute), "120m", 120)
+	createNetworkProbeResultWithBucket(t, hub, probe.Id, systemB.Id, now.Add(-4*time.Hour+45*time.Minute), "20m", 45)
+
+	request := httptest.NewRequest(http.MethodGet, "/api/beszel/network-probes/"+probe.Id+"/results?range=1w", nil)
+	request.SetPathValue("probeId", probe.Id)
+	recorder := httptest.NewRecorder()
+	event := &core.RequestEvent{
+		App:  hub,
+		Auth: user,
+		Event: router.Event{
+			Request:  request,
+			Response: recorder,
+		},
+	}
+
+	require.NoError(t, hub.getNetworkProbeResults(event))
+
+	var response NetworkProbeResultsResponse
+	require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &response))
+	require.Len(t, response.Series, 2)
+	assert.ElementsMatch(t, []string{systemA.Id, systemB.Id}, []string{response.Series[0].SystemID, response.Series[1].SystemID})
+}
+
+func TestGetNetworkProbeResultsCollapseCompatibleFallbackDensityPerWindow(t *testing.T) {
+	hub := newNetworkProbeTestHub(t)
+	user := createNetworkProbeTestRecord(t, hub, "users", map[string]any{
+		"email":    "network-probe-density@example.com",
+		"password": "password123",
+	})
+	probe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeFixed,
+		"target":           "example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	systemRecord := createNetworkProbeTestRecord(t, hub, "systems", map[string]any{
+		"name":   "node",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+
+	now := time.Now().UTC().Truncate(120 * time.Minute)
+	createNetworkProbeLegacyResult(t, hub, probe.Id, systemRecord.Id, now.Add(-2*time.Hour+10*time.Minute), 20)
+	createNetworkProbeLegacyResult(t, hub, probe.Id, systemRecord.Id, now.Add(-2*time.Hour+30*time.Minute), 30)
+	createNetworkProbeLegacyResult(t, hub, probe.Id, systemRecord.Id, now.Add(-2*time.Hour+50*time.Minute), 50)
+
+	response := requestNetworkProbeResults(t, hub, probe.Id, systemRecord.Id, "1w")
+	require.Len(t, response.Series, 1)
+	require.NotNil(t, response.Series[0].LatencyMs)
+	assert.Equal(t, 50.0, *response.Series[0].LatencyMs)
+}
+
 func TestGetNetworkProbeResultsRejectsInvalidRange(t *testing.T) {
 	hub := newNetworkProbeTestHub(t)
 	probe := createNetworkProbeTestRecord(t, hub, CollectionNetworkProbes, map[string]any{
@@ -535,6 +664,26 @@ func createNetworkProbeTestRecord(t testing.TB, app core.App, collectionName str
 }
 
 func createNetworkProbeResult(t testing.TB, app core.App, probeID string, systemID string, created time.Time, latency float64) {
+	t.Helper()
+	createNetworkProbeResultWithBucket(t, app, probeID, systemID, created, "1m", latency)
+}
+
+func createNetworkProbeResultWithBucket(t testing.TB, app core.App, probeID string, systemID string, created time.Time, bucket string, latency float64) {
+	t.Helper()
+	record := createNetworkProbeTestRecord(t, app, CollectionNetworkProbeResults, map[string]any{
+		"probe":            probeID,
+		"system":           systemID,
+		"type":             NetworkProbeTypeTCPing,
+		"success":          true,
+		"latency_ms":       latency,
+		"failure_category": "",
+		"bucket":           bucket,
+	})
+	record.SetRaw("created", created.Format(types.DefaultDateLayout))
+	require.NoError(t, app.SaveNoValidate(record))
+}
+
+func createNetworkProbeLegacyResult(t testing.TB, app core.App, probeID string, systemID string, created time.Time, latency float64) {
 	t.Helper()
 	record := createNetworkProbeTestRecord(t, app, CollectionNetworkProbeResults, map[string]any{
 		"probe":            probeID,

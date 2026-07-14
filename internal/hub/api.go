@@ -120,6 +120,10 @@ func (h *Hub) registerApiRoutes(se *core.ServeEvent) error {
 	apiAuth.PATCH("/telegram/destinations/{destinationId}", h.updateTelegramDestination).BindFunc(requireAdminRole)
 	apiAuth.DELETE("/telegram/destinations/{destinationId}", h.deleteTelegramDestination).BindFunc(requireAdminRole)
 	apiAuth.POST("/telegram/destinations/{destinationId}/test", h.testTelegramDestination).BindFunc(requireAdminRole)
+	apiAuth.GET("/telegram/destinations/{destinationId}/policies", h.listTelegramNotificationPoliciesHandler).BindFunc(requireAdminRole)
+	apiAuth.POST("/telegram/destinations/{destinationId}/policies", h.createTelegramNotificationPolicy).BindFunc(requireAdminRole)
+	apiAuth.PATCH("/telegram/destinations/{destinationId}/policies/{policyId}", h.updateTelegramNotificationPolicy).BindFunc(requireAdminRole)
+	apiAuth.DELETE("/telegram/destinations/{destinationId}/policies/{policyId}", h.deleteTelegramNotificationPolicy).BindFunc(requireAdminRole)
 	// heartbeat status and test
 	apiAuth.GET("/heartbeat-status", h.getHeartbeatStatus).BindFunc(requireAdminRole)
 	apiAuth.POST("/test-heartbeat", h.testHeartbeat).BindFunc(requireAdminRole)

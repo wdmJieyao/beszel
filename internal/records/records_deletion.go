@@ -17,6 +17,10 @@ func (rm *RecordManager) DeleteOldRecords() {
 		if err != nil {
 			slog.Error("Error deleting old system stats", "err", err)
 		}
+		err = deleteOldNetworkProbeResults(txApp)
+		if err != nil {
+			slog.Error("Error deleting old network probe results", "err", err)
+		}
 		err = deleteOldContainerRecords(txApp)
 		if err != nil {
 			slog.Error("Error deleting old container records", "err", err)
@@ -61,6 +65,14 @@ func deleteOldSystemStats(app core.App) error {
 	// Collections to process
 	collections := [2]string{"system_stats", "container_stats"}
 
+	return deleteOldBucketedRecords(app, collections[:], "type")
+}
+
+func deleteOldNetworkProbeResults(app core.App) error {
+	return deleteOldBucketedRecords(app, []string{"network_probe_results"}, "bucket")
+}
+
+func deleteOldBucketedRecords(app core.App, collections []string, fieldName string) error {
 	// Record types and their retention periods
 	type RecordDeletionData struct {
 		recordType string
@@ -84,8 +96,12 @@ func deleteOldSystemStats(app core.App) error {
 			rd := recordData[i]
 			// Create parameterized condition for this record type
 			dateParam := fmt.Sprintf("date%d", i)
-			conditionParts = append(conditionParts, fmt.Sprintf("(type = '%s' AND created < {:%s})", rd.recordType, dateParam))
+			conditionParts = append(conditionParts, fmt.Sprintf("(%s = '%s' AND created < {:%s})", fieldName, rd.recordType, dateParam))
 			params[dateParam] = now.Add(-rd.retention)
+		}
+		if fieldName == "bucket" {
+			params["legacyDate"] = now.Add(-time.Hour)
+			conditionParts = append(conditionParts, "((bucket = '' OR bucket IS NULL) AND created < {:legacyDate})")
 		}
 		// Combine conditions with OR
 		conditionStr := strings.Join(conditionParts, " OR ")

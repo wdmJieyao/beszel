@@ -12,6 +12,7 @@ import (
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/tools/types"
 )
 
 type RecordManager struct {
@@ -151,13 +152,231 @@ func (rm *RecordManager) CreateLongerRecords() {
 		return nil
 	})
 
+	rm.CreateLongerNetworkProbeRecords()
+
 	// log.Println("finished creating longer records", "time (ms)", time.Since(start).Milliseconds())
 }
 
-// CreateLongerNetworkProbeRecords is an explicit no-aggregation hook for probe
-// results. Probe samples remain raw timestamped rows until a retention policy is
-// defined for the new collection.
-func (rm *RecordManager) CreateLongerNetworkProbeRecords() {}
+type networkProbeRollup struct {
+	probeID           string
+	systemID          string
+	recordType        string
+	target            string
+	created           time.Time
+	success           bool
+	latencyMs         float64
+	hasLatency        bool
+	errorMessage      string
+	failureCategory   string
+	packetLossPercent *float64
+	httpStatus        *int
+}
+
+// CreateLongerNetworkProbeRecords creates longer-duration probe result rows by
+// aggregating recent shorter-bucket samples into coarser retention buckets.
+func (rm *RecordManager) CreateLongerNetworkProbeRecords() {
+	now := time.Now().UTC()
+	longerRecordData := []LongerRecordData{
+		{
+			shorterType:        "1m",
+			minShorterRecords:  9,
+			longerType:         "10m",
+			longerTimeDuration: -10 * time.Minute,
+		},
+		{
+			shorterType:        "10m",
+			minShorterRecords:  2,
+			longerType:         "20m",
+			longerTimeDuration: -20 * time.Minute,
+		},
+		{
+			shorterType:        "20m",
+			minShorterRecords:  6,
+			longerType:         "120m",
+			longerTimeDuration: -120 * time.Minute,
+		},
+		{
+			shorterType:        "120m",
+			minShorterRecords:  4,
+			longerType:         "480m",
+			longerTimeDuration: -480 * time.Minute,
+		},
+	}
+
+	_ = rm.app.RunInTransaction(func(txApp core.App) error {
+		collection, err := txApp.FindCachedCollectionByNameOrId("network_probe_results")
+		if err != nil {
+			return err
+		}
+
+		for i := range longerRecordData {
+			recordData := longerRecordData[i]
+			windowDuration := -recordData.longerTimeDuration
+			filter := "bucket = {:bucket} && created > {:created}"
+			if recordData.shorterType == "1m" {
+				filter = "((bucket = {:bucket}) || bucket = '' || bucket = null) && created > {:created}"
+			}
+			shorterRecords, err := txApp.FindRecordsByFilter(
+				collection,
+				filter,
+				"created",
+				-1,
+				0,
+				dbx.Params{
+					"bucket":  recordData.shorterType,
+					"created": now.Add(recordData.longerTimeDuration),
+				},
+			)
+			if err != nil || len(shorterRecords) == 0 {
+				continue
+			}
+
+			windowedRecords := make(map[string][]*core.Record)
+			windowStarts := make(map[string]time.Time)
+			for _, record := range shorterRecords {
+				created := record.GetDateTime("created").Time().UTC()
+				windowStart := created.Truncate(windowDuration)
+				key := record.GetString("probe") + ":" + record.GetString("system") + ":" + windowStart.Format(time.RFC3339)
+				windowedRecords[key] = append(windowedRecords[key], record)
+				windowStarts[key] = windowStart
+			}
+
+			for key, recordsInWindow := range windowedRecords {
+				if len(recordsInWindow) < recordData.minShorterRecords {
+					continue
+				}
+
+				windowStart := windowStarts[key]
+				windowEnd := windowStart.Add(windowDuration)
+				if windowEnd.After(now) {
+					continue
+				}
+				latestRecord := recordsInWindow[len(recordsInWindow)-1]
+				probeID := latestRecord.GetString("probe")
+				systemID := latestRecord.GetString("system")
+
+				existingRecords, err := txApp.FindRecordsByFilter(
+					collection,
+					"probe = {:probe} && system = {:system} && bucket = {:bucket} && created >= {:start} && created < {:end}",
+					"",
+					1,
+					0,
+					dbx.Params{
+						"probe":  probeID,
+						"system": systemID,
+						"bucket": recordData.longerType,
+						"start":  windowStart,
+						"end":    windowEnd,
+					},
+				)
+				if err != nil || len(existingRecords) > 0 {
+					continue
+				}
+
+				rollup := aggregateNetworkProbeWindow(recordsInWindow)
+				longerRecord := core.NewRecord(collection)
+				longerRecord.Set("probe", rollup.probeID)
+				longerRecord.Set("system", rollup.systemID)
+				longerRecord.Set("type", rollup.recordType)
+				longerRecord.Set("target", rollup.target)
+				longerRecord.Set("success", rollup.success)
+				longerRecord.Set("bucket", recordData.longerType)
+				if rollup.hasLatency {
+					longerRecord.Set("latency_ms", rollup.latencyMs)
+				}
+				if rollup.packetLossPercent != nil {
+					longerRecord.Set("packet_loss_percent", *rollup.packetLossPercent)
+				}
+				if rollup.httpStatus != nil {
+					longerRecord.Set("http_status", *rollup.httpStatus)
+				}
+				longerRecord.Set("error", rollup.errorMessage)
+				if field := longerRecord.Collection().Fields.GetByName("failure_category"); field != nil {
+					longerRecord.Set("failure_category", rollup.failureCategory)
+				}
+				longerRecord.SetRaw("created", rollup.created.Format(types.DefaultDateLayout))
+				if err := txApp.SaveNoValidate(longerRecord); err != nil {
+					log.Println("failed to save longer network probe record", "err", err)
+				}
+			}
+		}
+
+		return nil
+	})
+}
+
+func aggregateNetworkProbeWindow(records []*core.Record) networkProbeRollup {
+	latestRecord := records[len(records)-1]
+	rollup := networkProbeRollup{
+		probeID:         latestRecord.GetString("probe"),
+		systemID:        latestRecord.GetString("system"),
+		recordType:      latestRecord.GetString("type"),
+		target:          latestRecord.GetString("target"),
+		created:         latestRecord.GetDateTime("created").Time().UTC(),
+		failureCategory: "",
+	}
+
+	var latestFailure *core.Record
+	var latestAnyPacketLoss *float64
+	var latestAnyHTTPStatus *int
+	successCount := 0
+	latencySum := 0.0
+
+	for _, record := range records {
+		if packetLossPercent, ok := optionalRecordFloat(record, "packet_loss_percent"); ok {
+			value := packetLossPercent
+			latestAnyPacketLoss = &value
+		}
+		if httpStatus, ok := optionalRecordInt(record, "http_status"); ok {
+			value := httpStatus
+			latestAnyHTTPStatus = &value
+		}
+		if record.GetBool("success") {
+			successCount++
+			latencySum += record.GetFloat("latency_ms")
+			continue
+		}
+		latestFailure = record
+	}
+
+	if successCount > 0 {
+		rollup.success = true
+		rollup.hasLatency = true
+		rollup.latencyMs = twoDecimals(latencySum / float64(successCount))
+		rollup.packetLossPercent = latestAnyPacketLoss
+		rollup.httpStatus = latestAnyHTTPStatus
+		return rollup
+	}
+
+	if latestFailure != nil {
+		rollup.errorMessage = latestFailure.GetString("error")
+		rollup.failureCategory = latestFailure.GetString("failure_category")
+		if packetLossPercent, ok := optionalRecordFloat(latestFailure, "packet_loss_percent"); ok {
+			value := packetLossPercent
+			rollup.packetLossPercent = &value
+		}
+		if httpStatus, ok := optionalRecordInt(latestFailure, "http_status"); ok {
+			value := httpStatus
+			rollup.httpStatus = &value
+		}
+	}
+
+	return rollup
+}
+
+func optionalRecordFloat(record *core.Record, field string) (float64, bool) {
+	if record.Get(field) == nil {
+		return 0, false
+	}
+	return record.GetFloat(field), true
+}
+
+func optionalRecordInt(record *core.Record, field string) (int, bool) {
+	if record.Get(field) == nil {
+		return 0, false
+	}
+	return record.GetInt(field), true
+}
 
 // Calculate the average stats of a list of system_stats records without reflect
 func (rm *RecordManager) AverageSystemStats(db dbx.Builder, records RecordIds) *system.Stats {

@@ -30,11 +30,21 @@ msgstr "{0} 可用"
 msgid "{0} created, {1} updated."
 msgstr ""
 
+#. placeholder {0}: policyDraft.nodeScope.length
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "{0} nodes selected"
+msgstr "已选择 {0} 个节点"
+
 #. placeholder {0}: table.getFilteredSelectedRowModel().rows.length
 #. placeholder {1}: table.getFilteredRowModel().rows.length
 #: src/components/routes/settings/alerts-history-data-table.tsx
 msgid "{0} of {1} row(s) selected."
 msgstr "已选择 {0} / {1} 行"
+
+#. placeholder {0}: policy.nodeScope.length
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "{0} selected nodes"
+msgstr "{0} 个指定节点"
 
 #: src/components/routes/system/info-bar.tsx
 msgid "{cores, plural, one {# core} other {# cores}}"
@@ -99,6 +109,10 @@ msgstr "30 天"
 msgid "5 min"
 msgstr "5 分钟"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "A matching enabled policy delivers once, even when policies overlap."
+msgstr "任意启用规则匹配时只投递一次，规则重叠也不会重复发送。"
+
 #. Table column
 #: src/components/routes/settings/quiet-hours.tsx
 #: src/components/routes/settings/tokens-fingerprints.tsx
@@ -149,6 +163,14 @@ msgstr "调整主布局宽度"
 msgid "Admin"
 msgstr "管理员"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Admin channels receive full alert details within policy scope. Only private admins can use the management menu."
+msgstr "管理员渠道接收策略范围内的完整告警详情；仅私聊管理员可使用管理菜单。"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Administrator"
+msgstr "管理员"
+
 #: src/components/systemd-table/systemd-table.tsx
 msgid "After"
 msgstr "之后"
@@ -161,6 +183,10 @@ msgstr "设置环境变量后，重新启动您的 Beszel hub 以使更改生效
 msgid "Agent"
 msgstr "客户端"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Alert categories"
+msgstr "告警类别"
+
 #: src/components/command-palette.tsx
 #: src/components/routes/settings/alerts-history-data-table.tsx
 #: src/components/routes/settings/layout.tsx
@@ -168,8 +194,8 @@ msgid "Alert History"
 msgstr "警报历史"
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "Alert Scope Tags"
-msgstr ""
+#~ msgid "Alert Scope Tags"
+#~ msgstr ""
 
 #: src/components/alerts/alert-button.tsx
 #: src/components/alerts/alerts-sheet.tsx
@@ -183,6 +209,14 @@ msgstr "警报"
 #: src/components/routes/containers.tsx
 msgid "All Containers"
 msgstr "所有容器"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "All nodes"
+msgstr "全部节点"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "All nodes (including future nodes)"
+msgstr "全部节点（包含未来新增）"
 
 #: src/components/alerts/alerts-sheet.tsx
 #: src/components/command-palette.tsx
@@ -258,6 +292,7 @@ msgstr ""
 msgid "Backups"
 msgstr "备份"
 
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system/charts/network-charts.tsx
 #: src/lib/alerts.ts
 msgid "Bandwidth"
@@ -268,6 +303,7 @@ msgstr "带宽"
 msgid "Bat"
 msgstr "电池"
 
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system/charts/sensor-charts.tsx
 #: src/lib/alerts.ts
 msgid "Battery"
@@ -313,17 +349,26 @@ msgstr "比特 (Kbps, Mbps, Gbps)"
 msgid "Boot state"
 msgstr "启动状态"
 
+#. placeholder {0}: stage.error
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Bot credential verification failed: {0}"
+msgstr "Bot 凭据验证失败：{0}"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Bot credentials verified"
+msgstr "Bot 凭据验证成功"
+
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Bot menu"
-msgstr ""
+msgstr "Bot 菜单"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Bot polling"
-msgstr ""
+msgstr "Bot 轮询"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Bot Token"
-msgstr ""
+msgstr "Bot Token"
 
 #: src/components/routes/settings/general.tsx
 #: src/components/routes/settings/general.tsx
@@ -348,6 +393,7 @@ msgstr "可停止"
 
 #: src/components/routes/settings/alerts-history-data-table.tsx
 #: src/components/routes/settings/quiet-hours.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/systems-table/systems-table-columns.tsx
 msgid "Cancel"
 msgstr "取消"
@@ -395,11 +441,11 @@ msgstr "图表宽度"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Chat ID"
-msgstr ""
+msgstr "Chat ID"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Chat Type"
-msgstr ""
+msgstr "会话类型"
 
 #: src/components/login/forgot-pass-form.tsx
 msgid "Check {email} for a reset link."
@@ -418,6 +464,7 @@ msgid "Check your notification service"
 msgstr "检查您的通知服务"
 
 #: src/components/containers-table/containers-table.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system/smart-table.tsx
 #: src/components/systems-table/systems-table.tsx
 msgid "Clear"
@@ -444,6 +491,15 @@ msgstr "点击复制"
 msgid "Command line instructions"
 msgstr "命令行说明"
 
+#. placeholder {0}: stage.error
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Command menu initialization failed: {0}"
+msgstr "命令菜单初始化失败：{0}"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Command menu initialized"
+msgstr "命令菜单初始化成功"
+
 #: src/components/routes/settings/config-yaml.tsx
 msgid "Configuration Backup"
 msgstr ""
@@ -464,6 +520,10 @@ msgstr "配置您接收警报通知的方式。"
 #~ msgid "Configure TCPing, ICMP Ping, and HTTP GET checks executed by selected agents."
 #~ msgstr ""
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Confirm delete"
+msgstr "确认删除"
+
 #: src/components/login/auth-form.tsx
 #: src/components/login/auth-form.tsx
 msgid "Confirm password"
@@ -472,6 +532,10 @@ msgstr "确认密码"
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Conflicts"
 msgstr "冲突"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Connection error"
+msgstr "连接异常"
 
 #: src/components/active-alerts.tsx
 msgid "Connection is down"
@@ -547,10 +611,11 @@ msgid "Core"
 msgstr "核心"
 
 #: src/components/containers-table/containers-table-columns.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/systemd-table/systemd-table-columns.tsx
 #: src/components/systems-table/systems-table-columns.tsx
 msgid "CPU"
-msgstr ""
+msgstr "CPU"
 
 #: src/components/routes/system/cpu-sheet.tsx
 msgid "CPU Cores"
@@ -587,6 +652,10 @@ msgstr "创建账户"
 #: src/components/alerts-history-columns.tsx
 msgid "Created"
 msgstr "创建时间"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Credentials configured"
+msgstr "凭据已配置"
 
 #: src/components/routes/settings/general.tsx
 msgid "Critical (%)"
@@ -626,14 +695,42 @@ msgstr "默认时间段"
 
 #: src/components/routes/settings/alerts-history-data-table.tsx
 #: src/components/routes/settings/quiet-hours.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system/smart-table.tsx
 #: src/components/systems-table/systems-table-columns.tsx
 msgid "Delete"
 msgstr "删除"
 
+#. placeholder {0}: deleteCandidate?.name
+#. placeholder {1}: maskTelegramChatID(deleteCandidate?.chatId ?? "")
+#. placeholder {2}: deleteCandidate?.policyCount ?? 0
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Delete {0} (Chat ID {1}) and its {2} notification policies. Bot settings and other channels are not affected."
+msgstr "将删除“{0}”（Chat ID {1}）及其 {2} 条通知规则。Bot 设置和其他渠道不会受影响。"
+
 #: src/components/routes/settings/tokens-fingerprints.tsx
 msgid "Delete fingerprint"
 msgstr "删除指纹"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Delete policy"
+msgstr "删除规则"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Delete Telegram destination"
+msgstr "删除 Telegram 渠道"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Delete Telegram notification channel?"
+msgstr "删除 Telegram 通知渠道？"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Delivery error"
+msgstr "投递异常"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Delivery healthy"
+msgstr "投递正常"
 
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Description"
@@ -647,11 +744,18 @@ msgstr "详情"
 msgid "Device"
 msgstr "设备"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Disabled"
+msgstr "已停用"
+
 #. Context: Battery state
 #: src/lib/i18n.ts
 msgid "Discharging"
 msgstr "放电中"
 
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system.tsx
 #: src/components/systems-table/systems-table-columns.tsx
 msgid "Disk"
@@ -743,12 +847,17 @@ msgid "Empty"
 msgstr "空电"
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "Enable Telegram"
-msgstr ""
+msgid "Enable policy"
+msgstr "启用规则"
 
 #: src/components/routes/settings/telegram-destinations.tsx
+msgid "Enable Telegram"
+msgstr "启用 Telegram"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
 msgid "Enabled"
-msgstr ""
+msgstr "已启用"
 
 #: src/components/routes/settings/config-yaml.tsx
 msgid "Encrypt sensitive values"
@@ -799,6 +908,11 @@ msgstr "临时"
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Error"
 msgstr "错误"
+
+#. placeholder {0}: health.error
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Error: {0}"
+msgstr "故障信息：{0}"
 
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Example:"
@@ -864,20 +978,32 @@ msgid "Failed to authenticate"
 msgstr "认证失败"
 
 #: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to delete notification policy"
+msgstr "通知规则删除失败"
+
+#: src/components/routes/settings/telegram-destinations.tsx
 msgid "Failed to delete Telegram destination"
-msgstr ""
+msgstr "Telegram 渠道删除失败"
 
 #: src/components/routes/settings/config-yaml.tsx
 msgid "Failed to export configuration backup"
 msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to load notification policies"
+msgstr "通知规则加载失败"
+
+#: src/components/routes/settings/telegram-destinations.tsx
 msgid "Failed to load Telegram destinations"
-msgstr ""
+msgstr "Telegram 渠道加载失败"
 
 #: src/components/routes/settings/config-yaml.tsx
 msgid "Failed to restore configuration backup"
 msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to save notification policy"
+msgstr "通知规则保存失败"
 
 #: src/components/routes/settings/layout.tsx
 #: src/components/routes/settings/notifications.tsx
@@ -887,11 +1013,11 @@ msgstr "保存设置失败"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Failed to save Telegram destination"
-msgstr ""
+msgstr "Telegram 渠道保存失败"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Failed to save Telegram settings"
-msgstr ""
+msgstr "Telegram 设置保存失败"
 
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Failed to send heartbeat"
@@ -899,7 +1025,7 @@ msgstr "发送 heartbeat 失败"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Failed to send Telegram test message"
-msgstr ""
+msgstr "Telegram 测试消息发送失败"
 
 #: src/components/routes/settings/notifications.tsx
 msgid "Failed to send test notification"
@@ -915,7 +1041,7 @@ msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Failed to verify Telegram bot"
-msgstr ""
+msgstr "Telegram Bot 验证失败"
 
 #. placeholder {0}: statusTotals[ServiceStatus.Failed]
 #: src/components/systemd-table/systemd-table.tsx
@@ -969,9 +1095,10 @@ msgstr "常规"
 msgid "Global"
 msgstr "全局"
 
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system.tsx
 msgid "GPU"
-msgstr ""
+msgstr "GPU"
 
 #: src/components/routes/system/charts/gpu-charts.tsx
 msgid "GPU Engines"
@@ -989,6 +1116,10 @@ msgstr "GPU 使用率"
 #: src/components/systems-table/systems-table.tsx
 msgid "Grid"
 msgstr "网格"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Groups, supergroups, and channels can receive full notifications but cannot use the management menu."
+msgstr "群组、超群和频道可以接收完整通知，但不能使用管理菜单。"
 
 #: src/components/containers-table/containers-table-columns.tsx
 msgid "Health"
@@ -1070,6 +1201,16 @@ msgstr "无效的电子邮件地址。"
 msgid "Language"
 msgstr "语言"
 
+#. placeholder {0}: health.lastDeliveryAt || t`No delivery yet`
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Last delivery: {0}"
+msgstr "最近投递：{0}"
+
+#. placeholder {0}: health.lastTestAt || t`Not tested yet`
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Last test: {0}"
+msgstr "最近测试：{0}"
+
 #: src/components/routes/public-status.tsx
 #~ msgid "Last updated"
 #~ msgstr ""
@@ -1081,6 +1222,10 @@ msgstr "布局"
 #: src/components/routes/settings/general.tsx
 msgid "Layout width"
 msgstr "布局宽度"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Leave empty to include all alert categories. System load is the average number of runnable tasks over 1, 5, and 15 minutes. It is not a percentage or alert duration; compare it with the node's logical CPU core count."
+msgstr "留空表示包含全部告警类别。系统负载是操作系统在 1、5、15 分钟内的平均可运行任务数，不是百分比或告警持续时间；请与节点的逻辑 CPU 核心数比较。"
 
 #: src/components/routes/settings/config-yaml.tsx
 msgid "Legacy config.yml"
@@ -1167,6 +1312,7 @@ msgid "Max 1 min"
 msgstr "1分钟内最大值"
 
 #: src/components/containers-table/containers-table-columns.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system/info-bar.tsx
 #: src/components/systemd-table/systemd-table-columns.tsx
 #: src/components/systemd-table/systemd-table.tsx
@@ -1196,6 +1342,15 @@ msgstr "Docker 容器的内存使用率"
 #: src/components/routes/system/smart-table.tsx
 msgid "Model"
 msgstr "型号"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Muted"
+msgstr "已静音"
+
+#. placeholder {0}: health.muteUntil || t`No mute deadline`
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Muted until: {0}"
+msgstr "静音截止：{0}"
 
 #: src/components/add-system.tsx
 #: src/components/alerts-history-columns.tsx
@@ -1234,13 +1389,25 @@ msgstr "网络单位"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "New Destination"
-msgstr ""
+msgstr "新建渠道"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "New policy"
+msgstr "新建规则"
 
 #: src/components/systemd-table/systemd-table.tsx
 #: src/components/systemd-table/systemd-table.tsx
 #: src/components/systemd-table/systemd-table.tsx
 msgid "No"
 msgstr "否"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "No delivery yet"
+msgstr "尚未投递"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "No mute deadline"
+msgstr "无静音截止时间"
 
 #: src/components/routes/public-status.tsx
 #~ msgid "No public systems are currently available."
@@ -1265,8 +1432,8 @@ msgid "No S.M.A.R.T. attributes available for this device."
 msgstr "此设备没有可用的 S.M.A.R.T. 属性。"
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "No systems available."
-msgstr ""
+#~ msgid "No systems available."
+#~ msgstr ""
 
 #: src/components/systems-table/systems-table.tsx
 #: src/components/systems-table/systems-table.tsx
@@ -1275,11 +1442,32 @@ msgstr "未找到系统。"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "No Telegram destinations yet."
-msgstr ""
+msgstr "暂无 Telegram 通知渠道。"
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "Node Scope"
-msgstr ""
+msgid "Node scope"
+msgstr "节点范围"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+#~ msgid "Node Scope"
+#~ msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Node status"
+msgstr "节点状态"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Not tested yet"
+msgstr "尚未测试"
+
+#. placeholder {0}: policyDestination.name
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Notification policies for {0}"
+msgstr "{0} 的通知规则"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Notification policy saved"
+msgstr "通知规则已保存"
 
 #: src/components/command-palette.tsx
 #: src/components/routes/settings/layout.tsx
@@ -1431,6 +1619,15 @@ msgstr "请参阅<0>文档</0>以获取说明。"
 msgid "Please sign in to your account"
 msgstr "请登录您的账户"
 
+#. placeholder {0}: destination.policyCount ?? 0
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Policies: {0}"
+msgstr "规则 {0}"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Policy name"
+msgstr "规则名称"
+
 #: src/components/add-system.tsx
 msgid "Port"
 msgstr "端口"
@@ -1485,6 +1682,14 @@ msgstr "静默时间"
 #: src/components/routes/system/disk-io-sheet.tsx
 msgid "Read"
 msgstr "读取"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Read-only channels receive sanitized monitoring messages within policy scope and cannot run management commands."
+msgstr "只读渠道接收策略范围内的脱敏监控消息，不能执行管理命令。"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Read-only notifications"
+msgstr "只读通知"
 
 #: src/components/routes/system/charts/network-charts.tsx
 msgid "Received"
@@ -1544,7 +1749,7 @@ msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Role"
-msgstr ""
+msgstr "角色"
 
 #: src/components/systems-table/systems-table-columns.tsx
 msgctxt "Root disk label"
@@ -1559,9 +1764,17 @@ msgstr "轮换令牌"
 msgid "Rows per page"
 msgstr "每页行数"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Running normally"
+msgstr "运行正常"
+
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Runtime Metrics"
 msgstr "运行时指标"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "S.M.A.R.T."
+msgstr "S.M.A.R.T."
 
 #: src/components/routes/system/smart-table.tsx
 msgid "S.M.A.R.T. Details"
@@ -1585,7 +1798,11 @@ msgstr "使用回车键或逗号保存地址。留空以禁用电子邮件通知
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Save Destination"
-msgstr ""
+msgstr "保存渠道"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Save policy"
+msgstr "保存规则"
 
 #: src/components/routes/settings/general.tsx
 #: src/components/routes/settings/notifications.tsx
@@ -1594,7 +1811,7 @@ msgstr "保存设置"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Save Telegram"
-msgstr ""
+msgstr "保存 Telegram"
 
 #: src/components/routes/settings/tokens-fingerprints.tsx
 msgid "Saved in the database and does not expire until you disable it."
@@ -1620,6 +1837,10 @@ msgstr "搜索"
 msgid "Search for systems or settings..."
 msgstr "搜索系统或设置..."
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Search nodes"
+msgstr "搜索节点"
+
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Seconds between pings (default: 60)"
 msgstr "Ping 之间的秒数 (默认：60)"
@@ -1636,9 +1857,21 @@ msgstr "查看<0>通知设置</0>以配置您接收警报的方式。"
 msgid "Select {foo}"
 msgstr "选择 {foo}"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Select all current results"
+msgstr "全选当前结果"
+
 #: src/components/routes/settings/public-status.tsx
 #~ msgid "Select which systems are visible on the anonymous public status page."
 #~ msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Selected nodes"
+msgstr "指定节点"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Selected-node mode requires at least one node."
+msgstr "指定节点模式至少需要选择一个节点。"
 
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Send a single heartbeat ping to verify your endpoint is working."
@@ -1724,8 +1957,8 @@ msgid "Status"
 msgstr "状态"
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "status, cpu, memory ..."
-msgstr ""
+#~ msgid "status, cpu, memory ..."
+#~ msgstr ""
 
 #: src/components/systemd-table/systemd-table-columns.tsx
 msgid "Sub State"
@@ -1759,6 +1992,18 @@ msgstr ""
 msgid "System"
 msgstr "系统"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "System load (1-minute average)"
+msgstr "系统负载（1 分钟均值）"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "System load (15-minute average)"
+msgstr "系统负载（15 分钟均值）"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "System load (5-minute average)"
+msgstr "系统负载（5 分钟均值）"
+
 #: src/components/routes/system/charts/load-average-chart.tsx
 msgid "System load averages over time"
 msgstr "系统负载平均值随时间变化"
@@ -1790,32 +2035,35 @@ msgstr "任务数"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Telegram bot"
-msgstr ""
+msgstr "Telegram Bot"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram bot verification incomplete"
+msgstr "Telegram Bot 验证未完成"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Telegram bot verified"
-msgstr ""
+msgstr "Telegram Bot 验证成功"
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "Telegram connectivity is working."
-msgstr ""
+#~ msgid "Telegram connectivity is working."
+#~ msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Telegram destination saved"
-msgstr ""
+msgstr "Telegram 渠道已保存"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Telegram destinations"
-msgstr ""
+msgstr "Telegram 通知渠道"
 
 #: src/components/routes/settings/telegram-destinations.tsx
-#: src/components/routes/settings/telegram-destinations.tsx
 msgid "Telegram test failed"
-msgstr ""
+msgstr "Telegram 测试失败"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Telegram test message sent"
-msgstr ""
+msgstr "Telegram 测试消息已发送"
 
 #. Temperature label in systems table
 #: src/components/routes/system/smart-table.tsx
@@ -1823,6 +2071,7 @@ msgstr ""
 msgid "Temp"
 msgstr "温度"
 
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system/charts/sensor-charts.tsx
 #: src/lib/alerts.ts
 msgid "Temperature"
@@ -1838,7 +2087,7 @@ msgstr "系统传感器的温度"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Test"
-msgstr ""
+msgstr "测试"
 
 #: src/components/routes/settings/notifications.tsx
 msgid "Test <0>URL</0>"
@@ -1846,7 +2095,7 @@ msgstr "测试<0>URL</0>"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Test Bot"
-msgstr ""
+msgstr "测试 Bot"
 
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Test heartbeat"
@@ -1860,6 +2109,10 @@ msgstr "测试通知已发送"
 msgid "The overall status is <0>ok</0> when all systems are up, <1>warn</1> when alerts are triggered, and <2>error</2> when any system is down."
 msgstr "当所有系统都正常运行时，整体状态为 <0>ok</0>；当触发警报时为 <1>警告</1>；当任何系统故障时为 <2>错误</2>。"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "The read-only role cannot use the management menu."
+msgstr "只读角色不能使用管理菜单。"
+
 #: src/components/login/forgot-pass-form.tsx
 msgid "Then log into the backend and reset your user account password in the users table."
 msgstr "然后登录到后台并在用户表中重置您的用户账户密码。"
@@ -1867,6 +2120,18 @@ msgstr "然后登录到后台并在用户表中重置您的用户账户密码。
 #: src/components/systems-table/systems-table-columns.tsx
 msgid "This action cannot be undone. This will permanently delete all current records for {name} from the database."
 msgstr "此操作无法撤销。这将永久删除数据库中{name}的所有当前记录。"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "This channel has no notification policies."
+msgstr "此渠道暂无通知规则。"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "This Chat ID already exists. The existing channel is now selected."
+msgstr "该 Chat ID 已存在，已定位到现有渠道。"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "This private admin can use the Bot management menu."
+msgstr "此私聊管理员可以使用 Bot 管理菜单。"
 
 #: src/components/routes/settings/alerts-history-data-table.tsx
 msgid "This will permanently delete all selected records from the database."
@@ -2103,9 +2368,17 @@ msgstr "查看您最近的200个警报。"
 msgid "Visible Fields"
 msgstr "可见列"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Waiting for configuration"
+msgstr "等待配置"
+
 #: src/components/routes/system/chart-card.tsx
 msgid "Waiting for enough records to display"
 msgstr "正在收集足够的数据来显示"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Waiting for test"
+msgstr "等待测试"
 
 #: src/components/routes/settings/general.tsx
 msgid "Want to help improve our translations? Check <0>Crowdin</0> for details."
@@ -2215,20 +2488,20 @@ msgid "包含 token、Webhook URL、Telegram Bot Token 等敏感值时必须加�
 msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "只读渠道可按告警类别限制投递；留空表示不过滤。"
-msgstr ""
+#~ msgid "只读渠道可按告警类别限制投递；留空表示不过滤。"
+#~ msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "后续可用于管理 Telegram 菜单命令。"
-msgstr ""
+msgstr "后续可用于管理 Telegram 菜单命令。"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "启用 Telegram 告警投递。"
-msgstr ""
+msgstr "启用 Telegram 告警投递。"
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "启用轮询后，管理员目的地可使用 /status、/alerts、/systems、/system、/mute、/unmute；只读目的地只能接收授权范围内的通知。"
-msgstr ""
+msgstr "启用轮询后，管理员目的地可使用 /status、/alerts、/systems、/system、/mute、/unmute；只读目的地只能接收授权范围内的通知。"
 
 #: src/components/routes/settings/config-yaml.tsx
 msgid "导出完整面板配置，或通过预览后的合并恢复导入配置。"
@@ -2236,7 +2509,7 @@ msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "已保存旧 token；留空即可保留。"
-msgstr ""
+msgstr "已保存旧 token；留空即可保留。"
 
 #: src/components/routes/settings/public-status.tsx
 msgid "已展示"
@@ -2280,7 +2553,7 @@ msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "管理员可以在这里配置 Bot 凭据、验证连通性，并维护允许接收消息的会话。"
-msgstr ""
+msgstr "管理员可以在这里配置 Bot 凭据、验证连通性，并维护允许接收消息的会话。"
 
 #: src/components/routes/public-status.tsx
 msgid "管理登录"
@@ -2292,8 +2565,12 @@ msgid "线路检测"
 msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "维护允许接收告警的私聊、群组、频道或超群，并为只读渠道限制节点和告警范围。"
-msgstr ""
+#~ msgid "维护允许接收告警的私聊、群组、频道或超群，并为只读渠道限制节点和告警范围。"
+#~ msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "维护允许接收告警的私聊、群组、频道或超群，并通过通知规则限制节点和告警范围。"
+msgstr "维护允许接收告警的私聊、群组、频道或超群，并通过通知规则限制节点和告警范围。"
 
 #: src/components/routes/public-status.tsx
 #: src/components/routes/public-status.tsx
@@ -2314,7 +2591,7 @@ msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "首次启用时需要填写有效 token。"
-msgstr ""
+msgstr "首次启用时需要填写有效 token。"
 
 #: src/components/routes/settings/network-probes.tsx
 msgid "高级设置"

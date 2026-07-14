@@ -1,0 +1,32 @@
+meta:
+  backupVersion: "1"
+  sourceVersion: test
+  createdAt: "2026-07-10T00:00:00Z"
+  mode: merge
+  sections: [notifications]
+  sectionVersions:
+    notifications: "2"
+notifications:
+  telegram:
+    settings:
+      enabled: false
+      pollingEnabled: false
+      botUsername: fixture_bot
+      botToken:
+        redacted: true
+    destinations:
+      - stableId: channel00000001
+        name: Operations
+        chatId: "10002"
+        chatType: group
+        role: read_only
+        enabled: false
+        muteUntil: "2026-07-10 08:30:00.000Z"
+    policies:
+      - stableId: policy000000001
+        destinationStableId: channel00000001
+        name: All status alerts
+        enabled: false
+        nodeScopeMode: all
+        nodeScope: []
+        alertLevelScope: [status]

@@ -8,12 +8,35 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
+
+const (
+	telegramHTTPTimeout            = time.Duration(telegramPollingTimeoutSeconds+10) * time.Second
+	telegramMessageMaxRunes        = 4096
+	telegramMessageTruncatedSuffix = "\n…内容已截断"
+)
+
+func truncateTelegramMessage(message string) string {
+	if utf8.RuneCountInString(message) <= telegramMessageMaxRunes {
+		return message
+	}
+	suffix := []rune(telegramMessageTruncatedSuffix)
+	limit := telegramMessageMaxRunes - len(suffix)
+	return string([]rune(message)[:limit]) + telegramMessageTruncatedSuffix
+}
+
+type telegramBotCommand struct {
+	Command     string `json:"command"`
+	Description string `json:"description"`
+}
 
 type TelegramTransport interface {
 	GetMe(ctx context.Context, botToken string) (*TelegramBotIdentity, error)
+	SetMyCommands(ctx context.Context, botToken string, commands []telegramBotCommand) error
 	SendMessage(ctx context.Context, botToken string, chatID string, text string, options *TelegramSendOptions) error
 	GetUpdates(ctx context.Context, botToken string, offset int64, timeoutSeconds int) ([]TelegramUpdate, error)
 	AnswerCallbackQuery(ctx context.Context, botToken string, callbackQueryID string, text string) error
@@ -67,7 +90,7 @@ type TelegramUpdate = telegramUpdate
 
 func newTelegramHTTPTransport(client *http.Client) TelegramTransport {
 	if client == nil {
-		client = &http.Client{Timeout: 15 * time.Second}
+		client = &http.Client{Timeout: telegramHTTPTimeout}
 	}
 	return &telegramHTTPTransport{
 		client:  client,
@@ -83,7 +106,16 @@ func (t *telegramHTTPTransport) GetMe(ctx context.Context, botToken string) (*Te
 	return &response.Result, nil
 }
 
+func (t *telegramHTTPTransport) SetMyCommands(ctx context.Context, botToken string, commands []telegramBotCommand) error {
+	body := map[string]any{
+		"commands": commands,
+		"scope":    map[string]string{"type": "all_private_chats"},
+	}
+	return t.doJSON(ctx, botToken, http.MethodPost, "setMyCommands", body, nil)
+}
+
 func (t *telegramHTTPTransport) SendMessage(ctx context.Context, botToken string, chatID string, text string, options *TelegramSendOptions) error {
+	text = truncateTelegramMessage(text)
 	body := map[string]any{
 		"chat_id":                  chatID,
 		"text":                     text,
@@ -142,7 +174,7 @@ func (t *telegramHTTPTransport) doJSON(ctx context.Context, botToken string, met
 	}()
 
 	if result == nil {
-		var apiResp telegramAPIResponse[map[string]any]
+		var apiResp telegramAPIResponse[json.RawMessage]
 		if err := json.NewDecoder(resp.Body).Decode(&apiResp); err != nil {
 			return sanitizeTelegramError(err.Error())
 		}
@@ -172,6 +204,7 @@ func (t *telegramHTTPTransport) doJSON(ctx context.Context, botToken string, met
 func sanitizeTelegramError(message string) error {
 	message = strings.TrimSpace(message)
 	message = strings.ReplaceAll(message, "\n", " ")
+	message = regexp.MustCompile(`\d+:[A-Za-z0-9_-]{10,}`).ReplaceAllString(message, "[telegram token hidden]")
 	switch {
 	case message == "":
 		return fmt.Errorf("telegram request failed")

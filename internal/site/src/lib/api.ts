@@ -19,6 +19,9 @@ import type {
 	PublicStatusResponse,
 	TelegramDestination,
 	TelegramDestinationInput,
+	TelegramNotificationPolicy,
+	TelegramNotificationPolicyInput,
+	TelegramPolicyListResponse,
 	TelegramSettings,
 	TelegramSettingsInput,
 	TelegramTestResponse,
@@ -158,7 +161,7 @@ export function saveTelegramSettings(settings: TelegramSettingsInput) {
 	})
 }
 
-export function testTelegramSettings(settings?: Partial<TelegramSettingsInput>) {
+export function testTelegramSettings(settings?: { botToken?: string }) {
 	return pb.send<TelegramTestResponse>("/api/beszel/telegram/settings/test", {
 		method: "POST",
 		body: settings ?? {},
@@ -193,6 +196,27 @@ export function testTelegramDestination(destinationId: string) {
 			method: "POST",
 		}
 	)
+}
+
+export function getTelegramNotificationPolicies(destinationId: string) {
+	return pb.send<TelegramPolicyListResponse>(`/api/beszel/telegram/destinations/${destinationId}/policies`, {})
+}
+
+export function saveTelegramNotificationPolicy(
+	destinationId: string,
+	policy: TelegramNotificationPolicyInput & { id?: string }
+) {
+	const path = policy.id
+		? `/api/beszel/telegram/destinations/${destinationId}/policies/${policy.id}`
+		: `/api/beszel/telegram/destinations/${destinationId}/policies`
+	return pb.send<TelegramNotificationPolicy>(path, {
+		method: policy.id ? "PATCH" : "POST",
+		body: policy,
+	})
+}
+
+export function deleteTelegramNotificationPolicy(destinationId: string, policyId: string) {
+	return pb.send(`/api/beszel/telegram/destinations/${destinationId}/policies/${policyId}`, { method: "DELETE" })
 }
 
 export function exportConfigBackup(request: ConfigBackupExportRequest) {

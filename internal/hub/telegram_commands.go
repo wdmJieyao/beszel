@@ -70,6 +70,10 @@ func normalizeTelegramCommandName(name string) string {
 		return "unmute"
 	case "status":
 		return "status"
+	case "settings":
+		return "settings"
+	case "binding":
+		return "binding"
 	case "help":
 		return "help"
 	default:

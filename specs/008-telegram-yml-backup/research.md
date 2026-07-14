@@ -127,3 +127,20 @@ unchanged.
 - Agent-assisted backup: unnecessary because the backed-up data is hub
   configuration, not host runtime state.
 - Agent-side Telegram: wrong ownership; notifications are hub decisions.
+
+## Decision: Keep unrelated latency refresh fixes in the latency feature line
+
+**Rationale**: The user may choose to release node-detail latency chart realtime
+refresh fixes together with Telegram/YML work, but those fixes change a separate
+behavioral surface, have their own acceptance logic, and already belong to the
+existing latency-related specs. Keeping the feature boundary explicit prevents
+plan/tasks drift and avoids mixing unrelated regression work into Telegram/YML
+contracts.
+
+**Alternatives considered**:
+
+- Move latency refresh fixes into this feature: would blur scope and make the
+  resulting plan and validation artifacts harder to reason about.
+- Ignore co-release intent completely: would keep scope pure, but would not
+  document the operator expectation that separate features may still ship in one
+  release batch.

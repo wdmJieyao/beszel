@@ -91,6 +91,16 @@ func redactedConfigBackupSecret(contentType string) *ConfigBackupSecret {
 	}
 }
 
+func configBackupHasEnabledEncryptedSecrets(document ConfigBackupDocument) bool {
+	if !document.configBackupSectionEnabled(ConfigBackupSectionSystems) {
+		document.Systems = nil
+	}
+	if !document.configBackupSectionEnabled(ConfigBackupSectionNotifications) {
+		document.Notifications = ConfigBackupNotifications{}
+	}
+	return configBackupHasEncryptedSecrets(document)
+}
+
 func configBackupHasEncryptedSecrets(document ConfigBackupDocument) bool {
 	var found bool
 	visit := func(secret *ConfigBackupSecret) {

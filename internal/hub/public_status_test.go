@@ -403,6 +403,58 @@ func TestPublicProbeSummariesFilterSeriesByRangeKeepLatestAndHideTarget(t *testi
 	assert.NotContains(t, string(payload), "443")
 }
 
+func TestPublicProbeSummariesUseCompatibleBucketsForLongRanges(t *testing.T) {
+	hub := newPublicStatusTestHub(t)
+	user := createPublicStatusUser(t, hub)
+
+	systemRecord := createPublicStatusRecord(t, hub, "systems", map[string]any{
+		"name":   "node",
+		"host":   "127.0.0.1",
+		"status": "up",
+		"users":  []string{user.Id},
+	})
+	probe := createPublicStatusRecord(t, hub, CollectionNetworkProbes, map[string]any{
+		"name":             "Public line",
+		"type":             NetworkProbeTypeTCPing,
+		"scope":            NetworkProbeScopeFixed,
+		"target":           "secret.example.com:443",
+		"interval_seconds": 20,
+		"timeout_seconds":  5,
+		"enabled":          true,
+		"public_visible":   true,
+	})
+	createPublicStatusRecord(t, hub, CollectionNetworkProbeAssignments, map[string]any{
+		"probe":   probe.Id,
+		"system":  systemRecord.Id,
+		"enabled": true,
+	})
+
+	now := time.Now().UTC().Truncate(120 * time.Minute)
+	createPublicProbeResultWithBucket(t, hub, probe.Id, systemRecord.Id, now.Add(-6*time.Hour+30*time.Minute), true, "120m", 120, "")
+	createPublicProbeResultWithBucket(t, hub, probe.Id, systemRecord.Id, now.Add(-6*time.Hour+50*time.Minute), true, "20m", 25, "")
+	createPublicProbeResultWithBucket(t, hub, probe.Id, systemRecord.Id, now.Add(-4*time.Hour+20*time.Minute), true, "20m", 40, "")
+	createPublicProbeLegacyResult(t, hub, probe.Id, systemRecord.Id, now.Add(-8*time.Hour+20*time.Minute), true, 60, "")
+	createPublicProbeResultWithBucket(t, hub, probe.Id, systemRecord.Id, now.Add(-10*time.Minute), true, "1m", 1, "")
+
+	summaries, err := hub.publicProbeSummaries(systemRecord.Id, PublicSystemVisibility{
+		PublicProbeIDs: []string{probe.Id},
+	}, publicChartRange{Name: "1w", Duration: 7 * 24 * time.Hour, StatsType: "120m", ProbeBucket: "120m"})
+	require.NoError(t, err)
+	require.Len(t, summaries, 1)
+	require.Len(t, summaries[0].Series, 4)
+	require.NotNil(t, summaries[0].Series[0].LatencyMs)
+	require.NotNil(t, summaries[0].Series[1].LatencyMs)
+	require.NotNil(t, summaries[0].Series[2].LatencyMs)
+	require.NotNil(t, summaries[0].Series[3].LatencyMs)
+	assert.Equal(t, 60.0, *summaries[0].Series[0].LatencyMs)
+	assert.Equal(t, 120.0, *summaries[0].Series[1].LatencyMs)
+	assert.Equal(t, 40.0, *summaries[0].Series[2].LatencyMs)
+	assert.Equal(t, 1.0, *summaries[0].Series[3].LatencyMs)
+	require.NotNil(t, summaries[0].Latest)
+	require.NotNil(t, summaries[0].Latest.LatencyMs)
+	assert.Equal(t, 1.0, *summaries[0].Latest.LatencyMs)
+}
+
 func TestPublicProbeSummariesIncludeGlobalPublicProbeWithoutAssignment(t *testing.T) {
 	hub := newPublicStatusTestHub(t)
 	user := createPublicStatusUser(t, hub)
@@ -909,6 +961,27 @@ func createPublicSystemStats(t testing.TB, app core.App, systemID string, create
 }
 
 func createPublicProbeResult(t testing.TB, app core.App, probeID string, systemID string, created time.Time, success bool, latency float64, errorMessage string) {
+	t.Helper()
+	createPublicProbeResultWithBucket(t, app, probeID, systemID, created, success, "1m", latency, errorMessage)
+}
+
+func createPublicProbeResultWithBucket(t testing.TB, app core.App, probeID string, systemID string, created time.Time, success bool, bucket string, latency float64, errorMessage string) {
+	t.Helper()
+	record := createPublicStatusRecord(t, app, CollectionNetworkProbeResults, map[string]any{
+		"probe":            probeID,
+		"system":           systemID,
+		"type":             NetworkProbeTypeTCPing,
+		"success":          success,
+		"latency_ms":       latency,
+		"error":            errorMessage,
+		"failure_category": "",
+		"bucket":           bucket,
+	})
+	record.SetRaw("created", created.Format(types.DefaultDateLayout))
+	require.NoError(t, app.SaveNoValidate(record))
+}
+
+func createPublicProbeLegacyResult(t testing.TB, app core.App, probeID string, systemID string, created time.Time, success bool, latency float64, errorMessage string) {
 	t.Helper()
 	record := createPublicStatusRecord(t, app, CollectionNetworkProbeResults, map[string]any{
 		"probe":            probeID,

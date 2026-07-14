@@ -345,13 +345,27 @@ func (am *AlertManager) sendSystemAlert(alert SystemAlertData) {
 		return
 	}
 	_ = am.SendAlert(AlertMessageData{
-		UserID:   alert.alertData.UserID,
-		SystemID: alert.systemRecord.Id,
-		Title:    subject,
-		Message:  body,
-		Link:     am.hub.MakeLink("system", alert.systemRecord.Id),
-		LinkText: "View " + systemName,
+		UserID:     alert.alertData.UserID,
+		SystemID:   alert.systemRecord.Id,
+		SystemName: systemName,
+		AlertClass: systemAlertClass(alert.name),
+		Severity:   map[bool]string{true: AlertSeverityWarning, false: AlertSeverityInfo}[alert.triggered],
+		State:      map[bool]string{true: AlertStateTriggered, false: AlertStateResolved}[alert.triggered],
+		EventTime:  time.Now().UTC(),
+		Title:      subject,
+		Message:    body,
+		Link:       am.hub.MakeLink("system", alert.systemRecord.Id),
+		LinkText:   "View " + systemName,
 	})
+}
+
+func systemAlertClass(name string) string {
+	name = strings.ToLower(strings.TrimSpace(name))
+	name = strings.TrimSuffix(name, " usage")
+	if minutes, ok := strings.CutSuffix(name, "m load"); ok {
+		return "loadavg" + strings.TrimSpace(minutes)
+	}
+	return name
 }
 
 func isLowAlert(name string) bool {

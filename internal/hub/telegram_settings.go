@@ -51,7 +51,9 @@ func (h *Hub) updateTelegramSettings(e *core.RequestEvent) error {
 
 func (h *Hub) testTelegramSettings(e *core.RequestEvent) error {
 	input := TelegramSettingsTestInput{}
-	_ = e.BindBody(&input)
+	if err := e.BindBody(&input); err != nil {
+		return e.BadRequestError("invalid request body", err)
+	}
 
 	settings, err := h.loadTelegramSettings()
 	if err != nil {
@@ -61,7 +63,8 @@ func (h *Hub) testTelegramSettings(e *core.RequestEvent) error {
 	if token == "" {
 		token, err = h.decryptTelegramToken(settings)
 		if err != nil {
-			return e.JSON(http.StatusOK, TelegramTestResponse{OK: false, Error: err.Error()})
+			errorMessage := sanitizeTelegramError(err.Error()).Error()
+			return e.JSON(http.StatusOK, telegramCredentialFailureResponse(errorMessage))
 		}
 	}
 	if !telegramTokenPattern.MatchString(token) {
@@ -69,8 +72,35 @@ func (h *Hub) testTelegramSettings(e *core.RequestEvent) error {
 	}
 	bot, err := h.telegramTransport.GetMe(context.Background(), token)
 	if err != nil {
-		return e.JSON(http.StatusOK, TelegramTestResponse{OK: false, Error: err.Error()})
+		errorMessage := sanitizeTelegramError(err.Error()).Error()
+		return e.JSON(http.StatusOK, telegramCredentialFailureResponse(errorMessage))
+	}
+	if err := h.telegramTransport.SetMyCommands(context.Background(), token, telegramAdminBotCommands()); err != nil {
+		errorMessage := sanitizeTelegramError(err.Error()).Error()
+		return e.JSON(http.StatusOK, TelegramTestResponse{
+			OK: false, BotUsername: bot.Username, Error: errorMessage,
+			Stages: TelegramTestStages{
+				Credentials: TelegramTestStage{OK: true},
+				CommandMenu: TelegramTestStage{OK: false, Error: errorMessage},
+			},
+		})
 	}
 	_ = h.setTelegramSettingsRuntimeState(bot.Username, settings.LastPollOffset, "")
-	return e.JSON(http.StatusOK, TelegramTestResponse{OK: true, BotUsername: bot.Username})
+	return e.JSON(http.StatusOK, TelegramTestResponse{
+		OK: true, BotUsername: bot.Username,
+		Stages: TelegramTestStages{
+			Credentials: TelegramTestStage{OK: true},
+			CommandMenu: TelegramTestStage{OK: true},
+		},
+	})
+}
+
+func telegramCredentialFailureResponse(message string) TelegramTestResponse {
+	return TelegramTestResponse{
+		OK: false, Error: message,
+		Stages: TelegramTestStages{
+			Credentials: TelegramTestStage{OK: false, Error: message},
+			CommandMenu: TelegramTestStage{OK: false, Error: "credentials were not verified"},
+		},
+	}
 }

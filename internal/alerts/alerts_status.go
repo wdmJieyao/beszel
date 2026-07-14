@@ -160,12 +160,17 @@ func (am *AlertManager) sendStatusAlert(alertStatus string, systemName string, a
 	systemID := alertData.SystemID
 
 	return am.SendAlert(AlertMessageData{
-		UserID:   alertData.UserID,
-		SystemID: systemID,
-		Title:    title,
-		Message:  message,
-		Link:     am.hub.MakeLink("system", systemID),
-		LinkText: "View " + systemName,
+		UserID:     alertData.UserID,
+		SystemID:   systemID,
+		SystemName: systemName,
+		AlertClass: "status",
+		Severity:   map[bool]string{true: AlertSeverityCritical, false: AlertSeverityInfo}[triggered],
+		State:      map[bool]string{true: AlertStateTriggered, false: AlertStateResolved}[triggered],
+		EventTime:  time.Now().UTC(),
+		Title:      title,
+		Message:    message,
+		Link:       am.hub.MakeLink("system", systemID),
+		LinkText:   "View " + systemName,
 	})
 }
 

@@ -37,6 +37,19 @@ func TestParseTelegramCommandFromMessageAndCallback(t *testing.T) {
 	assert.Equal(t, "callback-1", callbackCommand.CallbackQueryID)
 }
 
+func TestTelegramPollingClearsStaleErrorAfterEmptySuccess(t *testing.T) {
+	hub, _ := newTelegramHubWithAdmin(t)
+	hub.telegramTransport = &fakeTelegramTransport{}
+	_, err := hub.saveTelegramSettings(TelegramSettingsInput{Enabled: true, PollingEnabled: true, BotToken: "123456:abcde_token_valid"}, telegramSettingsRecord{})
+	require.NoError(t, err)
+	require.NoError(t, hub.setTelegramSettingsRuntimeState("", -1, "stale timeout"))
+
+	require.NoError(t, hub.pollTelegramOnce(context.Background()))
+	settings, err := hub.loadTelegramSettings()
+	require.NoError(t, err)
+	assert.Empty(t, settings.LastError)
+}
+
 func TestTelegramPollingProcessesUpdatesAndPersistsOffset(t *testing.T) {
 	hub, _ := newTelegramHubWithAdmin(t)
 	fake := &fakeTelegramTransport{

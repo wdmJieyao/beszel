@@ -1,6 +1,7 @@
 package hub
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -79,7 +80,16 @@ func (h *Hub) restoreConfigBackup(e *core.RequestEvent) error {
 	}
 	applied, warnings, err := h.applyConfigBackup(document, request.DecryptionCredential)
 	if err != nil {
-		return e.JSON(http.StatusUnprocessableEntity, map[string]any{"error": err.Error()})
+		var sectionErr *configBackupSectionRestoreError
+		if errors.As(err, &sectionErr) {
+			return e.JSON(http.StatusUnprocessableEntity, ConfigBackupRestoreFailureResponse{
+				Mode: ConfigBackupMode, Applied: sectionErr.Applied, CompletedSections: sectionErr.CompletedSections,
+				FailedSection: sectionErr.Section, Warnings: append(preview.Warnings, warnings...), Error: err.Error(),
+			})
+		}
+		return e.JSON(http.StatusUnprocessableEntity, ConfigBackupRestoreFailureResponse{
+			Mode: ConfigBackupMode, Applied: applied, Warnings: append(preview.Warnings, warnings...), Error: err.Error(),
+		})
 	}
 	return e.JSON(http.StatusOK, ConfigBackupRestoreResponse{
 		Mode:     ConfigBackupMode,

@@ -33,6 +33,10 @@ func (h *Hub) handleTelegramCommand(ctx context.Context, token string, command t
 		message, options, err = h.telegramMuteDestination(destination)
 	case "unmute":
 		message, options, err = h.telegramUnmuteDestination(destination)
+	case "settings":
+		message, options, err = h.telegramNotificationSettingsStatus(destination)
+	case "binding":
+		message, options, err = h.telegramBindingStatus(destination)
 	default:
 		message, options = telegramHelpMessage(destination), telegramHelpKeyboard()
 	}
@@ -58,6 +62,19 @@ func (h *Hub) authorizeTelegramCommand(chatID string) (telegramDestinationRecord
 	return destination, true, nil
 }
 
+func telegramAdminBotCommands() []telegramBotCommand {
+	return []telegramBotCommand{
+		{Command: "status", Description: "查看面板状态总览"},
+		{Command: "systems", Description: "查看节点及当前资源使用率"},
+		{Command: "alerts", Description: "查看告警概要"},
+		{Command: "settings", Description: "查看 Telegram 通知设置"},
+		{Command: "binding", Description: "验证当前 Telegram 绑定"},
+		{Command: "mute", Description: "暂停当前目的地通知 1 小时"},
+		{Command: "unmute", Description: "恢复当前目的地通知"},
+		{Command: "help", Description: "显示管理菜单"},
+	}
+}
+
 func telegramHelpMessage(destination telegramDestinationRecord) string {
 	if destination.Role == TelegramRoleReadOnly {
 		return telegramReadOnlyMenuMessage(destination)
@@ -70,6 +87,8 @@ func telegramHelpMessage(destination telegramDestinationRecord) string {
 		"/system <序号或ID> - 查看节点详情",
 		"/mute - 暂停当前 Telegram 目的地通知 1 小时",
 		"/unmute - 恢复当前 Telegram 目的地通知",
+		"/settings - 查看 Telegram 通知设置状态",
+		"/binding - 验证当前 Telegram 绑定",
 	}, "\n")
 }
 
@@ -81,6 +100,10 @@ func telegramHelpKeyboard() *TelegramSendOptions {
 		},
 		[]map[string]string{
 			telegramButton("节点", "systems"),
+			telegramButton("通知设置", "settings"),
+			telegramButton("验证绑定", "binding"),
+		},
+		[]map[string]string{
 			telegramButton("静音", "mute"),
 			telegramButton("恢复", "unmute"),
 		},
@@ -93,6 +116,7 @@ func (h *Hub) telegramStatusOverview() (string, *TelegramSendOptions, error) {
 		return "", nil, err
 	}
 	up, down, paused := 0, 0, 0
+	problematic := make([]string, 0, 5)
 	for _, system := range systems {
 		switch strings.ToLower(system.GetString("status")) {
 		case "up":
@@ -101,10 +125,17 @@ func (h *Hub) telegramStatusOverview() (string, *TelegramSendOptions, error) {
 			paused++
 		default:
 			down++
+			if len(problematic) < 5 {
+				problematic = append(problematic, system.GetString("name")+"（"+valueOrUnknown(system.GetString("status"))+"）")
+			}
 		}
 	}
 	alertsCount, _ := h.CountRecords("alerts")
-	return fmt.Sprintf("Beszel 状态总览\n节点：%d 个（在线 %d，异常 %d，暂停 %d）\n告警规则：%d 条", len(systems), up, down, paused, alertsCount), telegramHelpKeyboard(), nil
+	message := fmt.Sprintf("Beszel 状态总览\n节点：%d 个（在线 %d，异常 %d，暂停 %d）\n告警规则：%d 条", len(systems), up, down, paused, alertsCount)
+	if len(problematic) > 0 {
+		message += "\n最近异常节点：\n- " + strings.Join(problematic, "\n- ")
+	}
+	return message, nil, nil
 }
 
 func (h *Hub) telegramAlertSummary() (string, *TelegramSendOptions, error) {
@@ -118,5 +149,5 @@ func (h *Hub) telegramAlertSummary() (string, *TelegramSendOptions, error) {
 			triggered++
 		}
 	}
-	return fmt.Sprintf("Beszel 告警概要\n告警规则：%d 条\n当前触发：%d 条", len(alerts), triggered), telegramHelpKeyboard(), nil
+	return fmt.Sprintf("Beszel 告警概要\n告警规则：%d 条\n当前触发：%d 条", len(alerts), triggered), nil, nil
 }

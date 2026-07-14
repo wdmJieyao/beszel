@@ -1,14 +1,20 @@
 package hub
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/henrygd/beszel/internal/alerts"
 )
 
 func telegramDestinationCanUseAdminMenu(destination telegramDestinationRecord) bool {
-	return destination.Enabled && destination.Role == TelegramRoleAdmin
+	return destination.Enabled && destination.Role == TelegramRoleAdmin && destination.ChatType == TelegramChatTypePrivate
 }
+
+var (
+	telegramURLPattern  = regexp.MustCompile(`https?://\S+`)
+	telegramIPv4Pattern = regexp.MustCompile(`\b(?:\d{1,3}\.){3}\d{1,3}\b`)
+)
 
 func telegramReadOnlyMenuMessage(destination telegramDestinationRecord) string {
 	name := strings.TrimSpace(destination.Name)
@@ -21,6 +27,12 @@ func telegramReadOnlyMenuMessage(destination telegramDestinationRecord) string {
 func sanitizeTelegramReadOnlyAlert(data alerts.AlertMessageData) alerts.AlertMessageData {
 	sanitized := data
 	sanitized.Link = ""
-	sanitized.Message = strings.ReplaceAll(sanitized.Message, data.Link, "")
+	sanitized.LinkText = ""
+	for _, text := range []*string{&sanitized.Title, &sanitized.Message} {
+		*text = strings.ReplaceAll(*text, data.Link, "")
+		*text = telegramURLPattern.ReplaceAllString(*text, "[链接已隐藏]")
+		*text = telegramIPv4Pattern.ReplaceAllString(*text, "[地址已隐藏]")
+		*text = strings.TrimSpace(*text)
+	}
 	return sanitized
 }

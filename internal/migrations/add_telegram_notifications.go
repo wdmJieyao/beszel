@@ -73,4 +73,5 @@ func init() {
 		}
 		return nil
 	})
+	registerTelegramNotificationPoliciesMigration()
 }

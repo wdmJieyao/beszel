@@ -4,9 +4,9 @@
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/, quickstart.md
 
-**Tests**: Unit tests are REQUIRED for every behavior change by the project constitution. Test tasks are listed before implementation tasks in each user story.
+**Tests**: Unit tests are REQUIRED for every behavior change by the project constitution. Test tasks are listed before implementation tasks in each user story. Contract or workflow tests are included where APIs, persistence, or cross-boundary flows are touched.
 
-**Organization**: Tasks are grouped by user story so Telegram notification delivery, Telegram bot menus, YML backup/restore, and agent compatibility can be implemented and validated independently.
+**Organization**: Tasks are grouped by user story so Telegram notification delivery, Telegram bot menus, YML backup/restore, and agent compatibility can be implemented and validated independently. Node-detail latency chart realtime refresh fixes remain out of scope for this feature even if released in the same batch.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -18,17 +18,17 @@
 
 **Purpose**: Confirm repository baseline and prepare shared implementation surfaces.
 
-- [X] T001 Review the implementation plan and contracts in `specs/008-telegram-yml-backup/plan.md`
+- [X] T001 Review the implementation plan, research, and contracts in `specs/008-telegram-yml-backup/plan.md`
 - [X] T002 [P] Inspect existing notification settings behavior in `internal/site/src/components/routes/settings/notifications.tsx`
 - [X] T003 [P] Inspect existing alert delivery behavior in `internal/alerts/alerts.go`
 - [X] T004 [P] Inspect existing system-only YAML export/sync behavior in `internal/hub/config/config.go`
-- [X] T005 [P] Inspect current custom route registration in `internal/hub/api.go`
+- [X] T005 [P] Inspect current hub route registration and lifecycle wiring in `internal/hub/api.go`
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Shared schema, types, and route foundations that block all user stories.
+**Purpose**: Shared schema, types, helpers, and route foundations that block all user stories.
 
 **CRITICAL**: Do not begin story implementation until this phase is complete.
 
@@ -48,7 +48,7 @@
 
 ---
 
-## Phase 3: User Story 1 - Telegram Bot Notification Channel (Priority: P1) MVP
+## Phase 3: User Story 1 - Telegram Bot Notification Channel (Priority: P1)
 
 **Goal**: Administrators can configure Telegram delivery, send a test message, and receive alert notifications through authorized destinations.
 
@@ -66,8 +66,8 @@
 
 - [X] T022 [US1] Implement Telegram settings read/update/test handlers in `internal/hub/telegram_settings.go`
 - [X] T023 [US1] Implement Telegram destination list/create/update/delete/test handlers in `internal/hub/telegram_destinations.go`
-- [X] T024 [US1] Implement Telegram sendMessage delivery and sanitized error mapping in `internal/hub/telegram_delivery.go`
-- [X] T025 [US1] Integrate Telegram destination delivery with existing alert sending in `internal/alerts/alerts.go`
+- [X] T024 [US1] Implement Telegram `sendMessage` delivery and sanitized error mapping in `internal/hub/telegram_delivery.go`
+- [X] T025 [US1] Integrate Telegram destination delivery with the existing alert pipeline in `internal/alerts/alerts.go`
 - [X] T026 [US1] Add Telegram alert delivery adapter interface between alerts and hub in `internal/alerts/telegram_adapter.go`
 - [X] T027 [US1] Add Telegram route auth and readonly restrictions in `internal/hub/api.go`
 - [X] T028 [US1] Add Telegram settings UI section to notification settings in `internal/site/src/components/routes/settings/notifications.tsx`
@@ -94,17 +94,17 @@
 
 ### Implementation for User Story 2
 
-- [X] T036 [US2] Implement Telegram long polling worker lifecycle in `internal/hub/telegram_polling.go`
+- [X] T036 [US2] Implement Telegram long-polling worker lifecycle in `internal/hub/telegram_polling.go`
 - [X] T037 [US2] Implement Telegram command and callback parser in `internal/hub/telegram_commands.go`
 - [X] T038 [US2] Implement admin status overview and alert summary menu actions in `internal/hub/telegram_menu.go`
 - [X] T039 [US2] Implement admin node list and node detail menu actions in `internal/hub/telegram_menu_systems.go`
 - [X] T040 [US2] Implement notification mute and restore menu actions in `internal/hub/telegram_menu_notifications.go`
 - [X] T041 [US2] Implement read-only destination scope filtering and non-sensitive summary formatting in `internal/hub/telegram_readonly.go`
-- [X] T042 [US2] Wire Telegram polling startup/shutdown into hub lifecycle in `internal/hub/hub.go`
-- [X] T043 [US2] Add Telegram menu status/help display in settings UI in `internal/site/src/components/routes/settings/telegram-destinations.tsx`
+- [X] T042 [US2] Wire Telegram polling startup and shutdown into hub lifecycle in `internal/hub/hub.go`
+- [X] T043 [US2] Add Telegram menu status and help display in settings UI in `internal/site/src/components/routes/settings/telegram-destinations.tsx`
 - [X] T044 [US2] Add non-sensitive logging for Telegram polling and menu failures in `internal/hub/telegram_polling.go`
 
-**Checkpoint**: Telegram bot menu works for admin allowlist entries and refuses read-only/unknown privileged access.
+**Checkpoint**: Telegram bot menu works for admin allowlist entries and refuses read-only or unknown privileged access.
 
 ---
 
@@ -139,10 +139,10 @@
 - [X] T062 [US3] Implement restore validation and preview handler for `POST /api/beszel/config-backups/validations` in `internal/hub/config_backup_api.go`
 - [X] T063 [US3] Implement merge restore apply handler for `POST /api/beszel/config-backups/restores` in `internal/hub/config_backup_restore.go`
 - [X] T064 [US3] Preserve legacy `GET /api/beszel/config-yaml` behavior while linking it to the new backup UI in `internal/hub/config/config.go`
-- [X] T065 [US3] Replace settings YAML page with backup export/preview/restore UI in `internal/site/src/components/routes/settings/config-yaml.tsx`
-- [X] T066 [US3] Add backup preview summary component for create/update/preserve/skip/conflict/error decisions in `internal/site/src/components/routes/settings/config-backup-preview.tsx`
+- [X] T065 [US3] Replace the settings YAML page with backup export/preview/restore UI in `internal/site/src/components/routes/settings/config-yaml.tsx`
+- [X] T066 [US3] Add backup preview summary UI for create/update/preserve/skip/conflict/error decisions in `internal/site/src/components/routes/settings/config-backup-preview.tsx`
 - [X] T067 [US3] Add backup API client helper calls in `internal/site/src/lib/api.ts`
-- [X] T068 [US3] Add TypeScript backup response/request types in `internal/site/src/types.d.ts`
+- [X] T068 [US3] Add TypeScript backup request and response types in `internal/site/src/types.d.ts`
 
 **Checkpoint**: Full configuration backup export and merge restore are independently functional and preserve target-only records.
 
@@ -152,18 +152,18 @@
 
 **Goal**: Confirm the feature can roll out as a panel-only update and existing agents keep reporting.
 
-**Independent Test**: Run panel with existing or simulated agents, exercise Telegram and backup workflows, and confirm no agent source or deployment command changes are required.
+**Independent Test**: Run the panel with existing or simulated agents, exercise Telegram and backup workflows, and confirm no agent source or deployment command changes are required.
 
 ### Tests for User Story 4
 
-- [X] T069 [P] [US4] Add backend regression test asserting backup/Telegram routes do not require agent transport changes in `internal/hub/agent_compatibility_test.go`
-- [X] T070 [P] [US4] Add repository guard test or script check for unintended `agent/` source changes in `specs/008-telegram-yml-backup/quickstart.md`
+- [X] T069 [P] [US4] Add backend regression test asserting Telegram and backup routes do not require agent transport changes in `internal/hub/agent_compatibility_test.go`
+- [X] T070 [P] [US4] Add backend or repository regression coverage for preserving agent-facing route and rollout assumptions in `internal/hub/agent_compatibility_test.go`
 
 ### Implementation for User Story 4
 
-- [X] T071 [US4] Document panel-only rollout and no-agent-update expectation in `specs/008-telegram-yml-backup/quickstart.md`
+- [X] T071 [US4] Document panel-only rollout and no-agent-update expectations in `specs/008-telegram-yml-backup/quickstart.md`
 - [X] T072 [US4] Validate existing agent websocket and metric reporting paths remain untouched in `internal/hub/api.go`
-- [X] T073 [US4] Validate generated install commands still point to existing images unless a later feature changes agent code in `internal/site/src/components/install-dropdowns-utils.ts`
+- [X] T073 [US4] Validate generated install commands still point to the existing agent image policy in `internal/site/src/components/install-dropdowns-utils.ts`
 
 **Checkpoint**: Panel-only deployment compatibility is explicitly verified.
 
@@ -173,17 +173,17 @@
 
 **Purpose**: Final quality, documentation, localization, and release checks across all stories.
 
-- [X] T074 [P] Run Go formatting on touched Go files from repository root `go.mod`
+- [X] T074 [P] Run Go formatting on touched files from repository root `go.mod`
 - [X] T075 Run focused backend feature tests for Telegram and backup packages from repository root `go.mod`
 - [X] T076 Run full backend tests with `go test -tags=testing ./...` from repository root `go.mod`
-- [X] T077 Run Go lint/static checks with `golangci-lint run --build-tags testing` from repository root `.golangci.yml`
+- [X] T077 Run Go lint and static checks with `golangci-lint run --build-tags testing` from repository root `go.mod`
 - [X] T078 Run frontend unit tests with `npm --prefix ./internal/site run test:unit` using `internal/site/package.json`
 - [X] T079 Run frontend Biome check with `npm --prefix ./internal/site run check` using `internal/site/package.json`
 - [X] T080 Run frontend production build with `npm --prefix ./internal/site run build` using `internal/site/package.json`
 - [X] T081 [P] Review REST API contract compatibility against `specs/008-telegram-yml-backup/contracts/telegram-api.md`
-- [X] T082 [P] Review backup schema compatibility against `specs/008-telegram-yml-backup/contracts/yml-backup-schema.md`
-- [X] T083 [P] Update operator validation notes in `specs/008-telegram-yml-backup/quickstart.md`
-- [X] T084 If pushed to GitHub or Docker image inputs change, wait for `Make docker images` and verify GHCR tags before reporting success using `specs/008-telegram-yml-backup/quickstart.md`
+- [X] T082 [P] Review backup API and schema compatibility against `specs/008-telegram-yml-backup/contracts/config-backup-api.md`
+- [X] T083 [P] Update operator validation and release notes in `specs/008-telegram-yml-backup/quickstart.md`
+- [X] T084 If pushed to GitHub or Docker image inputs change, wait for `Make docker images` and verify GHCR tags using `specs/008-telegram-yml-backup/quickstart.md`
 
 ---
 
@@ -195,13 +195,13 @@
 - **Foundational (Phase 2)**: Depends on Phase 1 and blocks all user stories.
 - **US1 Telegram notification channel (Phase 3)**: Depends on Phase 2.
 - **US2 Telegram bot menu (Phase 4)**: Depends on Phase 2 and can begin after the Telegram settings/destination store from US1 exists; keep tests independent with fakes.
-- **US3 YML backup/restore (Phase 5)**: Depends on Phase 2; can run in parallel with US1/US2 after shared schema and helpers exist.
-- **US4 Agent compatibility (Phase 6)**: Depends on US1/US3 implementation surfaces enough to verify no agent changes.
+- **US3 YML backup/restore (Phase 5)**: Depends on Phase 2 and can run in parallel with US1 and US2 after shared schema and helpers exist.
+- **US4 Agent compatibility (Phase 6)**: Depends on US1 and US3 implementation surfaces enough to verify no agent changes.
 - **Polish (Phase 7)**: Depends on all desired stories being complete.
 
 ### User Story Dependencies
 
-- **US1 (P1)**: MVP. No dependency on US2/US3/US4 after foundation.
+- **US1 (P1)**: MVP. No dependency on US2, US3, or US4 after foundation.
 - **US2 (P2)**: Uses Telegram settings/destinations from foundation and US1; menu actions are independently testable with fake updates.
 - **US3 (P3)**: Can proceed after foundation; includes Telegram config if US1 schema exists.
 - **US4 (P4)**: Verification story; should run after implementation to prove panel-only rollout.
@@ -258,6 +258,30 @@ After Phase 2, one agent can work US1 Telegram delivery, another can work US3 ba
 ## Notes
 
 - Baseline implementation must not modify `agent/` source files.
-- Existing `config.yml` startup sync remains legacy system-only behavior and may still delete systems absent from that file; new backup restore must not copy that deletion behavior.
-- Read-only Telegram destinations must never receive internal hosts, tokens, probe targets, webhook URLs, raw metric payloads, admin links, or backup details.
-- If full verification commands fail due existing unrelated repository issues, record exact blockers and run narrow feature tests before reporting implementation status.
+
+## Phase 8: Convergence
+
+- [X] T085 [P] Add backend tests for structured Telegram alert context covering affected node, alert class, severity, event timestamp, and triggered/resolved state in `internal/hub/telegram_delivery_test.go` and `internal/alerts/alerts_telegram_test.go` per FR-003 and US1/AC2 (partial)
+- [X] T086 Extend alert delivery data and Telegram message formatting with explicit severity, event timestamp, and current triggered/resolved state in `internal/alerts/alerts.go`, alert producers under `internal/alerts/`, and `internal/hub/telegram_delivery.go` per FR-003 and US1/AC2 (partial)
+- [X] T087 [P] Add frontend unit coverage for Telegram bot and destination delivery-health presentation in `internal/site/src/components/routes/settings/telegram-utils.test.ts` per FR-001 and US1/AC3 (partial)
+- [X] T088 Display bot status plus destination `lastTestAt`, `lastDeliveryAt`, mute state, and sanitized troubleshooting status in `internal/site/src/components/routes/settings/telegram-destinations.tsx` per FR-001 and US1/AC3 (partial)
+- [X] T089 [P] Add backend command tests for notification settings/status and current-binding verification actions in `internal/hub/telegram_menu_test.go` and `internal/hub/telegram_commands_test.go` per FR-005 and US2/AC3 (partial)
+- [X] T090 Implement Telegram notification settings/status and current-binding verification commands, help entries, and callback buttons in `internal/hub/telegram_commands.go`, `internal/hub/telegram_menu.go`, and `internal/hub/telegram_menu_notifications.go` per FR-005 and US2/AC3 (partial)
+- [X] T091 [P] Add backend tests for recently problematic node summaries in `internal/hub/telegram_menu_test.go` per US2/AC1 (partial)
+- [X] T092 Extend Telegram status overview with a bounded list of recently problematic nodes in `internal/hub/telegram_menu.go` per US2/AC1 (partial)
+- [X] T093 [P] Add backend and frontend validation tests for the supported Telegram alert-scope vocabulary in `internal/hub/telegram_destinations_test.go` and `internal/site/src/components/routes/settings/telegram-utils.test.ts` per FR-009 (partial)
+- [X] T094 Define and validate supported `alertLevelScope` values in `internal/hub/telegram_types.go`, `internal/hub/telegram_store.go`, and `internal/site/src/components/routes/settings/telegram-utils.ts` per FR-009 (partial)
+- [X] T095 [P] Add Telegram transport/menu tests for truncating or paginating messages that exceed Telegram limits in `internal/hub/telegram_delivery_test.go` and `internal/hub/telegram_menu_test.go` per edge case: Telegram message size limits (missing)
+- [X] T096 Implement shared Telegram message length handling and bounded node-list output in `internal/hub/telegram_transport.go`, `internal/hub/telegram_delivery.go`, and `internal/hub/telegram_menu_systems.go` per edge case: Telegram message size limits (missing)
+- [X] T097 [P] Add delivery tests for notification-storm throttling, bounded queue behavior, and retryable Telegram failures in `internal/hub/telegram_delivery_test.go` per edge case: notification storm conditions (missing)
+- [X] T098 Implement bounded Telegram delivery concurrency, rate limiting, and retry/backoff behavior in `internal/hub/telegram_delivery.go` and `internal/hub/telegram_transport.go` per edge case: notification storm conditions (missing)
+- [X] T099 [P] Add backup schema tests for per-section versions, unknown top-level sections, and newer incompatible section versions in `internal/hub/config_backup_export_test.go` and `internal/hub/config_backup_restore_test.go` per FR-011, FR-019, and US3/AC1-3 (partial)
+- [X] T100 Add section-level version metadata and compatibility warning/skip behavior for unknown or newer sections in `internal/hub/config_backup_types.go`, `internal/hub/config_backup_schema.go`, and `internal/hub/config_backup_restore.go` per FR-011, FR-019, and US3/AC1-3 (partial)
+- [X] T101 [P] Add restore preview tests that enumerate target-only preserve and unsupported skip decisions across alerts, quiet hours, notifications, Telegram destinations, public visibility, probes, and assignments in `internal/hub/config_backup_restore_test.go` per FR-013 and SC-005 (partial)
+- [X] T102 Expand restore preview inventory and summary accounting for preserve/skip decisions in every supported backup section in `internal/hub/config_backup_restore.go` per FR-013 and SC-005 (partial)
+- [X] T103 [P] Add regression tests proving redacted or omitted system tokens, webhooks, and Telegram bot tokens preserve existing target secrets during merge restore in `internal/hub/config_backup_crypto_test.go`, `internal/hub/config_backup_notifications_test.go`, and `internal/hub/config_backup_restore_test.go` per FR-016 and FR-017 (contradicts)
+- [X] T104 Preserve existing sensitive target values when backup secret envelopes are redacted or omitted in `internal/hub/config_backup_restore.go` and `internal/hub/telegram_store.go` per FR-016 and FR-017 (contradicts)
+- [X] T105 [P] Add section-failure tests proving restore does not leave undocumented partial mutations and returns actionable progress details in `internal/hub/config_backup_restore_test.go` per plan: restore transaction decision (partial)
+- [X] T106 Apply each configuration backup section transactionally or persist an explicit resumable partial-progress result in `internal/hub/config_backup_restore.go` and `internal/hub/config_backup_api.go` per plan: restore transaction decision (partial)
+- [X] T107 [P] Add consistency tests for configuration export while records change across collections in `internal/hub/config_backup_export_test.go` per edge case: YML export during concurrent configuration changes (partial)
+- [X] T108 Build configuration backups from a consistent database snapshot in `internal/hub/config_backup_sources.go` and `internal/hub/config_backup_api.go` per edge case: YML export during concurrent configuration changes (partial)

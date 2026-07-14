@@ -30,11 +30,21 @@ msgstr "{0} در دسترس است"
 msgid "{0} created, {1} updated."
 msgstr ""
 
+#. placeholder {0}: policyDraft.nodeScope.length
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "{0} nodes selected"
+msgstr ""
+
 #. placeholder {0}: table.getFilteredSelectedRowModel().rows.length
 #. placeholder {1}: table.getFilteredRowModel().rows.length
 #: src/components/routes/settings/alerts-history-data-table.tsx
 msgid "{0} of {1} row(s) selected."
 msgstr "{0} از {1} ردیف انتخاب شده است."
+
+#. placeholder {0}: policy.nodeScope.length
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "{0} selected nodes"
+msgstr ""
 
 #: src/components/routes/system/info-bar.tsx
 msgid "{cores, plural, one {# core} other {# cores}}"
@@ -99,6 +109,10 @@ msgstr "۳۰ روز"
 msgid "5 min"
 msgstr "۵ دقیقه"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "A matching enabled policy delivers once, even when policies overlap."
+msgstr ""
+
 #. Table column
 #: src/components/routes/settings/quiet-hours.tsx
 #: src/components/routes/settings/tokens-fingerprints.tsx
@@ -149,6 +163,14 @@ msgstr "تنظیم عرض چیدمان اصلی"
 msgid "Admin"
 msgstr "مدیر"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Admin channels receive full alert details within policy scope. Only private admins can use the management menu."
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Administrator"
+msgstr ""
+
 #: src/components/systemd-table/systemd-table.tsx
 msgid "After"
 msgstr "بعد از"
@@ -161,6 +183,10 @@ msgstr "پس از تنظیم متغیرهای محیطی، هاب Beszel خود 
 msgid "Agent"
 msgstr "عامل"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Alert categories"
+msgstr ""
+
 #: src/components/command-palette.tsx
 #: src/components/routes/settings/alerts-history-data-table.tsx
 #: src/components/routes/settings/layout.tsx
@@ -168,8 +194,8 @@ msgid "Alert History"
 msgstr "تاریخچه هشدارها"
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "Alert Scope Tags"
-msgstr ""
+#~ msgid "Alert Scope Tags"
+#~ msgstr ""
 
 #: src/components/alerts/alert-button.tsx
 #: src/components/alerts/alerts-sheet.tsx
@@ -183,6 +209,14 @@ msgstr "هشدارها"
 #: src/components/routes/containers.tsx
 msgid "All Containers"
 msgstr "همه کانتینرها"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "All nodes"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "All nodes (including future nodes)"
+msgstr ""
 
 #: src/components/alerts/alerts-sheet.tsx
 #: src/components/command-palette.tsx
@@ -258,6 +292,7 @@ msgstr ""
 msgid "Backups"
 msgstr "پشتیبان‌گیری‌ها"
 
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system/charts/network-charts.tsx
 #: src/lib/alerts.ts
 msgid "Bandwidth"
@@ -268,6 +303,7 @@ msgstr "پهنای باند"
 msgid "Bat"
 msgstr "باتری"
 
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system/charts/sensor-charts.tsx
 #: src/lib/alerts.ts
 msgid "Battery"
@@ -313,6 +349,15 @@ msgstr "بیت (کیلوبیت بر ثانیه، مگابیت بر ثانیه، 
 msgid "Boot state"
 msgstr "وضعیت بوت"
 
+#. placeholder {0}: stage.error
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Bot credential verification failed: {0}"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Bot credentials verified"
+msgstr ""
+
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Bot menu"
 msgstr ""
@@ -348,6 +393,7 @@ msgstr "می‌تواند متوقف شود"
 
 #: src/components/routes/settings/alerts-history-data-table.tsx
 #: src/components/routes/settings/quiet-hours.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/systems-table/systems-table-columns.tsx
 msgid "Cancel"
 msgstr "لغو"
@@ -418,6 +464,7 @@ msgid "Check your notification service"
 msgstr "سرویس اطلاع‌رسانی خود را بررسی کنید"
 
 #: src/components/containers-table/containers-table.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system/smart-table.tsx
 #: src/components/systems-table/systems-table.tsx
 msgid "Clear"
@@ -444,6 +491,15 @@ msgstr "برای کپی کردن کلیک کنید"
 msgid "Command line instructions"
 msgstr "دستورالعمل‌های خط فرمان"
 
+#. placeholder {0}: stage.error
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Command menu initialization failed: {0}"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Command menu initialized"
+msgstr ""
+
 #: src/components/routes/settings/config-yaml.tsx
 msgid "Configuration Backup"
 msgstr ""
@@ -464,6 +520,10 @@ msgstr "نحوه دریافت هشدارهای اطلاع‌رسانی را پی
 #~ msgid "Configure TCPing, ICMP Ping, and HTTP GET checks executed by selected agents."
 #~ msgstr ""
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Confirm delete"
+msgstr ""
+
 #: src/components/login/auth-form.tsx
 #: src/components/login/auth-form.tsx
 msgid "Confirm password"
@@ -472,6 +532,10 @@ msgstr "تأیید رمز عبور"
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Conflicts"
 msgstr "تعارض‌ها"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Connection error"
+msgstr ""
 
 #: src/components/active-alerts.tsx
 msgid "Connection is down"
@@ -547,6 +611,7 @@ msgid "Core"
 msgstr "هسته"
 
 #: src/components/containers-table/containers-table-columns.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/systemd-table/systemd-table-columns.tsx
 #: src/components/systems-table/systems-table-columns.tsx
 msgid "CPU"
@@ -588,6 +653,10 @@ msgstr "ایجاد حساب کاربری"
 msgid "Created"
 msgstr "ایجاد شده"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Credentials configured"
+msgstr ""
+
 #: src/components/routes/settings/general.tsx
 msgid "Critical (%)"
 msgstr "بحرانی (%)"
@@ -626,14 +695,42 @@ msgstr "بازه زمانی پیش‌فرض"
 
 #: src/components/routes/settings/alerts-history-data-table.tsx
 #: src/components/routes/settings/quiet-hours.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system/smart-table.tsx
 #: src/components/systems-table/systems-table-columns.tsx
 msgid "Delete"
 msgstr "حذف"
 
+#. placeholder {0}: deleteCandidate?.name
+#. placeholder {1}: maskTelegramChatID(deleteCandidate?.chatId ?? "")
+#. placeholder {2}: deleteCandidate?.policyCount ?? 0
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Delete {0} (Chat ID {1}) and its {2} notification policies. Bot settings and other channels are not affected."
+msgstr ""
+
 #: src/components/routes/settings/tokens-fingerprints.tsx
 msgid "Delete fingerprint"
 msgstr "حذف اثر انگشت"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Delete policy"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Delete Telegram destination"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Delete Telegram notification channel?"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Delivery error"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Delivery healthy"
+msgstr ""
 
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Description"
@@ -647,11 +744,18 @@ msgstr "جزئیات"
 msgid "Device"
 msgstr "دستگاه"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Disabled"
+msgstr ""
+
 #. Context: Battery state
 #: src/lib/i18n.ts
 msgid "Discharging"
 msgstr "در حال تخلیه"
 
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system.tsx
 #: src/components/systems-table/systems-table-columns.tsx
 msgid "Disk"
@@ -743,9 +847,14 @@ msgid "Empty"
 msgstr "خالی"
 
 #: src/components/routes/settings/telegram-destinations.tsx
+msgid "Enable policy"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
 msgid "Enable Telegram"
 msgstr ""
 
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Enabled"
 msgstr ""
@@ -799,6 +908,11 @@ msgstr "گذرا"
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Error"
 msgstr "خطا"
+
+#. placeholder {0}: health.error
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Error: {0}"
+msgstr ""
 
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Example:"
@@ -864,6 +978,10 @@ msgid "Failed to authenticate"
 msgstr "احراز هویت ناموفق بود"
 
 #: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to delete notification policy"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
 msgid "Failed to delete Telegram destination"
 msgstr ""
 
@@ -872,11 +990,19 @@ msgid "Failed to export configuration backup"
 msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to load notification policies"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
 msgid "Failed to load Telegram destinations"
 msgstr ""
 
 #: src/components/routes/settings/config-yaml.tsx
 msgid "Failed to restore configuration backup"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Failed to save notification policy"
 msgstr ""
 
 #: src/components/routes/settings/layout.tsx
@@ -969,6 +1095,7 @@ msgstr "عمومی"
 msgid "Global"
 msgstr "جهانی"
 
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system.tsx
 msgid "GPU"
 msgstr "پردازنده گرافیکی"
@@ -989,6 +1116,10 @@ msgstr "میزان استفاده از GPU"
 #: src/components/systems-table/systems-table.tsx
 msgid "Grid"
 msgstr "جدول"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Groups, supergroups, and channels can receive full notifications but cannot use the management menu."
+msgstr ""
 
 #: src/components/containers-table/containers-table-columns.tsx
 msgid "Health"
@@ -1070,6 +1201,16 @@ msgstr "آدرس ایمیل نامعتبر است."
 msgid "Language"
 msgstr "زبان"
 
+#. placeholder {0}: health.lastDeliveryAt || t`No delivery yet`
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Last delivery: {0}"
+msgstr ""
+
+#. placeholder {0}: health.lastTestAt || t`Not tested yet`
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Last test: {0}"
+msgstr ""
+
 #: src/components/routes/public-status.tsx
 #~ msgid "Last updated"
 #~ msgstr ""
@@ -1081,6 +1222,10 @@ msgstr "طرح‌بندی"
 #: src/components/routes/settings/general.tsx
 msgid "Layout width"
 msgstr "عرض چیدمان"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Leave empty to include all alert categories. System load is the average number of runnable tasks over 1, 5, and 15 minutes. It is not a percentage or alert duration; compare it with the node's logical CPU core count."
+msgstr ""
 
 #: src/components/routes/settings/config-yaml.tsx
 msgid "Legacy config.yml"
@@ -1167,6 +1312,7 @@ msgid "Max 1 min"
 msgstr "حداکثر ۱ دقیقه"
 
 #: src/components/containers-table/containers-table-columns.tsx
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system/info-bar.tsx
 #: src/components/systemd-table/systemd-table-columns.tsx
 #: src/components/systemd-table/systemd-table.tsx
@@ -1196,6 +1342,15 @@ msgstr "میزان استفاده از حافظه کانتینرهای داکر"
 #: src/components/routes/system/smart-table.tsx
 msgid "Model"
 msgstr "مدل"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Muted"
+msgstr ""
+
+#. placeholder {0}: health.muteUntil || t`No mute deadline`
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Muted until: {0}"
+msgstr ""
 
 #: src/components/add-system.tsx
 #: src/components/alerts-history-columns.tsx
@@ -1236,11 +1391,23 @@ msgstr "واحد شبکه"
 msgid "New Destination"
 msgstr ""
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "New policy"
+msgstr ""
+
 #: src/components/systemd-table/systemd-table.tsx
 #: src/components/systemd-table/systemd-table.tsx
 #: src/components/systemd-table/systemd-table.tsx
 msgid "No"
 msgstr "خیر"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "No delivery yet"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "No mute deadline"
+msgstr ""
 
 #: src/components/routes/public-status.tsx
 #~ msgid "No public systems are currently available."
@@ -1265,8 +1432,8 @@ msgid "No S.M.A.R.T. attributes available for this device."
 msgstr "هیچ ویژگی S.M.A.R.T برای این دستگاه موجود نیست."
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "No systems available."
-msgstr ""
+#~ msgid "No systems available."
+#~ msgstr ""
 
 #: src/components/systems-table/systems-table.tsx
 #: src/components/systems-table/systems-table.tsx
@@ -1278,7 +1445,28 @@ msgid "No Telegram destinations yet."
 msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "Node Scope"
+msgid "Node scope"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+#~ msgid "Node Scope"
+#~ msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Node status"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Not tested yet"
+msgstr ""
+
+#. placeholder {0}: policyDestination.name
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Notification policies for {0}"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Notification policy saved"
 msgstr ""
 
 #: src/components/command-palette.tsx
@@ -1431,6 +1619,15 @@ msgstr "لطفاً برای دستورالعمل‌ها به <0>مستندات</
 msgid "Please sign in to your account"
 msgstr "لطفاً به حساب کاربری خود وارد شوید"
 
+#. placeholder {0}: destination.policyCount ?? 0
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Policies: {0}"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Policy name"
+msgstr ""
+
 #: src/components/add-system.tsx
 msgid "Port"
 msgstr "پورت"
@@ -1485,6 +1682,14 @@ msgstr "ساعات آرام"
 #: src/components/routes/system/disk-io-sheet.tsx
 msgid "Read"
 msgstr "خواندن"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Read-only channels receive sanitized monitoring messages within policy scope and cannot run management commands."
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Read-only notifications"
+msgstr ""
 
 #: src/components/routes/system/charts/network-charts.tsx
 msgid "Received"
@@ -1559,9 +1764,17 @@ msgstr "چرخش توکن"
 msgid "Rows per page"
 msgstr "ردیف در هر صفحه"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Running normally"
+msgstr ""
+
 #: src/components/systemd-table/systemd-table.tsx
 msgid "Runtime Metrics"
 msgstr "معیارهای زمان اجرا"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "S.M.A.R.T."
+msgstr ""
 
 #: src/components/routes/system/smart-table.tsx
 msgid "S.M.A.R.T. Details"
@@ -1585,6 +1798,10 @@ msgstr "آدرس را با استفاده از کلید Enter یا کاما ذخ
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Save Destination"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Save policy"
 msgstr ""
 
 #: src/components/routes/settings/general.tsx
@@ -1620,6 +1837,10 @@ msgstr "جستجو"
 msgid "Search for systems or settings..."
 msgstr "جستجو برای سیستم‌ها یا تنظیمات..."
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Search nodes"
+msgstr ""
+
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Seconds between pings (default: 60)"
 msgstr "ثانیه بین پینگ‌ها (پیش‌فرض: ۶۰)"
@@ -1636,9 +1857,21 @@ msgstr "برای پیکربندی نحوه دریافت هشدارها، به <0
 msgid "Select {foo}"
 msgstr "انتخاب {foo}"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Select all current results"
+msgstr ""
+
 #: src/components/routes/settings/public-status.tsx
 #~ msgid "Select which systems are visible on the anonymous public status page."
 #~ msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Selected nodes"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Selected-node mode requires at least one node."
+msgstr ""
 
 #: src/components/routes/settings/heartbeat.tsx
 msgid "Send a single heartbeat ping to verify your endpoint is working."
@@ -1724,8 +1957,8 @@ msgid "Status"
 msgstr "وضعیت"
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "status, cpu, memory ..."
-msgstr ""
+#~ msgid "status, cpu, memory ..."
+#~ msgstr ""
 
 #: src/components/systemd-table/systemd-table-columns.tsx
 msgid "Sub State"
@@ -1758,6 +1991,18 @@ msgstr ""
 #: src/lib/alerts.ts
 msgid "System"
 msgstr "سیستم"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "System load (1-minute average)"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "System load (15-minute average)"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "System load (5-minute average)"
+msgstr ""
 
 #: src/components/routes/system/charts/load-average-chart.tsx
 msgid "System load averages over time"
@@ -1793,12 +2038,16 @@ msgid "Telegram bot"
 msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
+msgid "Telegram bot verification incomplete"
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
 msgid "Telegram bot verified"
 msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "Telegram connectivity is working."
-msgstr ""
+#~ msgid "Telegram connectivity is working."
+#~ msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Telegram destination saved"
@@ -1808,7 +2057,6 @@ msgstr ""
 msgid "Telegram destinations"
 msgstr ""
 
-#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "Telegram test failed"
 msgstr ""
@@ -1823,6 +2071,7 @@ msgstr ""
 msgid "Temp"
 msgstr "دما"
 
+#: src/components/routes/settings/telegram-destinations.tsx
 #: src/components/routes/system/charts/sensor-charts.tsx
 #: src/lib/alerts.ts
 msgid "Temperature"
@@ -1860,6 +2109,10 @@ msgstr "اعلان آزمایشی ارسال شد"
 msgid "The overall status is <0>ok</0> when all systems are up, <1>warn</1> when alerts are triggered, and <2>error</2> when any system is down."
 msgstr "وضعیت کلی زمانی <0>ok</0> است که همه سیستم‌ها بالا باشند، <1>warn</1> زمانی که هشدارها فعال شوند، و <2>error</2> زمانی که هر سیستمی پایین باشد."
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "The read-only role cannot use the management menu."
+msgstr ""
+
 #: src/components/login/forgot-pass-form.tsx
 msgid "Then log into the backend and reset your user account password in the users table."
 msgstr "سپس وارد بخش پشتیبان شوید و رمز عبور حساب کاربری خود را در جدول کاربران بازنشانی کنید."
@@ -1867,6 +2120,18 @@ msgstr "سپس وارد بخش پشتیبان شوید و رمز عبور حسا
 #: src/components/systems-table/systems-table-columns.tsx
 msgid "This action cannot be undone. This will permanently delete all current records for {name} from the database."
 msgstr "این عمل قابل برگشت نیست. این کار تمام رکوردهای فعلی {name} را برای همیشه از پایگاه داده حذف خواهد کرد."
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "This channel has no notification policies."
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "This Chat ID already exists. The existing channel is now selected."
+msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "This private admin can use the Bot management menu."
+msgstr ""
 
 #: src/components/routes/settings/alerts-history-data-table.tsx
 msgid "This will permanently delete all selected records from the database."
@@ -2103,9 +2368,17 @@ msgstr "۲۰۰ هشدار اخیر خود را مشاهده کنید."
 msgid "Visible Fields"
 msgstr "فیلدهای قابل مشاهده"
 
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Waiting for configuration"
+msgstr ""
+
 #: src/components/routes/system/chart-card.tsx
 msgid "Waiting for enough records to display"
 msgstr "در انتظار رکوردهای کافی برای نمایش"
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "Waiting for test"
+msgstr ""
 
 #: src/components/routes/settings/general.tsx
 msgid "Want to help improve our translations? Check <0>Crowdin</0> for details."
@@ -2215,8 +2488,8 @@ msgid "包含 token、Webhook URL、Telegram Bot Token 等敏感值时必须加�
 msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "只读渠道可按告警类别限制投递；留空表示不过滤。"
-msgstr ""
+#~ msgid "只读渠道可按告警类别限制投递；留空表示不过滤。"
+#~ msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
 msgid "后续可用于管理 Telegram 菜单命令。"
@@ -2292,7 +2565,11 @@ msgid "线路检测"
 msgstr ""
 
 #: src/components/routes/settings/telegram-destinations.tsx
-msgid "维护允许接收告警的私聊、群组、频道或超群，并为只读渠道限制节点和告警范围。"
+#~ msgid "维护允许接收告警的私聊、群组、频道或超群，并为只读渠道限制节点和告警范围。"
+#~ msgstr ""
+
+#: src/components/routes/settings/telegram-destinations.tsx
+msgid "维护允许接收告警的私聊、群组、频道或超群，并通过通知规则限制节点和告警范围。"
 msgstr ""
 
 #: src/components/routes/public-status.tsx

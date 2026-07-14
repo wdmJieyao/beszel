@@ -1,10 +1,11 @@
-import { CircleAlertIcon } from "lucide-react"
+import { CircleAlertIcon, LoaderCircleIcon } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 import { getPublicChartTimeData } from "@/lib/utils"
 import type { NetworkProbeChartSeries, NetworkProbeSeriesPoint, PublicChartRange } from "@/types"
 import { prepareNetworkProbeChartData } from "./network-probe-chart-data"
+import { getNetworkProbeChartEmptyState } from "./network-probe-chart-state.ts"
 
 const NETWORK_PROBE_CHART_VERSION = "2026-07-02-cache-refresh"
 
@@ -13,14 +14,19 @@ export function NetworkProbeChart({
 	range = "30m",
 	heightClassName = "h-28",
 	emptyLabel = "暂无检测结果",
+	loading = false,
+	error = false,
 }: {
 	series: NetworkProbeChartSeries[]
 	range?: PublicChartRange
 	heightClassName?: string
 	emptyLabel?: string
+	loading?: boolean
+	error?: boolean
 }) {
 	const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(() => new Set())
 	const [nowMs, setNowMs] = useState(() => Date.now())
+	const emptyState = getNetworkProbeChartEmptyState({ range, emptyLabel, loading, error })
 	const { chartRows, renderedSeries, hasLatency, hasAnyPoints, latestPoint, timeData } = useMemo(
 		() => prepareNetworkProbeChartData(series, range, nowMs),
 		[range, series, nowMs]
@@ -56,9 +62,16 @@ export function NetworkProbeChart({
 	if (!series.length) {
 		return (
 			<div
-				className={`${heightClassName} flex items-center justify-center rounded-md bg-muted/40 text-sm text-muted-foreground`}
+				className={`${heightClassName} flex items-center justify-center rounded-md bg-muted/40 px-3 text-sm text-muted-foreground`}
 			>
-				{emptyLabel}
+				{emptyState.kind === "loading" ? (
+					<span className="inline-flex items-center gap-2">
+						<LoaderCircleIcon className="size-4 animate-spin" />
+						{emptyState.message}
+					</span>
+				) : (
+					emptyState.message
+				)}
 			</div>
 		)
 	}
@@ -100,9 +113,16 @@ export function NetworkProbeChart({
 			<div className="space-y-2">
 				{legend}
 				<div
-					className={`${heightClassName} flex items-center justify-center rounded-md bg-muted/40 text-sm text-muted-foreground`}
+					className={`${heightClassName} flex items-center justify-center rounded-md bg-muted/40 px-3 text-sm text-muted-foreground`}
 				>
-					{emptyLabel}
+					{emptyState.kind === "loading" ? (
+						<span className="inline-flex items-center gap-2">
+							<LoaderCircleIcon className="size-4 animate-spin" />
+							{emptyState.message}
+						</span>
+					) : (
+						emptyState.message
+					)}
 				</div>
 			</div>
 		)

@@ -16,7 +16,38 @@ type configBackupExportOptions struct {
 	Sections       []string
 }
 
+func (h *Hub) configBackupTransactionHub(app core.App) *Hub {
+	return &Hub{
+		App:                   app,
+		AlertManager:          h.AlertManager,
+		um:                    h.um,
+		rm:                    h.rm,
+		sm:                    h.sm,
+		hb:                    h.hb,
+		hbStop:                h.hbStop,
+		telegramDeliveryState: h.telegramDeliveryState,
+		telegramTransport:     h.telegramTransport,
+		telegramPollingCancel: h.telegramPollingCancel,
+		networkProbeLive:      h.networkProbeLive,
+		pubKey:                h.pubKey,
+		signer:                h.signer,
+		appURL:                h.appURL,
+	}
+}
+
 func (h *Hub) buildConfigBackupDocument(options configBackupExportOptions) (ConfigBackupDocument, []string, error) {
+	var document ConfigBackupDocument
+	var warnings []string
+	err := h.RunInTransaction(func(txApp core.App) error {
+		txHub := h.configBackupTransactionHub(txApp)
+		var err error
+		document, warnings, err = txHub.buildConfigBackupDocumentSnapshot(options)
+		return err
+	})
+	return document, warnings, err
+}
+
+func (h *Hub) buildConfigBackupDocumentSnapshot(options configBackupExportOptions) (ConfigBackupDocument, []string, error) {
 	sections, err := normalizeConfigBackupSections(options.Sections)
 	if err != nil {
 		return ConfigBackupDocument{}, nil, err
@@ -167,7 +198,8 @@ func (h *Hub) configBackupNotifications(userIDToEmail map[string]string, options
 		return ConfigBackupNotifications{}, err
 	}
 	result := ConfigBackupNotifications{
-		UserSettings: make([]ConfigBackupUserNotificationSettings, 0, len(settingsRecords)),
+		SectionVersion: ConfigBackupNotificationsVersion,
+		UserSettings:   make([]ConfigBackupUserNotificationSettings, 0, len(settingsRecords)),
 	}
 	for _, record := range settingsRecords {
 		var settings struct {
@@ -197,6 +229,7 @@ func (h *Hub) configBackupNotifications(userIDToEmail map[string]string, options
 		return ConfigBackupNotifications{}, err
 	}
 	result.Telegram.Settings = ConfigBackupTelegramSettings{
+		Present:        true,
 		Enabled:        telegramSettings.Enabled,
 		PollingEnabled: telegramSettings.PollingEnabled,
 		BotUsername:    telegramSettings.BotUsername,
@@ -220,20 +253,32 @@ func (h *Hub) configBackupNotifications(userIDToEmail map[string]string, options
 	result.Telegram.Destinations = make([]ConfigBackupTelegramDestination, 0, len(destinations))
 	for _, destination := range destinations {
 		item := ConfigBackupTelegramDestination{
-			StableID:        destination.ID,
-			UserEmail:       userIDToEmail[destination.UserID],
-			Name:            destination.Name,
-			ChatID:          destination.ChatID,
-			ChatType:        destination.ChatType,
-			Role:            destination.Role,
-			Enabled:         destination.Enabled,
-			NodeScope:       destination.NodeScope,
-			AlertLevelScope: destination.AlertLevelScope,
+			StableID:  destination.ID,
+			UserEmail: userIDToEmail[destination.UserID],
+			Name:      destination.Name,
+			ChatID:    destination.ChatID,
+			ChatType:  destination.ChatType,
+			Role:      destination.Role,
+			Enabled:   destination.Enabled,
 		}
 		if destination.MuteUntil != nil {
 			item.MuteUntil = destination.MuteUntil.UTC().Format(configBackupDateLayout)
 		}
 		result.Telegram.Destinations = append(result.Telegram.Destinations, item)
+	}
+	policiesByDestination, err := h.listAllTelegramNotificationPolicies()
+	if err != nil {
+		return ConfigBackupNotifications{}, err
+	}
+	result.Telegram.Policies = []ConfigBackupTelegramPolicy{}
+	for _, destination := range destinations {
+		for _, policy := range policiesByDestination[destination.ID] {
+			result.Telegram.Policies = append(result.Telegram.Policies, ConfigBackupTelegramPolicy{
+				StableID: policy.ID, DestinationStableID: destination.ID, Name: policy.Name,
+				Enabled: policy.Enabled, NodeScopeMode: policy.NodeScopeMode,
+				NodeScope: policy.NodeScope, AlertLevelScope: policy.AlertLevelScope,
+			})
+		}
 	}
 	return result, nil
 }

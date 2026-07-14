@@ -9,6 +9,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestTelegramAdminMenuRequiresPrivateChat(t *testing.T) {
+	assert.True(t, telegramDestinationCanUseAdminMenu(telegramDestinationRecord{Enabled: true, Role: TelegramRoleAdmin, ChatType: TelegramChatTypePrivate}))
+	assert.False(t, telegramDestinationCanUseAdminMenu(telegramDestinationRecord{Enabled: true, Role: TelegramRoleAdmin, ChatType: TelegramChatTypeGroup}))
+	assert.False(t, telegramDestinationCanUseAdminMenu(telegramDestinationRecord{Enabled: true, Role: TelegramRoleAdmin, ChatType: TelegramChatTypeSupergroup}))
+}
+
 func TestTelegramAuthorizationUsesEnabledAllowlist(t *testing.T) {
 	hub, _ := newTelegramHubWithAdmin(t)
 	_, err := hub.upsertTelegramDestination(nil, TelegramDestinationInput{

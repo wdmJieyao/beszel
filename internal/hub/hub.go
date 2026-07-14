@@ -36,6 +36,7 @@ type Hub struct {
 	sm                        *systems.SystemManager
 	hb                        *heartbeat.Heartbeat
 	hbStop                    chan struct{}
+	telegramDeliveryState     *telegramDeliveryState
 	telegramTransport         TelegramTransport
 	telegramPollingOnce       sync.Once
 	telegramPollingCancel     context.CancelFunc
@@ -49,7 +50,7 @@ type Hub struct {
 
 // NewHub creates a new Hub instance with default configuration
 func NewHub(app core.App) *Hub {
-	hub := &Hub{App: app}
+	hub := &Hub{App: app, telegramDeliveryState: &telegramDeliveryState{}}
 	hub.AlertManager = alerts.NewAlertManager(hub)
 	hub.SetTelegramSender(hub)
 	hub.um = users.NewUserManager(hub)

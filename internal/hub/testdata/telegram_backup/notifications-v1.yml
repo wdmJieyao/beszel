@@ -1,0 +1,19 @@
+meta:
+  backupVersion: "1"
+  sourceVersion: test
+  createdAt: "2026-07-10T00:00:00Z"
+  mode: merge
+  sections: [notifications]
+  sectionVersions:
+    notifications: "1"
+notifications:
+  telegram:
+    destinations:
+      - stableId: legacychannel01
+        name: Legacy operations
+        chatId: "10001"
+        chatType: private
+        role: read_only
+        enabled: true
+        nodeScope: []
+        alertLevelScope: [status]

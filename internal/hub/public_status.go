@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -20,19 +21,168 @@ const (
 )
 
 type publicChartRange struct {
-	Name      string
-	Duration  time.Duration
-	StatsType string
+	Name        string
+	Duration    time.Duration
+	StatsType   string
+	ProbeBucket string
 }
 
 var publicChartRanges = map[string]publicChartRange{
-	"1m":  {Name: "1m", Duration: time.Minute, StatsType: "1m"},
-	"30m": {Name: "30m", Duration: 30 * time.Minute, StatsType: "1m"},
-	"1h":  {Name: "1h", Duration: time.Hour, StatsType: "1m"},
-	"12h": {Name: "12h", Duration: 12 * time.Hour, StatsType: "10m"},
-	"24h": {Name: "24h", Duration: 24 * time.Hour, StatsType: "20m"},
-	"1w":  {Name: "1w", Duration: 7 * 24 * time.Hour, StatsType: "120m"},
-	"30d": {Name: "30d", Duration: 30 * 24 * time.Hour, StatsType: "480m"},
+	"1m":  {Name: "1m", Duration: time.Minute, StatsType: "1m", ProbeBucket: "1m"},
+	"30m": {Name: "30m", Duration: 30 * time.Minute, StatsType: "1m", ProbeBucket: "1m"},
+	"1h":  {Name: "1h", Duration: time.Hour, StatsType: "1m", ProbeBucket: "1m"},
+	"12h": {Name: "12h", Duration: 12 * time.Hour, StatsType: "10m", ProbeBucket: "10m"},
+	"24h": {Name: "24h", Duration: 24 * time.Hour, StatsType: "20m", ProbeBucket: "20m"},
+	"1w":  {Name: "1w", Duration: 7 * 24 * time.Hour, StatsType: "120m", ProbeBucket: "120m"},
+	"30d": {Name: "30d", Duration: 30 * 24 * time.Hour, StatsType: "480m", ProbeBucket: "480m"},
+}
+
+var orderedProbeBuckets = []string{"1m", "10m", "20m", "120m", "480m"}
+
+var probeBucketDurations = map[string]time.Duration{
+	"1m":   time.Minute,
+	"10m":  10 * time.Minute,
+	"20m":  20 * time.Minute,
+	"120m": 120 * time.Minute,
+	"480m": 480 * time.Minute,
+}
+
+func (r publicChartRange) probeBucket() string {
+	if r.ProbeBucket != "" {
+		return r.ProbeBucket
+	}
+	return r.StatsType
+}
+
+func (r publicChartRange) preferredProbeBuckets() []string {
+	target := r.probeBucket()
+	index := slices.Index(orderedProbeBuckets, target)
+	if index < 0 {
+		return []string{target}
+	}
+	buckets := make([]string, 0, index+1)
+	for i := index; i >= 0; i-- {
+		buckets = append(buckets, orderedProbeBuckets[i])
+	}
+	return buckets
+}
+
+func (r publicChartRange) probeBucketWindow() time.Duration {
+	if duration, ok := probeBucketDurations[r.probeBucket()]; ok {
+		return duration
+	}
+	return time.Minute
+}
+
+func (r publicChartRange) probeBucketRank(bucket string) (int, bool) {
+	bucket = strings.TrimSpace(bucket)
+	for index, preferred := range r.preferredProbeBuckets() {
+		if bucket == preferred {
+			return index, true
+		}
+	}
+	if bucket == "" {
+		return len(r.preferredProbeBuckets()), true
+	}
+	return 0, false
+}
+
+func (r publicChartRange) selectCompatibleProbeRecords(records []*core.Record) []*core.Record {
+	if len(records) == 0 {
+		return nil
+	}
+	window := r.probeBucketWindow()
+	bestRankByWindow := make(map[string]int)
+	selectedByWindow := make(map[string]*core.Record)
+	for _, record := range records {
+		rank, ok := r.probeBucketRank(record.GetString("bucket"))
+		if !ok {
+			continue
+		}
+		windowKey := compatibleProbeRecordWindowKey(record, window)
+		bestRank, seen := bestRankByWindow[windowKey]
+		if !seen || rank < bestRank {
+			bestRankByWindow[windowKey] = rank
+			selectedByWindow[windowKey] = record
+			continue
+		}
+		if rank == bestRank && shouldPreferLaterCompatibleProbeRecord(record, selectedByWindow[windowKey]) {
+			selectedByWindow[windowKey] = record
+		}
+	}
+	selected := make([]*core.Record, 0, len(records))
+	for _, record := range selectedByWindow {
+		selected = append(selected, record)
+	}
+	slices.SortFunc(selected, func(a, b *core.Record) int {
+		createdA := a.GetDateTime("created").Time().UTC()
+		createdB := b.GetDateTime("created").Time().UTC()
+		switch {
+		case createdA.Before(createdB):
+			return -1
+		case createdA.After(createdB):
+			return 1
+		default:
+			return strings.Compare(a.Id, b.Id)
+		}
+	})
+	return selected
+}
+
+func shouldPreferLaterCompatibleProbeRecord(candidate *core.Record, current *core.Record) bool {
+	if current == nil {
+		return true
+	}
+	candidateCreated := candidate.GetDateTime("created").Time().UTC()
+	currentCreated := current.GetDateTime("created").Time().UTC()
+	switch {
+	case candidateCreated.After(currentCreated):
+		return true
+	case candidateCreated.Before(currentCreated):
+		return false
+	default:
+		return candidate.Id > current.Id
+	}
+}
+
+func compatibleProbeRecordWindowKey(record *core.Record, window time.Duration) string {
+	systemID := record.GetString("system")
+	windowStart := record.GetDateTime("created").Time().UTC().Truncate(window).UnixNano()
+	return systemID + ":" + strconv.FormatInt(windowStart, 10)
+}
+
+func (h *Hub) compatibleProbeRangeRecords(probeID string, systemID string, rangeSpec publicChartRange) ([]*core.Record, error) {
+	filter := "probe = {:probe} && created >= {:created}"
+	params := dbx.Params{
+		"probe":   probeID,
+		"created": time.Now().UTC().Add(-rangeSpec.Duration),
+	}
+	bucketFilter := compatibleProbeBucketFilter(rangeSpec)
+	if bucketFilter != "" {
+		filter += " && (" + bucketFilter + ")"
+	}
+	if systemID != "" {
+		filter += " && system = {:system}"
+		params["system"] = systemID
+	}
+	records, err := h.FindRecordsByFilter(CollectionNetworkProbeResults, filter, "created", -1, 0, params)
+	if err != nil {
+		return nil, err
+	}
+	return rangeSpec.selectCompatibleProbeRecords(records), nil
+}
+
+func compatibleProbeBucketFilter(rangeSpec publicChartRange) string {
+	preferred := rangeSpec.preferredProbeBuckets()
+	if len(preferred) == 0 {
+		return "(bucket = '' || bucket = null)"
+	}
+	parts := make([]string, 0, len(preferred)+2)
+	for _, bucket := range preferred {
+		parts = append(parts, fmt.Sprintf("bucket = '%s'", bucket))
+	}
+	parts = append(parts, "bucket = ''", "bucket = null")
+	return strings.Join(parts, " || ")
 }
 
 type PublicSystemVisibility struct {
@@ -520,18 +670,7 @@ func (h *Hub) publicProbeSummaries(systemID string, visibility PublicSystemVisib
 		if err != nil {
 			return nil, err
 		}
-		results, err := h.FindRecordsByFilter(
-			CollectionNetworkProbeResults,
-			"probe = {:probe} && system = {:system} && created >= {:created}",
-			"created",
-			-1,
-			0,
-			dbx.Params{
-				"probe":   probe.Id,
-				"system":  systemID,
-				"created": time.Now().UTC().Add(-rangeSpec.Duration),
-			},
-		)
+		results, err := h.compatibleProbeRangeRecords(probe.Id, systemID, rangeSpec)
 		if err != nil {
 			return nil, err
 		}

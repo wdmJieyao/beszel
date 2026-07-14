@@ -27,13 +27,27 @@ type AlertManager struct {
 	telegramSender TelegramAlertSender
 }
 
+const (
+	AlertSeverityInfo     = "info"
+	AlertSeverityWarning  = "warning"
+	AlertSeverityCritical = "critical"
+
+	AlertStateTriggered = "triggered"
+	AlertStateResolved  = "resolved"
+)
+
 type AlertMessageData struct {
-	UserID   string
-	SystemID string
-	Title    string
-	Message  string
-	Link     string
-	LinkText string
+	UserID     string
+	SystemID   string
+	SystemName string
+	AlertClass string
+	Severity   string
+	State      string
+	EventTime  time.Time
+	Title      string
+	Message    string
+	Link       string
+	LinkText   string
 }
 
 type UserNotificationSettings struct {

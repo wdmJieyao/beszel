@@ -411,22 +411,12 @@ func (h *Hub) getNetworkProbeResults(e *core.RequestEvent) error {
 		return e.NotFoundError("Network probe not found.", err)
 	}
 	systemID := e.Request.URL.Query().Get("system")
-	filter := "probe = {:probe} && created >= {:created}"
-	params := dbx.Params{
-		"probe":   probeID,
-		"created": time.Now().UTC().Add(-rangeSpec.Duration),
-	}
-	if systemID != "" {
-		filter += " && system = {:system}"
-		params["system"] = systemID
-	}
-	results, err := h.FindRecordsByFilter(CollectionNetworkProbeResults, filter, "-created", 500, 0, params)
+	results, err := h.compatibleProbeRangeRecords(probeID, systemID, rangeSpec)
 	if err != nil {
 		return err
 	}
 	series := make([]NetworkProbeResultPoint, 0, len(results))
-	for i := len(results) - 1; i >= 0; i-- {
-		result := results[i]
+	for _, result := range results {
 		series = append(series, networkProbeResultPoint(result))
 	}
 	return e.JSON(200, NetworkProbeResultsResponse{ProbeID: probeID, Series: series})

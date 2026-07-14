@@ -1,8 +1,10 @@
 package hub
 
 const (
-	ConfigBackupVersion = "1"
-	ConfigBackupMode    = "merge"
+	ConfigBackupVersion              = "1"
+	ConfigBackupSectionVersion       = "1"
+	ConfigBackupNotificationsVersion = "2"
+	ConfigBackupMode                 = "merge"
 
 	ConfigBackupSectionSystems       = "systems"
 	ConfigBackupSectionAlerts        = "alerts"
@@ -45,6 +47,15 @@ type ConfigBackupRestoreRequest struct {
 	DecryptionCredential string `json:"decryptionCredential"`
 }
 
+type ConfigBackupRestoreFailureResponse struct {
+	Mode              string                   `json:"mode"`
+	Applied           ConfigBackupApplySummary `json:"applied"`
+	CompletedSections []string                 `json:"completedSections"`
+	FailedSection     string                   `json:"failedSection"`
+	Warnings          []string                 `json:"warnings"`
+	Error             string                   `json:"error"`
+}
+
 type ConfigBackupRestoreResponse struct {
 	Mode     string                   `json:"mode"`
 	Applied  ConfigBackupApplySummary `json:"applied"`
@@ -59,22 +70,26 @@ type ConfigBackupApplySummary struct {
 }
 
 type ConfigBackupDocument struct {
-	Meta          ConfigBackupMeta          `json:"meta" yaml:"meta"`
-	Encryption    ConfigBackupEncryption    `json:"encryption,omitempty" yaml:"encryption,omitempty"`
-	Users         []ConfigBackupUser        `json:"users,omitempty" yaml:"users,omitempty"`
-	Systems       []ConfigBackupSystem      `json:"systems,omitempty" yaml:"systems,omitempty"`
-	Alerts        ConfigBackupAlerts        `json:"alerts,omitempty" yaml:"alerts,omitempty"`
-	Notifications ConfigBackupNotifications `json:"notifications,omitempty" yaml:"notifications,omitempty"`
-	PublicStatus  ConfigBackupPublicStatus  `json:"publicStatus,omitempty" yaml:"publicStatus,omitempty"`
-	NetworkProbes ConfigBackupNetworkProbes `json:"networkProbes,omitempty" yaml:"networkProbes,omitempty"`
+	CompatibilityWarnings []string                  `json:"-" yaml:"-"`
+	UnknownSections       []string                  `json:"-" yaml:"-"`
+	SkippedSections       map[string]string         `json:"-" yaml:"-"`
+	Meta                  ConfigBackupMeta          `json:"meta" yaml:"meta"`
+	Encryption            ConfigBackupEncryption    `json:"encryption,omitempty" yaml:"encryption,omitempty"`
+	Users                 []ConfigBackupUser        `json:"users,omitempty" yaml:"users,omitempty"`
+	Systems               []ConfigBackupSystem      `json:"systems,omitempty" yaml:"systems,omitempty"`
+	Alerts                ConfigBackupAlerts        `json:"alerts,omitempty" yaml:"alerts,omitempty"`
+	Notifications         ConfigBackupNotifications `json:"notifications,omitempty" yaml:"notifications,omitempty"`
+	PublicStatus          ConfigBackupPublicStatus  `json:"publicStatus,omitempty" yaml:"publicStatus,omitempty"`
+	NetworkProbes         ConfigBackupNetworkProbes `json:"networkProbes,omitempty" yaml:"networkProbes,omitempty"`
 }
 
 type ConfigBackupMeta struct {
-	BackupVersion string   `json:"backupVersion" yaml:"backupVersion"`
-	SourceVersion string   `json:"sourceVersion" yaml:"sourceVersion"`
-	CreatedAt     string   `json:"createdAt" yaml:"createdAt"`
-	Mode          string   `json:"mode" yaml:"mode"`
-	Sections      []string `json:"sections" yaml:"sections"`
+	BackupVersion   string            `json:"backupVersion" yaml:"backupVersion"`
+	SourceVersion   string            `json:"sourceVersion" yaml:"sourceVersion"`
+	CreatedAt       string            `json:"createdAt" yaml:"createdAt"`
+	Mode            string            `json:"mode" yaml:"mode"`
+	Sections        []string          `json:"sections" yaml:"sections"`
+	SectionVersions map[string]string `json:"sectionVersions,omitempty" yaml:"sectionVersions,omitempty"`
 }
 
 type ConfigBackupEncryption struct {
@@ -138,8 +153,9 @@ type ConfigBackupQuietHour struct {
 }
 
 type ConfigBackupNotifications struct {
-	UserSettings []ConfigBackupUserNotificationSettings `json:"userSettings,omitempty" yaml:"userSettings,omitempty"`
-	Telegram     ConfigBackupTelegramNotifications      `json:"telegram,omitempty" yaml:"telegram,omitempty"`
+	SectionVersion string                                 `json:"-" yaml:"-"`
+	UserSettings   []ConfigBackupUserNotificationSettings `json:"userSettings,omitempty" yaml:"userSettings,omitempty"`
+	Telegram       ConfigBackupTelegramNotifications      `json:"telegram,omitempty" yaml:"telegram,omitempty"`
 }
 
 type ConfigBackupUserNotificationSettings struct {
@@ -151,9 +167,21 @@ type ConfigBackupUserNotificationSettings struct {
 type ConfigBackupTelegramNotifications struct {
 	Settings     ConfigBackupTelegramSettings      `json:"settings,omitempty" yaml:"settings,omitempty"`
 	Destinations []ConfigBackupTelegramDestination `json:"destinations,omitempty" yaml:"destinations,omitempty"`
+	Policies     []ConfigBackupTelegramPolicy      `json:"policies,omitempty" yaml:"policies,omitempty"`
+}
+
+type ConfigBackupTelegramPolicy struct {
+	StableID            string   `json:"stableId" yaml:"stableId"`
+	DestinationStableID string   `json:"destinationStableId" yaml:"destinationStableId"`
+	Name                string   `json:"name" yaml:"name"`
+	Enabled             bool     `json:"enabled" yaml:"enabled"`
+	NodeScopeMode       string   `json:"nodeScopeMode" yaml:"nodeScopeMode"`
+	NodeScope           []string `json:"nodeScope,omitempty" yaml:"nodeScope,omitempty"`
+	AlertLevelScope     []string `json:"alertLevelScope,omitempty" yaml:"alertLevelScope,omitempty"`
 }
 
 type ConfigBackupTelegramSettings struct {
+	Present        bool                `json:"-" yaml:"-"`
 	Enabled        bool                `json:"enabled" yaml:"enabled"`
 	PollingEnabled bool                `json:"pollingEnabled" yaml:"pollingEnabled"`
 	BotUsername    string              `json:"botUsername,omitempty" yaml:"botUsername,omitempty"`

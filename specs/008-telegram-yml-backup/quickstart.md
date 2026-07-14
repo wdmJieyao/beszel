@@ -20,6 +20,11 @@ existing hub collections. Existing `beszel-agent` deployments can keep running
 unchanged; no agent image, agent command, agent websocket, or metric reporting
 change is required for this feature.
 
+If a node-detail latency chart realtime refresh fix is released in the same
+batch, validate it through its own latency feature quickstart and acceptance
+tests. Do not treat that regression fix as part of Telegram/YML feature
+acceptance for this plan.
+
 Before deploying a build from this feature, verify that:
 
 - `/api/beszel/agent-connect` is still registered as the unauthenticated agent

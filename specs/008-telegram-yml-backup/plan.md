@@ -1,6 +1,6 @@
 # Implementation Plan: Telegram Notifications and YML Configuration Backup
 
-**Branch**: `` | **Date**: 2026-07-06 | **Spec**: [spec.md](./spec.md)
+**Branch**: `` | **Date**: 2026-07-10 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/008-telegram-yml-backup/spec.md`
 
@@ -21,6 +21,10 @@ panel-managed configuration sections, encrypt sensitive values when included,
 and imports use previewed merge restore: create missing records, update records
 matched by stable identifiers, preserve target-only records, and reject unsafe
 or incompatible sections before applying.
+
+Node-detail latency chart realtime refresh fixes may ship in the same release
+batch, but they remain specified, planned, and accepted under the existing
+latency-monitoring feature specs rather than this Telegram/YML feature.
 
 ## Technical Context
 
@@ -78,14 +82,16 @@ decryption credentials on import. Import defaults to merge restore and must not
 delete target-only configuration. Existing `config.yml` startup sync remains
 system-only and keeps its current semantics; the new backup flow must not inherit
 its destructive delete-by-absence behavior. Baseline implementation must not
-require `beszel-agent` updates.
+require `beszel-agent` updates. Unrelated latency-chart refresh fixes, even when
+co-released, are out of scope for this plan and must stay owned by the latency
+feature line.
 
 **Scale/Scope**: Applies to all configured systems, alert definitions, quiet
 hours, user notification preferences, public dashboard visibility, public probe
 visibility selections, network probe definitions and assignments, Telegram bot
 settings, and Telegram destinations. Excludes users/passwords/auth providers,
-historical metrics, alert history, probe result history, logs, and generated
-charts.
+historical metrics, alert history, probe result history, logs, generated
+charts, and unrelated node detail latency chart realtime refresh behavior.
 
 ## Constitution Check
 

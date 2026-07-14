@@ -163,7 +163,7 @@ export function useSystemData(id: string) {
 			...getTimeData(chartTime, lastCreated),
 			agentVersion,
 		}
-	}, [systemStats, containerData, direction])
+	}, [systemStats, containerData, direction, chartTime, agentVersion])
 
 	// Share chart config computation for all container charts
 	const containerChartConfigs = useContainerChartConfigs(containerData)

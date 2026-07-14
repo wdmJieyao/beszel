@@ -284,16 +284,21 @@ export default memo(function SystemDetail({ id }: { id: string }) {
 				details={details}
 			/>
 
-			{latencySeries.length > 0 && (
+			{(probeData.probes.length > 0 || probeData.loading || probeData.error) && (
 				<div className="space-y-3 rounded-md border bg-card p-4">
 					<div className="flex items-center justify-between gap-2">
 						<div>
 							<div className="font-medium">线路检测</div>
 							<div className="text-sm text-muted-foreground">点击图例显示或隐藏对应线路。</div>
 						</div>
-						<div className="text-sm text-muted-foreground">{latencySeries.length} 条线路</div>
+						<div className="text-sm text-muted-foreground">{probeData.probes.length} 条线路</div>
 					</div>
-					<NetworkProbeChart series={latencySeries} range={chartData.chartTime} />
+					<NetworkProbeChart
+						series={latencySeries}
+						range={chartData.chartTime}
+						loading={probeData.loading}
+						error={probeData.error}
+					/>
 				</div>
 			)}
 

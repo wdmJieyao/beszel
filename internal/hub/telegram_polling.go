@@ -7,6 +7,18 @@ import (
 
 const telegramPollingTimeoutSeconds = 25
 
+func (h *Hub) syncTelegramBotCommands(ctx context.Context) error {
+	settings, err := h.loadTelegramSettings()
+	if err != nil || !settings.Enabled {
+		return err
+	}
+	token, err := h.decryptTelegramToken(settings)
+	if err != nil || token == "" {
+		return err
+	}
+	return h.telegramTransport.SetMyCommands(ctx, token, telegramAdminBotCommands())
+}
+
 func (h *Hub) startTelegramPolling(ctx context.Context) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -14,6 +26,10 @@ func (h *Hub) startTelegramPolling(ctx context.Context) {
 		}
 	}()
 	for {
+		if err := h.syncTelegramBotCommands(ctx); err != nil && ctx.Err() == nil {
+			h.Logger().Warn("Telegram command menu initialization failed", "err", err)
+		}
+
 		if err := h.pollTelegramOnce(ctx); err != nil && ctx.Err() == nil {
 			h.Logger().Warn("Telegram polling error", "err", err)
 			_ = h.setTelegramSettingsRuntimeState("", -1, err.Error())
@@ -66,8 +82,5 @@ func (h *Hub) pollTelegramOnce(ctx context.Context) error {
 			h.Logger().Warn("Telegram menu command failed", "err", err)
 		}
 	}
-	if len(updates) > 0 {
-		return h.setTelegramSettingsRuntimeState("", nextOffset, "")
-	}
-	return nil
+	return h.setTelegramSettingsRuntimeState("", nextOffset, "")
 }

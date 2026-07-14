@@ -18,6 +18,11 @@
 - Q: YML 导入恢复应该如何匹配现有配置？ → A: 优先使用备份中的稳定标识匹配，名称仅用于显示和冲突提示。
 - Q: 只读 Telegram 通知渠道应该接收哪些内容？ → A: 可配置节点和告警级别范围，但只能接收非敏感告警摘要。
 
+### Session 2026-07-10
+
+- Q: 如果当前正在处理的节点线路检测实时刷新修复需要与本功能同批完成，应如何归属规格？ → A: 线路检测实时刷新修复继续归属到现有的延迟相关 spec，不并入本 Telegram/YML spec。
+- Q: 当线路检测实时刷新修复与 TG/YML 工作同批交付时，应如何记录边界？ → A: 延迟相关 spec 负责该修复的功能定义与验收，本 spec 只允许记录“可同批交付”，不承载该修复的需求细节。
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Telegram Bot Notification Channel (Priority: P1)
@@ -167,3 +172,4 @@ An administrator who only updates the panel wants confidence that Telegram notif
 - Sensitive values are expected to be restorable through encrypted export/import, never through plaintext YML fields.
 - Existing authentication and administrator permissions remain the source of truth for who can configure notifications, export backups, or restore backups.
 - The previous public probe visibility change did not require source changes under the `agent/` directory; this feature should preserve that panel-only baseline unless planning proves otherwise.
+- Unrelated node detail latency chart refresh fixes remain owned by the existing latency-monitoring specs even if they are delivered in the same release batch as this feature.

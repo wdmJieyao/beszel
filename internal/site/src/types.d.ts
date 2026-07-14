@@ -158,6 +158,19 @@ export interface NetworkProbeChartGroup {
 }
 
 export type TelegramRole = "admin" | "read_only"
+export type TelegramAlertScope =
+	| "status"
+	| "cpu"
+	| "memory"
+	| "disk"
+	| "temperature"
+	| "bandwidth"
+	| "gpu"
+	| "loadavg1"
+	| "loadavg5"
+	| "loadavg15"
+	| "battery"
+	| "smart"
 export type TelegramChatType = "private" | "group" | "supergroup" | "channel" | "unknown"
 
 export interface TelegramSettings {
@@ -179,6 +192,15 @@ export interface TelegramTestResponse {
 	ok: boolean
 	botUsername?: string
 	error?: string
+	stages?: {
+		credentials: TelegramTestStage
+		commandMenu: TelegramTestStage
+	}
+}
+
+export interface TelegramTestStage {
+	ok: boolean
+	error: string
 }
 
 export interface TelegramDestination {
@@ -189,12 +211,33 @@ export interface TelegramDestination {
 	chatType: TelegramChatType
 	role: TelegramRole
 	enabled: boolean
+	policyCount?: number
+	/** @deprecated Compatibility projection of the default policy. */
 	nodeScope: string[]
-	alertLevelScope: string[]
+	/** @deprecated Compatibility projection of the default policy. */
+	alertLevelScope: TelegramAlertScope[]
 	muteUntil?: string
 	lastTestAt?: string
 	lastDeliveryAt?: string
 	lastError: string
+}
+
+export type TelegramNodeScopeMode = "all" | "selected"
+
+export interface TelegramNotificationPolicy {
+	id: string
+	destinationId: string
+	name: string
+	enabled: boolean
+	nodeScopeMode: TelegramNodeScopeMode
+	nodeScope: string[]
+	alertLevelScope: TelegramAlertScope[]
+}
+
+export type TelegramNotificationPolicyInput = Omit<TelegramNotificationPolicy, "id" | "destinationId">
+
+export interface TelegramPolicyListResponse {
+	policies: TelegramNotificationPolicy[]
 }
 
 export type TelegramDestinationInput = Omit<

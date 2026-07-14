@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -86,6 +87,27 @@ func TestTestTelegramSettingsRejectsInvalidToken(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, apiErr.Status)
 }
 
+func TestTestTelegramSettingsRejectsMalformedRequestBody(t *testing.T) {
+	hub, admin := newTelegramHubWithAdmin(t)
+	_, err := hub.saveTelegramSettings(TelegramSettingsInput{
+		Enabled: true, BotToken: "123456:saved_token_value",
+	}, telegramSettingsRecord{})
+	require.NoError(t, err)
+	fake := &fakeTelegramTransport{}
+	hub.telegramTransport = fake
+
+	req := httptest.NewRequest(http.MethodPost, "/api/beszel/telegram/settings/test", bytes.NewBufferString(`{"botToken":`))
+	req.Header.Set("Content-Type", "application/json")
+	err = hub.testTelegramSettings(&core.RequestEvent{
+		App: hub, Auth: admin,
+		Event: router.Event{Request: req, Response: httptest.NewRecorder()},
+	})
+
+	require.Error(t, err)
+	assert.Equal(t, http.StatusBadRequest, router.ToApiError(err).Status)
+	assert.Empty(t, fake.tokens)
+}
+
 func TestTestTelegramSettingsUsesTransportAndPersistsBotUsername(t *testing.T) {
 	hub, admin := newTelegramHubWithAdmin(t)
 	hub.telegramTransport = &fakeTelegramTransport{
@@ -113,10 +135,61 @@ func TestTestTelegramSettingsUsesTransportAndPersistsBotUsername(t *testing.T) {
 	require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &response))
 	assert.True(t, response.OK)
 	assert.Equal(t, "beszel_alert_bot", response.BotUsername)
+	require.NotEmpty(t, hub.telegramTransport.(*fakeTelegramTransport).commands)
+	assert.Equal(t, "systems", hub.telegramTransport.(*fakeTelegramTransport).commands[1].Command)
+	assert.Contains(t, hub.telegramTransport.(*fakeTelegramTransport).commands[1].Description, "节点")
 
 	settings, err := hub.loadTelegramSettings()
 	require.NoError(t, err)
 	assert.Equal(t, "beszel_alert_bot", settings.BotUsername)
+}
+
+func TestTestTelegramSettingsUsesEnteredTokenWithoutSavingAndReturnsStages(t *testing.T) {
+	hub, admin := newTelegramHubWithAdmin(t)
+	fake := &fakeTelegramTransport{bot: &telegramBotIdentity{ID: 99, Username: "staged_bot"}}
+	hub.telegramTransport = fake
+	_, err := hub.saveTelegramSettings(TelegramSettingsInput{Enabled: true, BotToken: "123456:saved_token_value"}, telegramSettingsRecord{})
+	require.NoError(t, err)
+
+	body := bytes.NewBufferString(`{"botToken":"654321:entered_token_value"}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/beszel/telegram/settings/test", body)
+	req.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+	require.NoError(t, hub.testTelegramSettings(&core.RequestEvent{App: hub, Auth: admin, Event: router.Event{Request: req, Response: recorder}}))
+
+	var response TelegramTestResponse
+	require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &response))
+	assert.True(t, response.OK)
+	assert.True(t, response.Stages.Credentials.OK)
+	assert.True(t, response.Stages.CommandMenu.OK)
+	assert.Equal(t, []string{"654321:entered_token_value", "654321:entered_token_value"}, fake.tokens)
+	settings, err := hub.loadTelegramSettings()
+	require.NoError(t, err)
+	savedToken, err := hub.decryptTelegramToken(settings)
+	require.NoError(t, err)
+	assert.Equal(t, "123456:saved_token_value", savedToken)
+}
+
+func TestTestTelegramSettingsReportsMenuFailureSeparatelyAndSanitizesToken(t *testing.T) {
+	hub, admin := newTelegramHubWithAdmin(t)
+	token := "654321:entered_secret_token"
+	hub.telegramTransport = &fakeTelegramTransport{
+		bot:         &telegramBotIdentity{ID: 99, Username: "staged_bot"},
+		commandsErr: errors.New("request /bot" + token + "/setMyCommands failed"),
+	}
+	body := bytes.NewBufferString(`{"botToken":"` + token + `"}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/beszel/telegram/settings/test", body)
+	req.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+	require.NoError(t, hub.testTelegramSettings(&core.RequestEvent{App: hub, Auth: admin, Event: router.Event{Request: req, Response: recorder}}))
+
+	var response TelegramTestResponse
+	require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &response))
+	assert.False(t, response.OK)
+	assert.True(t, response.Stages.Credentials.OK)
+	assert.False(t, response.Stages.CommandMenu.OK)
+	assert.NotEmpty(t, response.Stages.CommandMenu.Error)
+	assert.NotContains(t, recorder.Body.String(), token)
 }
 
 func newTelegramHubWithAdmin(t *testing.T) (*Hub, *core.Record) {
@@ -140,27 +213,50 @@ func newTelegramHubWithAdmin(t *testing.T) (*Hub, *core.Record) {
 }
 
 type fakeTelegramTransport struct {
-	bot        *telegramBotIdentity
-	sendCalls  []fakeTelegramMessage
-	getUpdates []telegramUpdate
-	sendErr    error
+	bot         *telegramBotIdentity
+	commands    []telegramBotCommand
+	sendCalls   []fakeTelegramMessage
+	getUpdates  []telegramUpdate
+	sendErr     error
+	getMeErr    error
+	commandsErr error
+	tokens      []string
+	sendStarted chan struct{}
+	sendRelease chan struct{}
 }
 
 type fakeTelegramMessage struct {
-	ChatID string
-	Text   string
+	ChatID  string
+	Text    string
+	Options *telegramSendOptions
 }
 
-func (f *fakeTelegramTransport) GetMe(_ context.Context, _ string) (*telegramBotIdentity, error) {
+func (f *fakeTelegramTransport) GetMe(_ context.Context, token string) (*telegramBotIdentity, error) {
+	f.tokens = append(f.tokens, token)
+	if f.getMeErr != nil {
+		return nil, f.getMeErr
+	}
 	if f.bot == nil {
 		return &telegramBotIdentity{ID: 1, Username: "bot"}, nil
 	}
 	return f.bot, nil
 }
 
-func (f *fakeTelegramTransport) SendMessage(_ context.Context, _ string, chatID string, text string, _ *telegramSendOptions) error {
-	f.sendCalls = append(f.sendCalls, fakeTelegramMessage{ChatID: chatID, Text: text})
+func (f *fakeTelegramTransport) SendMessage(_ context.Context, _ string, chatID string, text string, options *telegramSendOptions) error {
+	f.sendCalls = append(f.sendCalls, fakeTelegramMessage{ChatID: chatID, Text: text, Options: options})
+	if f.sendStarted != nil {
+		close(f.sendStarted)
+	}
+	if f.sendRelease != nil {
+		<-f.sendRelease
+	}
 	return f.sendErr
+}
+
+func (f *fakeTelegramTransport) SetMyCommands(_ context.Context, token string, commands []telegramBotCommand) error {
+	f.tokens = append(f.tokens, token)
+	f.commands = append([]telegramBotCommand(nil), commands...)
+	return f.commandsErr
 }
 
 func (f *fakeTelegramTransport) GetUpdates(_ context.Context, _ string, _ int64, _ int) ([]telegramUpdate, error) {
